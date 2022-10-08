@@ -1,0 +1,21 @@
+{
+  "Title": "Bsp Import",
+  "Type": "tool",
+  "Org": "doctor",
+  "Ident": "bsp-import",
+  "Schema": 1,
+  "HasAssets": true,
+  "AssetsPath": "",
+  "ResourcePaths": null,
+  "HasCode": true,
+  "CodePath": "code",
+  "RootNamespace": null,
+  "Metadata": {
+    "Compiler": {
+      "RootNamespace": "Sandbox",
+      "DefineConstants": "SANDBOX;ADDON;DEBUG",
+      "NoWarn": "1701;1702;1591;",
+      "Nullables": true
+    }
+  }
+}

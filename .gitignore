@@ -1,0 +1,9 @@
+code/obj/*
+code/Properties/*
+
+*.csproj
+
+# files from bsp map compiles we don't need
+*.log
+*.vmx
+*.prt
