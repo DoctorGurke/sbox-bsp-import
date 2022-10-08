@@ -12,7 +12,7 @@
   "RootNamespace": null,
   "Metadata": {
     "Compiler": {
-      "RootNamespace": "Sandbox",
+      "RootNamespace": "BspImport",
       "DefineConstants": "SANDBOX;ADDON;DEBUG",
       "NoWarn": "1701;1702;1591;",
       "Nullables": true
