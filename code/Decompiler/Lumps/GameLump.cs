@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BspImport.Decompiler.Lumps
+﻿namespace BspImport.Decompiler.Lumps
 {
 	public class GameLump : BaseLump
 	{
 		public int Id { get; set; }
 
-		public GameLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version )
+		public GameLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+
+		protected override void Parse( IEnumerable<byte> data )
 		{
 			if ( Context.Data is null )
 				return;
@@ -28,7 +24,7 @@ namespace BspImport.Decompiler.Lumps
 			switch ( (GameLumpType)Id )
 			{
 				case GameLumpType.StaticPropLump:
-					var staticprop = new StaticPropLump( Context, gamelumpdata );
+					_ = new StaticPropLump( Context, gamelumpdata );
 					break;
 			}
 		}

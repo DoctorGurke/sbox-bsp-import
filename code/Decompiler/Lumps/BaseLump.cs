@@ -11,5 +11,9 @@ public abstract class BaseLump
 		Context = context;
 		Data = data;
 		Version = version;
+
+		Parse( data );
 	}
+
+	protected abstract void Parse( IEnumerable<byte> data );
 }

@@ -2,7 +2,9 @@
 
 public class GameLumpHeader : BaseLump
 {
-	public GameLumpHeader( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version )
+	public GameLumpHeader( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+
+	protected override void Parse( IEnumerable<byte> data )
 	{
 		var parser = new ByteParser( data );
 		var count = parser.Read<int>();

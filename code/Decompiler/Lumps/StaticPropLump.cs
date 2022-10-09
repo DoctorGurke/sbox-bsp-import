@@ -6,9 +6,11 @@ namespace BspImport.Decompiler.Lumps;
 public class StaticPropLump : BaseLump
 {
 	private int DictEntryCount { get; set; }
-	private Dictionary<int, string> Names { get; set; }
+	private Dictionary<int, string>? Names { get; set; }
 
-	public StaticPropLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version )
+	public StaticPropLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+
+	protected override void Parse( IEnumerable<byte> data )
 	{
 		var parser = new ByteParser( data );
 

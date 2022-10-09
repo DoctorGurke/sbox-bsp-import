@@ -2,7 +2,9 @@
 
 public class EntityLump : BaseLump
 {
-	public EntityLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version )
+	public EntityLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+
+	protected override void Parse( IEnumerable<byte> data )
 	{
 		var pairs = Encoding.ASCII.GetString( data.ToArray() );
 		var ents = FromKeyValues( pairs );

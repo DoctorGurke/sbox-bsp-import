@@ -4,7 +4,9 @@ namespace BspImport.Decompiler.Lumps;
 
 public class EdgeLump : BaseLump
 {
-	public EdgeLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version )
+	public EdgeLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+
+	protected override void Parse( IEnumerable<byte> data )
 	{
 		var parser = new ByteParser( data );
 		var edges = parser.TryReadMultiple<EdgeIndices>();
