@@ -7,6 +7,8 @@ public class EntityLump : BaseLump
 		var pairs = Encoding.ASCII.GetString( data.ToArray() );
 		var ents = FromKeyValues( pairs );
 
+		Log.Info( $"ENTITIES: {ents.Count()}" );
+
 		Context.Entities = ents;
 	}
 

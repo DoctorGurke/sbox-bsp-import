@@ -10,20 +10,17 @@ public class StaticPropLump : BaseLump
 
 	public StaticPropLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version )
 	{
-		Log.Info( $"static prop lump" );
 		var parser = new ByteParser( data );
 
 		// parse static prop names (model names)
 		DictEntryCount = parser.Read<int>();
 		Names = new();
 
-		Log.Info( $"name entries: {DictEntryCount}" );
 		for ( int i = 0; i < DictEntryCount; i++ )
 		{
 			var name = parser.Read<StaticPropNameEntry>();
 			var entry = new string( name.Name ).Trim( '\0' );
 
-			Log.Info( $"{entry}" );
 			Names.TryAdd( i, entry );
 		}
 
@@ -33,7 +30,8 @@ public class StaticPropLump : BaseLump
 
 		// read static prop entries
 		var entries = parser.Read<int>();
-		Log.Info( $"static props: {entries}" );
+
+		Log.Info( $"STATIC PROPS: {entries}" );
 
 		// size per static prop
 		var sizeper = parser.BufferCapacity / entries;
@@ -47,11 +45,6 @@ public class StaticPropLump : BaseLump
 
 			var proptype = sprp.Read<ushort>();
 
-			Log.Info( $"### PROP STATIC ###" );
-			Log.Info( $"origin: {origin}" );
-			Log.Info( $"angles: {angles}" );
-			Log.Info( $"index: {proptype} :: {Names[proptype]}" );
-
 			var prop = new LumpEntity();
 			prop.SetClassName( "prop_static" );
 			prop.SetPosition( origin );
@@ -60,7 +53,6 @@ public class StaticPropLump : BaseLump
 
 			Context.Entities = Context.Entities?.Append( prop );
 		}
-
 	}
 
 	// helper for getting the dict entries

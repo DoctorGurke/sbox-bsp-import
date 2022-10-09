@@ -1,6 +1,5 @@
 ﻿using BspImport.Builder;
 using BspImport.Decompiler;
-using BspImport.Inspector;
 
 namespace BspImport;
 

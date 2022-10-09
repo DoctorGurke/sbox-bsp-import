@@ -36,6 +36,7 @@ public class LumpEntity
 		}
 	}
 
+	// helpers for constructing artificial entities, like prop static
 	public void SetClassName( string name ) => TryReplaceData( "classname", name );
 
 	public void SetPosition( Vector3 origin ) => TryReplaceData( "origin", $"[{origin.x} {origin.y} {origin.z}]" );
@@ -44,6 +45,7 @@ public class LumpEntity
 
 	public void SetModel( string model ) => TryReplaceData( "model", model );
 
+	// getting data for making actual MapEntity refs, parsed from kv data
 	public string? ClassName => GetValue( "classname" );
 	public Vector3 Position => Vector3.Parse( $"[{GetValue( "origin" ) ?? ""}]" );
 
@@ -58,4 +60,6 @@ public class LumpEntity
 	}
 
 	public Angles Angles => ConstructAngles();
+
+	public string? Model => GetValue( "model" );
 }
