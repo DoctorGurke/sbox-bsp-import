@@ -15,6 +15,16 @@ public class ByteParser
 		_buffer = data;
 	}
 
+	/// <summary>
+	/// Get the remainding capacity of the byte buffer.
+	/// </summary>
+	public int BufferCapacity => _buffer.Count();
+
+	/// <summary>
+	/// Read n bytes from the buffer.
+	/// </summary>
+	/// <param name="num">Number of bytes to read.</param>
+	/// <returns>IEnumerable of bytes with n length.</returns>
 	public IEnumerable<byte> ReadBytes( int num )
 	{
 		var result = _buffer.Take( num );
@@ -23,16 +33,31 @@ public class ByteParser
 		return result;
 	}
 
+	/// <summary>
+	/// Skips this many bytes in the parser buffer.
+	/// </summary>
+	/// <param name="num">Amount of bytes to skip.</param>
 	public void Skip( int num )
 	{
 		_buffer = _buffer.Skip( num );
 	}
 
-	public void Skip<T>()
+	/// <summary>
+	/// Skip a specific type n times, default 1.
+	/// </summary>
+	/// <typeparam name="T">Type.</typeparam>
+	/// <param name="num">Number of times to skip.</param>
+	public void Skip<T>( int num = 1 )
 	{
-		Skip( SizeOf( typeof( T ) ) );
+		Skip( SizeOf( typeof( T ) ) * num );
 	}
 
+	/// <summary>
+	/// Read a type from the buffer.
+	/// </summary>
+	/// <typeparam name="T">Type.</typeparam>
+	/// <returns>Type instance parsed from the byte buffer.</returns>
+	/// <exception cref="Exception">Throws if trying to read beyond buffer capacity.</exception>
 	public T Read<T>() where T : struct
 	{
 		var size = SizeOf( typeof( T ) );
@@ -48,7 +73,14 @@ public class ByteParser
 		return result;
 	}
 
-	public IEnumerable<T> ReadMultiple<T>( int num ) where T : struct
+	/// <summary>
+	/// Read a specific type n times, default 1.
+	/// </summary>
+	/// <typeparam name="T">Type.</typeparam>
+	/// <param name="num">Number of times to read.</param>
+	/// <returns>IEnumerable of Type with n elements.</returns>
+	/// <exception cref="Exception">Throws if trying to read beyond buffer capacity.</exception>
+	public IEnumerable<T> Read<T>( int num ) where T : struct
 	{
 		var size = SizeOf( typeof( T ) );
 
@@ -62,6 +94,12 @@ public class ByteParser
 		}
 	}
 
+	/// <summary>
+	/// Tries to read as many instances of the provided type as possible.
+	/// </summary>
+	/// <typeparam name="T">Type.</typeparam>
+	/// <returns>IEnumerable of type instances read from byte buffer.</returns>
+	/// <exception cref="Exception">Throws if reading exceeds buffer capacity.</exception>
 	public IEnumerable<T> TryReadMultiple<T>() where T : struct
 	{
 		var size = SizeOf( typeof( T ) );

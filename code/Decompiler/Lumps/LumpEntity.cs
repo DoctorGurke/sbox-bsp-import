@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BspImport.Decompiler.Lumps;
+﻿namespace BspImport.Decompiler.Lumps;
 
 public class LumpEntity
 {
@@ -27,6 +21,28 @@ public class LumpEntity
 		var val = find.FirstOrDefault().Value;
 		return val;
 	}
+
+	private void TryReplaceData( string key, string value )
+	{
+		var index = Data.FindIndex( x => x.Key == key );
+
+		if ( index <= -1 )
+		{
+			Data.Add( new KeyValuePair<string, string>( key, value ) );
+		}
+		else
+		{
+			Data[index] = new KeyValuePair<string, string>( key, value );
+		}
+	}
+
+	public void SetClassName( string name ) => TryReplaceData( "classname", name );
+
+	public void SetPosition( Vector3 origin ) => TryReplaceData( "origin", $"[{origin.x} {origin.y} {origin.z}]" );
+
+	public void SetAngles( Angles angles ) => TryReplaceData( "angles", $"{angles.pitch},{angles.yaw},{angles.roll}" );
+
+	public void SetModel( string model ) => TryReplaceData( "model", model );
 
 	public string? ClassName => GetValue( "classname" );
 	public Vector3 Position => Vector3.Parse( $"[{GetValue( "origin" ) ?? ""}]" );

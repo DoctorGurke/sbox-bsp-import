@@ -10,14 +10,20 @@ public static class Tool
 	public static void OpenLoadMenu()
 	{
 		var file = GetFileFromDialog( "Open a bsp file.", "*.bsp" );
-		Log.Info( file );
+		Log.Info( $"---------------" );
+		Log.Info( $"loading bsp: {file}" );
 
 		if ( file is null )
 			return;
 
+		var context = new DecompilerContext();
+
 		//var decompiler = new GmodMapDecompiler( file );
-		MapDecompiler.Decompile( file );
-		MapBuilder.Build();
+		var decompiler = new MapDecompiler( context );
+		decompiler.Decompile( file );
+
+		var builder = new MapBuilder( context );
+		builder.Build();
 	}
 
 	//[Menu( "Hammer", "Bsp Import/Inspect Map...", "construction" )]

@@ -2,11 +2,11 @@
 
 namespace BspImport.Decompiler;
 
-public static class DecompilerContext
+public class DecompilerContext
 {
-	public static IEnumerable<byte>? Data { get; set; }
-	public static BaseLump[] Lumps = new BaseLump[64];
-	public static IEnumerable<LumpEntity>? Entities { get; set; }
-	public static IEnumerable<MapModel>? Models { get; set; }
-	public static IEnumerable<GameLump>? GameLumps { get; set; }
+	public IEnumerable<byte>? Data { get; set; }
+	public BaseLump[] Lumps = new BaseLump[64];
+	public IEnumerable<LumpEntity>? Entities { get; set; }
+	public IEnumerable<MapModel>? Models { get; set; }
+	public IEnumerable<GameLump>? GameLumps { get; set; }
 }

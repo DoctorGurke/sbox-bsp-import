@@ -1,14 +1,21 @@
 ﻿namespace BspImport.Decompiler;
 
 [MapDecompiler( "Default" )]
-public static partial class MapDecompiler
+public partial class MapDecompiler
 {
 	private static int VBSP = ('P' << 24) + ('S' << 16) + ('B' << 8) + 'V';
 
-	public static void Decompile( string file )
+	protected DecompilerContext Context { get; set; }
+
+	public MapDecompiler( DecompilerContext context )
+	{
+		Context = context;
+	}
+
+	public virtual void Decompile( string file )
 	{
 		var data = File.ReadAllBytes( file );
-		DecompilerContext.Data = data;
+		Context.Data = data;
 
 		var parser = new ByteParser( data );
 
@@ -31,11 +38,11 @@ public static partial class MapDecompiler
 			if ( parsed is null )
 				continue;
 
-			DecompilerContext.Lumps[i] = parsed;
+			Context.Lumps[i] = parsed;
 		}
 
 		var revision = parser.Read<int>();
 
-		Log.Info( $"ident: {ident} version: {mapversion} revision: {revision}" );
+		Log.Info( $"decompiled bsp: [ident: {ident} version: {mapversion} revision: {revision}]" );
 	}
 }

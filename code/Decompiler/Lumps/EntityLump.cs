@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Tools.MapDoc;
-
-namespace BspImport.Decompiler.Lumps;
+﻿namespace BspImport.Decompiler.Lumps;
 
 public class EntityLump : BaseLump
 {
-	public EntityLump( IEnumerable<byte> data, int version = 0 ) : base( data, version )
+	public EntityLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version )
 	{
 		var pairs = Encoding.ASCII.GetString( data.ToArray() );
 		var ents = FromKeyValues( pairs );
 
-		DecompilerContext.Entities = ents;
+		Context.Entities = ents;
 	}
 
 	private static IEnumerable<LumpEntity> FromKeyValues( string keyvalues )

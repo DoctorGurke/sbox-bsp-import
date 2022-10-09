@@ -4,9 +4,17 @@ using Tools.MapEditor;
 
 namespace BspImport.Builder;
 
-public static class MapBuilder
+public class MapBuilder
 {
-	public static void Build()
+
+	protected DecompilerContext Context { get; set; }
+
+	public MapBuilder( DecompilerContext context )
+	{
+		Context = context;
+	}
+
+	public void Build()
 	{
 		BuildEntities();
 
@@ -15,12 +23,12 @@ public static class MapBuilder
 		BuildGeometry();
 	}
 
-	private static void BuildEntities()
+	protected virtual void BuildEntities()
 	{
-		if ( DecompilerContext.Entities is null )
+		if ( Context.Entities is null )
 			return;
 
-		foreach ( var ent in DecompilerContext.Entities )
+		foreach ( var ent in Context.Entities )
 		{
 			if ( ent.ClassName == "worldspawn" )
 				continue;
@@ -37,12 +45,12 @@ public static class MapBuilder
 		}
 	}
 
-	private static void BuildStaticProps()
+	protected virtual void BuildStaticProps()
 	{
 
 	}
 
-	private static void BuildGeometry()
+	protected virtual void BuildGeometry()
 	{
 
 	}

@@ -10,10 +10,9 @@ namespace BspImport.Decompiler.Lumps
 	{
 		public int Id { get; set; }
 
-		public GameLump( IEnumerable<byte> data, int version = 0 ) : base( data, version )
+		public GameLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version )
 		{
-
-			if ( DecompilerContext.Data is null )
+			if ( Context.Data is null )
 				return;
 
 			var parser = new ByteParser( data );
@@ -24,12 +23,12 @@ namespace BspImport.Decompiler.Lumps
 			var length = parser.Read<int>();
 
 			// offset is based on full file start, aka raw initial data
-			var gamelumpdata = DecompilerContext.Data.Take( new Range( offset, offset + length ) );
+			var gamelumpdata = Context.Data.Take( new Range( offset, offset + length ) );
 
 			switch ( (GameLumpType)Id )
 			{
 				case GameLumpType.StaticPropLump:
-					var staticprop = new StaticPropLump( gamelumpdata );
+					var staticprop = new StaticPropLump( Context, gamelumpdata );
 					break;
 			}
 		}

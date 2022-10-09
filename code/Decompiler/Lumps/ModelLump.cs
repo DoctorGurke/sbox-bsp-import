@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BspImport.Decompiler.Lumps;
+﻿namespace BspImport.Decompiler.Lumps;
 
 public class ModelLump : BaseLump
 {
-	public ModelLump( IEnumerable<byte> data, int version = 0 ) : base( data, version )
+	public ModelLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version )
 	{
 		var parser = new ByteParser( data );
 
@@ -25,10 +19,8 @@ public class ModelLump : BaseLump
 
 			var model = new MapModel( mins, maxs, origin, headnode, firstface, numfaces );
 			list.Add( model );
-
-			Log.Info( $"mins: {mins} maxs: {maxs} origin: {origin} headnode: {headnode} firstface: {firstface} numfaces: {numfaces}" );
 		}
 
-		DecompilerContext.Models = list;
+		Context.Models = list;
 	}
 }
