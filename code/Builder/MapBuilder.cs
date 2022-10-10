@@ -84,7 +84,13 @@ public class MapBuilder
 		var originalfaces = new HashSet<int>();
 		for ( int i = 0; i < model.FaceCount; i++ )
 		{
-			originalfaces.Add( geo.Faces.ElementAt( model.FirstFace + i ).OriginalFaceIndex );
+			var face = geo.Faces.ElementAt( model.FirstFace + i );
+
+			// no texture info, skip face (SKIP, CLIP, INVISIBLE, etc)
+			if ( face.TexInfo == -1 )
+				continue;
+
+			originalfaces.Add( face.OriginalFaceIndex );
 		}
 
 		// construct original faces
