@@ -32,6 +32,10 @@ public class StaticPropLump : BaseLump
 
 		Log.Info( $"STATIC PROPS: {entries}" );
 
+		// no static props, don't bother
+		if ( entries <= 0 )
+			return;
+
 		// size per static prop
 		var sizeper = data.BufferCapacity / entries;
 

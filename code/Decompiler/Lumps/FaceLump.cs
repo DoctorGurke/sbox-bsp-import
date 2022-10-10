@@ -13,27 +13,27 @@ public class FaceLump : BaseLump
 
 		for ( int i = 0; i < faces; i++ )
 		{
-			var faceparser = new ByteParser( data.ReadBytes( 56 ) );
-			faceparser.Skip<ushort>(); // planenum
-			faceparser.Skip<byte>(); // side
-			faceparser.Skip<byte>(); // onNode
+			var faceParser = new ByteParser( data.ReadBytes( 56 ) );
+			faceParser.Skip<ushort>(); // planenum
+			faceParser.Skip<byte>(); // side
+			faceParser.Skip<byte>(); // onNode
 
-			var firstedge = faceparser.Read<int>();
-			var numedges = faceparser.Read<short>();
-			var texinfo = faceparser.Read<short>();
-			var dispinfo = faceparser.Read<short>();
+			var firstEdge = faceParser.Read<int>();
+			var numEdges = faceParser.Read<short>();
+			var texInfo = faceParser.Read<short>();
+			var dispInfo = faceParser.Read<short>();
 
 			// don't need any of this
-			faceparser.Skip<short>(); // surfaceFogVolumeID
-			faceparser.Skip<byte>( 4 ); // styles[4]
-			faceparser.Skip<int>(); // lightofs
-			faceparser.Skip<float>(); // area
-			faceparser.Skip<int>( 2 ); // LightmapTextureMinsInLuxels[2]
-			faceparser.Skip<int>( 2 ); // LightmapTextureSizeInLuxels[2]
+			faceParser.Skip<short>(); // surfaceFogVolumeID
+			faceParser.Skip<byte>( 4 ); // styles[4]
+			faceParser.Skip<int>(); // lightofs
+			faceParser.Skip<float>(); // area
+			faceParser.Skip<int>( 2 ); // LightmapTextureMinsInLuxels[2]
+			faceParser.Skip<int>( 2 ); // LightmapTextureSizeInLuxels[2]
 
-			var origface = faceparser.Read<int>();
+			var oFace = faceParser.Read<int>();
 
-			list.Add( new Face( firstedge, numedges, texinfo, dispinfo, origface ) );
+			list.Add( new Face( firstEdge, numEdges, texInfo, dispInfo, oFace ) );
 		}
 
 		Log.Info( $"FACES: {list.Count()}" );
@@ -50,12 +50,12 @@ public struct Face
 	public short DisplacementInfo;
 	public int OriginalFaceIndex;
 
-	public Face( int firstedge, short edgecount, short texinfo, short dispinfo, int origface )
+	public Face( int firstEdge, short edgeCount, short texInfo, short dispInfo, int oFace )
 	{
-		FirstEdge = firstedge;
-		EdgeCount = edgecount;
-		TexInfo = texinfo;
-		DisplacementInfo = dispinfo;
-		OriginalFaceIndex = origface;
+		FirstEdge = firstEdge;
+		EdgeCount = edgeCount;
+		TexInfo = texInfo;
+		DisplacementInfo = dispInfo;
+		OriginalFaceIndex = oFace;
 	}
 }

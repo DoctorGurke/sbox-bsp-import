@@ -26,11 +26,26 @@ public class ByteParser
 	/// Read n bytes from the buffer.
 	/// </summary>
 	/// <param name="num">Number of bytes to read.</param>
+	/// <param name="skip">Whether to skip/progress the buffer or not.</param>
 	/// <returns>IEnumerable of bytes with n length.</returns>
-	public IEnumerable<byte> ReadBytes( int num )
+	public IEnumerable<byte> ReadBytes( int num, bool skip = true )
 	{
 		var result = _buffer.Take( num );
-		_buffer = _buffer.Skip( num );
+
+		if ( skip )
+			_buffer = _buffer.Skip( num );
+
+		return result;
+	}
+
+	/// <summary>
+	/// Like ReadBytes but does not skip buffer.
+	/// </summary>
+	/// <param name="num">Number of bytes to copy.</param>
+	/// <returns>Collection of bytes.</returns>
+	public IEnumerable<byte> CopyBytes( int num )
+	{
+		var result = _buffer.Take( num );
 
 		return result;
 	}
@@ -55,12 +70,22 @@ public class ByteParser
 	}
 
 	/// <summary>
+	/// Copy an elementy from the buffer without skipping/progressing it.
+	/// </summary>
+	/// <typeparam name="T">Type.</typeparam>
+	/// <returns>The copied element.</returns>
+	public T Copy<T>() where T : struct
+	{
+		return Read<T>( false );
+	}
+
+	/// <summary>
 	/// Read a type from the buffer.
 	/// </summary>
 	/// <typeparam name="T">Type.</typeparam>
 	/// <returns>Type instance parsed from the byte buffer.</returns>
 	/// <exception cref="Exception">Throws if trying to read beyond buffer capacity.</exception>
-	public T Read<T>() where T : struct
+	public T Read<T>( bool skip = true ) where T : struct
 	{
 		var size = SizeOf( typeof( T ) );
 
@@ -70,7 +95,8 @@ public class ByteParser
 		var reader = new StructReader<T>();
 		var result = reader.Read( _buffer.ToArray() );
 
-		_buffer = _buffer.Skip( size );
+		if ( skip )
+			_buffer = _buffer.Skip( size );
 
 		return result;
 	}

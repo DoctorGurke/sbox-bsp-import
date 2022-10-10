@@ -15,10 +15,10 @@ public class ModelLump : BaseLump
 			data.Skip<Vector3>(); // maxs
 			var origin = data.Read<Vector3>();
 			data.Skip<int>(); // headnode
-			int firstface = data.Read<int>();
-			int numfaces = data.Read<int>();
+			int firstFace = data.Read<int>();
+			int numFaces = data.Read<int>();
 
-			var model = new MapModel( origin, firstface, numfaces );
+			var model = new MapModel( origin, firstFace, numFaces );
 			list.Add( model );
 		}
 
@@ -34,10 +34,10 @@ public struct MapModel
 	public int FirstFace;
 	public int FaceCount;
 
-	public MapModel( Vector3 origin, int firstface, int facecount )
+	public MapModel( Vector3 origin, int firstFace, int faceCount )
 	{
 		Origin = origin;
-		FirstFace = firstface;
-		FaceCount = facecount;
+		FirstFace = firstFace;
+		FaceCount = faceCount;
 	}
 }

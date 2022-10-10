@@ -1,4 +1,5 @@
 ﻿using BspImport.Decompiler;
+using Sandbox;
 using System.Linq;
 using Tools.MapDoc;
 using Tools.MapEditor;
@@ -78,7 +79,7 @@ public class MapBuilder
 
 		var model = Context.Models.ElementAt( index );
 
-		var polymesh = new PolygonMesh();
+		var polyMesh = new PolygonMesh();
 
 		// get original faces from split faces
 		var originalfaces = new Dictionary<int, int>();
@@ -97,49 +98,48 @@ public class MapBuilder
 		// construct original faces
 		foreach ( var pair in originalfaces )
 		{
-			var origface = pair.Key;
-			var texinfo = pair.Value;
-			var face = geo.OriginalFaces.ElementAt( origface );
+			var oFaceIndex = pair.Key;
+			var texInfo = pair.Value;
+			var oFace = geo.OriginalFaces.ElementAt( oFaceIndex );
 
 			// only construct valid primitives
-			if ( face.EdgeCount < 3 )
+			if ( oFace.EdgeCount < 3 )
 				continue;
 
 			// if split face texinfo is invalid, try it with original face texinfo?
-			if ( texinfo > Context.TexInfo?.Count() )
+			if ( texInfo > Context.TexInfo?.Count() )
 			{
-				texinfo = face.TexInfo;
+				//texinfo = face.TexInfo;
+				Log.Info( $"invalid texinfo: {texInfo} {oFace.TexInfo}" );
 			}
 
-			var material = $"materials/dev/reflectivity_30.vmat";
+			string? material;
 
 			// still invalid, just use default material
-			if ( texinfo > Context.TexInfo?.Count() )
+			if ( texInfo > Context.TexInfo?.Count() )
 			{
 				//Log.Info( $"skipping face with invalid texinfo: {texinfo}" );
+				material = null;
 			}
 			else
 			{
-				// get texture/material for face
-				var texdata = Context.TexInfo?.ElementAtOrDefault( texinfo ).TexData;
+				material = ParseFaceMaterial( texInfo );
+			}
 
-				if ( texdata is null )
-					continue;
-
-				var stringtableindex = Context.TexDataStringTable?.ElementAtOrDefault( texdata.Value );
-
-				if ( stringtableindex is null )
-					continue;
-
-				material = $"materials/{Context.TexDataStringData.FromStringTableIndex( stringtableindex.Value ).ToLower()}.vmat";
+			// fall back to default material if parsing failed
+			if ( material is null )
+			{
+				material = $"materials/dev/reflectivity_30.vmat";
 			}
 
 			var verts = new List<Vector3>();
 
-			for ( int i = 0; i < face.EdgeCount; i++ )
+			// get verts from surf edges -> edges -> vertices
+			for ( int i = 0; i < oFace.EdgeCount; i++ )
 			{
-				var edge = geo.SurfaceEdges.ElementAt( face.FirstEdge + i );
+				var edge = geo.SurfaceEdges.ElementAt( oFace.FirstEdge + i );
 
+				// edge sign affects winding order, indexing back to front or vice versa on the edge vertices
 				if ( edge >= 0 )
 				{
 					verts.Add( geo.VertexPositions.ElementAt( geo.EdgeIndices.ElementAt( edge ).Indices[0] ) );
@@ -154,29 +154,45 @@ public class MapBuilder
 			var indices = new List<int>();
 			foreach ( var vert in verts )
 			{
-				var meshvert = new MeshVertex();
-				meshvert.Position = vert + origin;
-				polymesh.Vertices.Add( meshvert );
-				indices.Add( polymesh.Vertices.Count() - 1 );
+				var meshVert = new MeshVertex();
+				meshVert.Position = vert + origin;
+				polyMesh.Vertices.Add( meshVert );
+				indices.Add( polyMesh.Vertices.Count() - 1 );
 			}
 
 			indices.Reverse();
 
-			var meshface = new MeshFace( indices, Material.Load( material ) );
-			polymesh.Faces.Add( meshface );
+			var meshFace = new MeshFace( indices, Material.Load( material ) );
+			polyMesh.Faces.Add( meshFace );
 		}
 
 		// no valid faces in mesh
-		if ( !polymesh.Faces.Any() )
+		if ( !polyMesh.Faces.Any() )
 		{
 			Log.Error( $"ConstructModel failed! No valid faces constructed!" );
 			return null;
 		}
 
-		var mapmesh = new MapMesh( Hammer.ActiveMap );
-		mapmesh.ConstructFromPolygons( polymesh );
-		mapmesh.Name = name;
+		var mapMesh = new MapMesh( Hammer.ActiveMap );
+		mapMesh.ConstructFromPolygons( polyMesh );
+		mapMesh.Name = name;
 
-		return mapmesh;
+		return mapMesh;
+	}
+
+	private string? ParseFaceMaterial( int texInfo )
+	{
+		// get texture/material for face
+		var texData = Context.TexInfo?.ElementAtOrDefault( texInfo ).TexData;
+
+		if ( texData is null )
+			return null;
+
+		var stringTableIndex = Context.TexDataStringTable?.ElementAtOrDefault( texData.Value );
+
+		if ( stringTableIndex is null )
+			return null;
+
+		return $"materials/{Context.TexDataStringData.FromStringTableIndex( stringTableIndex.Value ).ToLower()}.vmat";
 	}
 }

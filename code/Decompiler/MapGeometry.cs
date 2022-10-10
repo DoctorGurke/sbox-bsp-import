@@ -8,6 +8,6 @@ public class MapGeometry
 	public IEnumerable<EdgeIndices>? EdgeIndices { get; set; }
 	public IEnumerable<int>? SurfaceEdges { get; set; }
 	public IEnumerable<Face>? Faces { get; set; }
-	public IEnumerable<OriginalFace>? OriginalFaces { get; set; }
+	public IEnumerable<Face>? OriginalFaces { get; set; }
 
 }

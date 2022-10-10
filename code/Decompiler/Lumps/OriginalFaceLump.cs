@@ -9,7 +9,7 @@ public class OriginalFaceLump : BaseLump
 		// each face is 56 bytes
 		var faces = data.BufferCapacity / 56;
 
-		var list = new List<OriginalFace>();
+		var list = new List<Face>();
 
 		for ( int i = 0; i < faces; i++ )
 		{
@@ -18,32 +18,16 @@ public class OriginalFaceLump : BaseLump
 			faceparser.Skip<byte>(); // side
 			faceparser.Skip<byte>(); // onNode
 
-			var firstedge = faceparser.Read<int>();
-			var numedges = faceparser.Read<short>();
-			var texinfo = faceparser.Read<short>();
-			var dispinfo = faceparser.Read<short>();
+			var firstEdge = faceparser.Read<int>();
+			var numEdges = faceparser.Read<short>();
+			var texInfo = faceparser.Read<short>();
+			var dispInfo = faceparser.Read<short>();
 
-			list.Add( new OriginalFace( firstedge, numedges, texinfo, dispinfo ) );
+			list.Add( new Face( firstEdge, numEdges, texInfo, dispInfo, 0 ) );
 		}
 
 		Log.Info( $"ORIGINAL FACES: {list.Count()}" );
 
 		Context.MapGeometry.OriginalFaces = list;
-	}
-}
-
-public struct OriginalFace
-{
-	public int FirstEdge;
-	public short EdgeCount;
-	public short TexInfo;
-	public short DisplacementInfo;
-
-	public OriginalFace( int firstedge, short edgecount, short texinfo, short dispinfo )
-	{
-		FirstEdge = firstedge;
-		EdgeCount = edgecount;
-		TexInfo = texinfo;
-		DisplacementInfo = dispinfo;
 	}
 }
