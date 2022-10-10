@@ -63,5 +63,10 @@ public class StaticPropLump : BaseLump
 	{
 		[MarshalAs( UnmanagedType.ByValArray, SizeConst = 128 )]
 		public char[] Name;
+
+		public StaticPropNameEntry()
+		{
+			Name = new char[128];
+		}
 	}
 }

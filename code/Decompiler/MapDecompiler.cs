@@ -3,8 +3,6 @@
 [MapDecompiler( "Default" )]
 public partial class MapDecompiler
 {
-	private static int VBSP = ('P' << 24) + ('S' << 16) + ('B' << 8) + 'V';
-
 	protected DecompilerContext Context { get; set; }
 
 	public MapDecompiler( DecompilerContext context )

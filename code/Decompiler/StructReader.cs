@@ -34,17 +34,23 @@ public class StructReader<T> where T : struct
 			Array.Copy( bytes.ToArray(), byteBuf, Marshal.SizeOf( typeof( T ) ) );
 			bytes = bytes.Skip( Marshal.SizeOf( typeof( T ) ) ).ToArray();
 
-			T result;
+			object? result;
 			GCHandle handle = GCHandle.Alloc( byteBuf, GCHandleType.Pinned );
 			try
 			{
-				result = (T)Marshal.PtrToStructure( handle.AddrOfPinnedObject(), typeof( T ) );
+				result = Marshal.PtrToStructure( handle.AddrOfPinnedObject(), typeof( T ) );
 			}
 			finally
 			{
 				handle.Free();
 			}
-			yield return result;
+
+			if ( result is null )
+			{
+				result = default( T );
+			}
+
+			yield return (T)result;
 		}
 	}
 
@@ -53,16 +59,22 @@ public class StructReader<T> where T : struct
 		Array.Copy( bytes.ToArray(), byteBuf, Marshal.SizeOf( typeof( T ) ) );
 		if ( bytes.Count() == 0 ) throw new InvalidOperationException( "<EOF>" );
 
-		T result;
+		object? result;
 		GCHandle handle = GCHandle.Alloc( byteBuf, GCHandleType.Pinned );
 		try
 		{
-			result = (T)Marshal.PtrToStructure( handle.AddrOfPinnedObject(), typeof( T ) );
+			result = Marshal.PtrToStructure( handle.AddrOfPinnedObject(), typeof( T ) );
 		}
 		finally
 		{
 			handle.Free();
 		}
-		return result;
+
+		if ( result is null )
+		{
+			result = default( T );
+		}
+
+		return (T)result;
 	}
 }
