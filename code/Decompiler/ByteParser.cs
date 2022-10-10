@@ -4,7 +4,7 @@ namespace BspImport.Decompiler;
 
 public class ByteParser
 {
-	public IEnumerable<byte> Data { get; set; }
+	public IEnumerable<byte> Data { get; private set; }
 	private IEnumerable<byte> _buffer;
 
 	private int SizeOf( Type t ) => Marshal.SizeOf( t );
@@ -15,12 +15,40 @@ public class ByteParser
 		_buffer = data;
 	}
 
-	public static implicit operator byte[]( ByteParser p ) => p._buffer.ToArray();
-
 	/// <summary>
 	/// Get the remainding capacity of the byte buffer.
 	/// </summary>
 	public int BufferCapacity => _buffer.Count();
+
+	/// <summary>
+	/// Implicitly convert the ByteParser to its current byte buffer.
+	/// </summary>
+	/// <param name="p">ByteParser.</param>
+	public static implicit operator byte[]( ByteParser p ) => p._buffer.ToArray();
+
+	/// <summary>
+	/// Skips this many bytes in the parser buffer.
+	/// </summary>
+	/// <param name="num">Amount of bytes to skip.</param>
+	/// /// <param name="condition">Whether to skip or not.</param>
+	public void Skip( int num, bool condition = true )
+	{
+		if ( !condition )
+			return;
+
+		_buffer = _buffer.Skip( num );
+	}
+
+	/// <summary>
+	/// Skip a specific type n times, default 1.
+	/// </summary>
+	/// <typeparam name="T">Type.</typeparam>
+	/// <param name="num">Number of times to skip.</param>
+	/// <param name="condition">Whether to skip or not.</param>
+	public void Skip<T>( int num = 1, bool condition = true )
+	{
+		Skip( SizeOf( typeof( T ) ) * num, condition );
+	}
 
 	/// <summary>
 	/// Read n bytes from the buffer.
@@ -32,8 +60,7 @@ public class ByteParser
 	{
 		var result = _buffer.Take( num );
 
-		if ( skip )
-			_buffer = _buffer.Skip( num );
+		Skip( num, skip );
 
 		return result;
 	}
@@ -48,25 +75,6 @@ public class ByteParser
 		var result = _buffer.Take( num );
 
 		return result;
-	}
-
-	/// <summary>
-	/// Skips this many bytes in the parser buffer.
-	/// </summary>
-	/// <param name="num">Amount of bytes to skip.</param>
-	public void Skip( int num )
-	{
-		_buffer = _buffer.Skip( num );
-	}
-
-	/// <summary>
-	/// Skip a specific type n times, default 1.
-	/// </summary>
-	/// <typeparam name="T">Type.</typeparam>
-	/// <param name="num">Number of times to skip.</param>
-	public void Skip<T>( int num = 1 )
-	{
-		Skip( SizeOf( typeof( T ) ) * num );
 	}
 
 	/// <summary>
@@ -95,8 +103,7 @@ public class ByteParser
 		var reader = new StructReader<T>();
 		var result = reader.Read( _buffer.ToArray() );
 
-		if ( skip )
-			_buffer = _buffer.Skip( size );
+		Skip( size, skip );
 
 		return result;
 	}
@@ -108,7 +115,7 @@ public class ByteParser
 	/// <param name="num">Number of times to read.</param>
 	/// <returns>IEnumerable of Type with n elements.</returns>
 	/// <exception cref="Exception">Throws if trying to read beyond buffer capacity.</exception>
-	public IEnumerable<T> Read<T>( int num ) where T : struct
+	public IEnumerable<T> Read<T>( int num, bool skip = true ) where T : struct
 	{
 		var size = SizeOf( typeof( T ) );
 
@@ -118,7 +125,8 @@ public class ByteParser
 		for ( int i = 0; i < num; i++ )
 		{
 			yield return Read<T>();
-			_buffer = _buffer.Skip( SizeOf( typeof( T ) ) );
+
+			Skip( size, skip );
 		}
 	}
 
@@ -128,7 +136,7 @@ public class ByteParser
 	/// <typeparam name="T">Type.</typeparam>
 	/// <returns>IEnumerable of type instances read from byte buffer.</returns>
 	/// <exception cref="Exception">Throws if reading exceeds buffer capacity.</exception>
-	public IEnumerable<T> TryReadMultiple<T>() where T : struct
+	public IEnumerable<T> TryReadMultiple<T>( bool skip = true ) where T : struct
 	{
 		var size = SizeOf( typeof( T ) );
 
@@ -138,7 +146,7 @@ public class ByteParser
 		var reader = new StructReader<T>();
 		var result = reader.ReadMultiple( _buffer );
 
-		_buffer = _buffer.Skip( size );
+		Skip( size, skip );
 
 		return result;
 	}

@@ -6,10 +6,10 @@ public class SurfaceEdgeLump : BaseLump
 
 	protected override void Parse( ByteParser data )
 	{
-		var surfedges = data.TryReadMultiple<int>();
+		var surfEdges = data.TryReadMultiple<int>();
 
-		Log.Info( $"SURFACE EDGES: {surfedges.Count()}" );
+		Log.Info( $"SURFACE EDGES: {surfEdges.Count()}" );
 
-		Context.MapGeometry.SurfaceEdges = surfedges;
+		Context.MapGeometry.SurfaceEdges = surfEdges;
 	}
 }

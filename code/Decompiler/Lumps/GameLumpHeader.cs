@@ -13,8 +13,8 @@ public class GameLumpHeader : BaseLump
 		for ( int i = 0; i < count; i++ )
 		{
 			var lump = data.ReadBytes( 16 );
-			var gamelump = new GameLump( Context, lump );
-			list.Add( gamelump );
+			var gameLump = new GameLump( Context, lump );
+			list.Add( gameLump );
 		}
 
 		Context.GameLumps = list;

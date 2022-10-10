@@ -6,11 +6,11 @@ public class TexDataLump : BaseLump
 
 	protected override void Parse( ByteParser data )
 	{
-		var texdatas = data.BufferCapacity / 32;
+		var texDatas = data.BufferCapacity / 32;
 
 		var list = new List<TexData>();
 
-		for ( int i = 0; i < texdatas; i++ )
+		for ( int i = 0; i < texDatas; i++ )
 		{
 			data.Skip<Vector3>(); // reflectivity
 			var nameStringTableID = data.Read<int>();
@@ -18,8 +18,8 @@ public class TexDataLump : BaseLump
 			var height = data.Read<int>();
 			data.Skip<int>( 2 ); // view_width, view_height
 
-			var texdata = new TexData( nameStringTableID, width, height );
-			list.Add( texdata );
+			var texData = new TexData( nameStringTableID, width, height );
+			list.Add( texData );
 		}
 
 		Log.Info( $"TEXDATA: {list.Count()}" );

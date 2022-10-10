@@ -14,9 +14,9 @@ public class EntityLump : BaseLump
 		Context.Entities = ents;
 	}
 
-	private static IEnumerable<LumpEntity> FromKeyValues( string keyvalues )
+	private static IEnumerable<LumpEntity> FromKeyValues( string keyValues )
 	{
-		var data = keyvalues.Split( '\n' );
+		var data = keyValues.Split( '\n' );
 
 		LumpEntity? ent = null;
 

@@ -13,15 +13,15 @@ public class OriginalFaceLump : BaseLump
 
 		for ( int i = 0; i < faces; i++ )
 		{
-			var faceparser = new ByteParser( data.ReadBytes( 56 ) );
-			faceparser.Skip<ushort>(); // planenum
-			faceparser.Skip<byte>(); // side
-			faceparser.Skip<byte>(); // onNode
+			var faceParser = new ByteParser( data.ReadBytes( 56 ) );
+			faceParser.Skip<ushort>(); // planenum
+			faceParser.Skip<byte>(); // side
+			faceParser.Skip<byte>(); // onNode
 
-			var firstEdge = faceparser.Read<int>();
-			var numEdges = faceparser.Read<short>();
-			var texInfo = faceparser.Read<short>();
-			var dispInfo = faceparser.Read<short>();
+			var firstEdge = faceParser.Read<int>();
+			var numEdges = faceParser.Read<short>();
+			var texInfo = faceParser.Read<short>();
+			var dispInfo = faceParser.Read<short>();
 
 			list.Add( new Face( firstEdge, numEdges, texInfo, dispInfo, 0 ) );
 		}

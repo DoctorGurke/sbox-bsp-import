@@ -18,12 +18,12 @@
 			var length = data.Read<int>();
 
 			// offset is based on full file start, aka raw initial data
-			var gamelumpdata = Context.Data.Take( new Range( offset, offset + length ) );
+			var gameLumpData = Context.Data.Take( new Range( offset, offset + length ) );
 
 			switch ( (GameLumpType)Id )
 			{
 				case GameLumpType.StaticPropLump:
-					_ = new StaticPropLump( Context, gamelumpdata );
+					_ = new StaticPropLump( Context, gameLumpData );
 					break;
 			}
 		}

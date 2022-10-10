@@ -9,11 +9,11 @@ public class TexDataStringDataLump : BaseLump
 		var chars = Encoding.ASCII.GetChars( data );
 		var text = new string( chars );
 
-		var texdata = new TexDataStringData( text );
+		var texData = new TexDataStringData( text );
 
-		Log.Info( $"TEXDATASTRINGDATA: {texdata.Count}" );
+		Log.Info( $"TEXDATASTRINGDATA: {texData.Count}" );
 
-		Context.TexDataStringData = texdata;
+		Context.TexDataStringData = texData;
 	}
 }
 

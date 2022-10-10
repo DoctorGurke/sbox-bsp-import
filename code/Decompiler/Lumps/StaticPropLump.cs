@@ -37,22 +37,22 @@ public class StaticPropLump : BaseLump
 			return;
 
 		// size per static prop
-		var sizeper = data.BufferCapacity / entries;
+		var propLength = data.BufferCapacity / entries;
 
 		for ( int i = 0; i < entries; i++ )
 		{
-			var sprp = new ByteParser( data.ReadBytes( sizeper ) );
+			var sprp = new ByteParser( data.ReadBytes( propLength ) );
 
 			var origin = sprp.Read<Vector3>();
 			var angles = sprp.Read<Angles>();
 
-			var proptype = sprp.Read<ushort>();
+			var propType = sprp.Read<ushort>();
 
 			var prop = new LumpEntity();
 			prop.SetClassName( "prop_static" );
 			prop.SetPosition( origin );
 			prop.SetAngles( angles );
-			prop.SetModel( Names[proptype] );
+			prop.SetModel( Names[propType] );
 
 			Context.Entities = Context.Entities?.Append( prop );
 		}
