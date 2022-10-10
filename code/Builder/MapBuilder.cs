@@ -81,8 +81,7 @@ public class MapBuilder
 		var polymesh = new PolygonMesh();
 
 		// get original faces from split faces
-		var originalfaces = new HashSet<int>();
-		var test = new Dictionary<int, int>();
+		var originalfaces = new Dictionary<int, int>();
 		for ( int i = 0; i < model.FaceCount; i++ )
 		{
 			var face = geo.Faces.ElementAt( model.FirstFace + i );
@@ -91,12 +90,12 @@ public class MapBuilder
 			if ( face.TexInfo == -1 )
 				continue;
 
-			originalfaces.Add( face.OriginalFaceIndex );
-			test.TryAdd( face.OriginalFaceIndex, face.TexInfo );
+			// we need the texinfo of the split face
+			originalfaces.TryAdd( face.OriginalFaceIndex, face.TexInfo );
 		}
 
 		// construct original faces
-		foreach ( var pair in test )
+		foreach ( var pair in originalfaces )
 		{
 			var origface = pair.Key;
 			var texinfo = pair.Value;
@@ -112,25 +111,28 @@ public class MapBuilder
 				texinfo = face.TexInfo;
 			}
 
-			// still invalid
+			var material = $"materials/dev/reflectivity_30.vmat";
+
+			// still invalid, just use default material
 			if ( texinfo > Context.TexInfo?.Count() )
 			{
-				Log.Info( $"skipping face with invalid texinfo: {texinfo}" );
-				continue;
+				//Log.Info( $"skipping face with invalid texinfo: {texinfo}" );
 			}
+			else
+			{
+				// get texture/material for face
+				var texdata = Context.TexInfo?.ElementAtOrDefault( texinfo ).TexData;
 
-			// get texture/material for face
-			var texdata = Context.TexInfo?.ElementAtOrDefault( texinfo ).TexData;
+				if ( texdata is null )
+					continue;
 
-			if ( texdata is null )
-				continue;
+				var stringtableindex = Context.TexDataStringTable?.ElementAtOrDefault( texdata.Value );
 
-			var stringtableindex = Context.TexDataStringTable?.ElementAtOrDefault( texdata.Value );
+				if ( stringtableindex is null )
+					continue;
 
-			if ( stringtableindex is null )
-				continue;
-
-			var material = $"materials/{Context.TexDataStringData.FromStringTableIndex( stringtableindex.Value ).ToLower()}.vmat";
+				material = $"materials/{Context.TexDataStringData.FromStringTableIndex( stringtableindex.Value ).ToLower()}.vmat";
+			}
 
 			var verts = new List<Vector3>();
 
