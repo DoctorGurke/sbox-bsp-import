@@ -8,18 +8,21 @@ public class ModelLump : BaseLump
 	{
 		var list = new List<MapModel>();
 
-		for ( int i = 0; i < data.BufferCapacity / 48; i++ )
+		var models = data.BufferCapacity / 48;
+		for ( int i = 0; i < models; i++ )
 		{
-			data.Skip<Vector3>();
-			data.Skip<Vector3>();
+			data.Skip<Vector3>(); // mins
+			data.Skip<Vector3>(); // maxs
 			var origin = data.Read<Vector3>();
-			data.Skip<int>();
+			data.Skip<int>(); // headnode
 			int firstface = data.Read<int>();
 			int numfaces = data.Read<int>();
 
 			var model = new MapModel( origin, firstface, numfaces );
 			list.Add( model );
 		}
+
+		Log.Info( $"MODELS: {list.Count()}" );
 
 		Context.Models = list;
 	}

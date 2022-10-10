@@ -38,8 +38,8 @@ public class MapBuilder
 			if ( ent.Model is not null && ent.Model.StartsWith( '*' ) )
 			{
 				var index = int.Parse( ent.Model.TrimStart( '*' ) );
-				Log.Info( $"brush entity {index}" );
-				ConstructModel( index, ent.Position, ent.Model );
+				Log.Info( $"brush entity {index} {ent.Position} {ent.ClassName}" );
+				ConstructModel( index, ent.Position, ent.ClassName );
 				continue;
 			}
 
@@ -71,7 +71,7 @@ public class MapBuilder
 			throw new Exception( "No valid map geometry to construct!" );
 		}
 
-		if ( index > Context.Models.Count() )
+		if ( index > Context.Models.Count() - 1 )
 		{
 			throw new Exception( $"Tried to construct map model with index: {index}. Exceeds available Models!" );
 		}
