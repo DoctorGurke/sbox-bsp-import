@@ -12,6 +12,8 @@ public partial class MapDecompiler
 				return new EntityLump( Context, data );
 			case LumpType.VertexLump:
 				return new VertexLump( Context, data );
+			case LumpType.TexInfoLump:
+				return new TexInfoLump( Context, data );
 			case LumpType.FaceLump:
 				return new FaceLump( Context, data );
 			case LumpType.EdgeLump:
@@ -34,6 +36,7 @@ public partial class MapDecompiler
 	{
 		EntityLump = 0,
 		VertexLump = 3,
+		TexInfoLump = 6,
 		FaceLump = 7,
 		EdgeLump = 12,
 		SurfaceEdgeLump = 13,

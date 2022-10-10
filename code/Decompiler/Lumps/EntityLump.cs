@@ -4,9 +4,9 @@ public class EntityLump : BaseLump
 {
 	public EntityLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( IEnumerable<byte> data )
+	protected override void Parse( ByteParser data )
 	{
-		var pairs = Encoding.ASCII.GetString( data.ToArray() );
+		var pairs = Encoding.ASCII.GetString( data );
 		var ents = FromKeyValues( pairs );
 
 		Log.Info( $"ENTITIES: {ents.Count()}" );

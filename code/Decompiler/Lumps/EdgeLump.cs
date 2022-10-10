@@ -6,10 +6,9 @@ public class EdgeLump : BaseLump
 {
 	public EdgeLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( IEnumerable<byte> data )
+	protected override void Parse( ByteParser data )
 	{
-		var parser = new ByteParser( data );
-		var edges = parser.TryReadMultiple<EdgeIndices>();
+		var edges = data.TryReadMultiple<EdgeIndices>();
 
 		Log.Info( $"EDGES: {edges.Count()}" );
 

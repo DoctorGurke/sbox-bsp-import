@@ -4,18 +4,16 @@ public class OriginalFaceLump : BaseLump
 {
 	public OriginalFaceLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( IEnumerable<byte> data )
+	protected override void Parse( ByteParser data )
 	{
-		var parser = new ByteParser( data );
-
 		// each face is 56 bytes
-		var faces = parser.BufferCapacity / 56;
+		var faces = data.BufferCapacity / 56;
 
 		var list = new List<OriginalFace>();
 
 		for ( int i = 0; i < faces; i++ )
 		{
-			var faceparser = new ByteParser( parser.ReadBytes( 56 ) );
+			var faceparser = new ByteParser( data.ReadBytes( 56 ) );
 			faceparser.Skip<ushort>(); // planenum
 			faceparser.Skip<byte>(); // side
 			faceparser.Skip<byte>(); // onNode

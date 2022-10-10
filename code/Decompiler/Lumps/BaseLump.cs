@@ -12,8 +12,9 @@ public abstract class BaseLump
 		Data = data;
 		Version = version;
 
-		Parse( data );
+		var parser = new ByteParser( data );
+		Parse( parser );
 	}
 
-	protected abstract void Parse( IEnumerable<byte> data );
+	protected abstract void Parse( ByteParser data );
 }

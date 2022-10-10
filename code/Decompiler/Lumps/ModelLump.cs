@@ -4,20 +4,18 @@ public class ModelLump : BaseLump
 {
 	public ModelLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( IEnumerable<byte> data )
+	protected override void Parse( ByteParser data )
 	{
-		var parser = new ByteParser( data );
-
 		var list = new List<MapModel>();
 
-		for ( int i = 0; i < data.Count() / 48; i++ )
+		for ( int i = 0; i < data.BufferCapacity / 48; i++ )
 		{
-			parser.Skip<Vector3>();
-			parser.Skip<Vector3>();
-			var origin = parser.Read<Vector3>();
-			parser.Skip<int>();
-			int firstface = parser.Read<int>();
-			int numfaces = parser.Read<int>();
+			data.Skip<Vector3>();
+			data.Skip<Vector3>();
+			var origin = data.Read<Vector3>();
+			data.Skip<int>();
+			int firstface = data.Read<int>();
+			int numfaces = data.Read<int>();
 
 			var model = new MapModel( origin, firstface, numfaces );
 			list.Add( model );

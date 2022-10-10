@@ -4,10 +4,9 @@ public class SurfaceEdgeLump : BaseLump
 {
 	public SurfaceEdgeLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( IEnumerable<byte> data )
+	protected override void Parse( ByteParser data )
 	{
-		var parser = new ByteParser( data );
-		var surfedges = parser.TryReadMultiple<int>();
+		var surfedges = data.TryReadMultiple<int>();
 
 		Log.Info( $"SURFACE EDGES: {surfedges.Count()}" );
 

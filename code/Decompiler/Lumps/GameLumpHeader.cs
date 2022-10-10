@@ -4,16 +4,15 @@ public class GameLumpHeader : BaseLump
 {
 	public GameLumpHeader( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( IEnumerable<byte> data )
+	protected override void Parse( ByteParser data )
 	{
-		var parser = new ByteParser( data );
-		var count = parser.Read<int>();
+		var count = data.Read<int>();
 
 		var list = new List<GameLump>();
 
 		for ( int i = 0; i < count; i++ )
 		{
-			var lump = parser.ReadBytes( 16 );
+			var lump = data.ReadBytes( 16 );
 			var gamelump = new GameLump( Context, lump );
 			list.Add( gamelump );
 		}

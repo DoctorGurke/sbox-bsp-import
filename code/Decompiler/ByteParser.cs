@@ -15,6 +15,8 @@ public class ByteParser
 		_buffer = data;
 	}
 
+	public static implicit operator byte[]( ByteParser p ) => p._buffer.ToArray();
+
 	/// <summary>
 	/// Get the remainding capacity of the byte buffer.
 	/// </summary>

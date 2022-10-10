@@ -4,10 +4,9 @@ public class VertexLump : BaseLump
 {
 	public VertexLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( IEnumerable<byte> data )
+	protected override void Parse( ByteParser data )
 	{
-		var parser = new ByteParser( data );
-		var vertices = parser.TryReadMultiple<Vector3>();
+		var vertices = data.TryReadMultiple<Vector3>();
 
 		Log.Info( $"VERTICES: {vertices.Count()}" );
 
