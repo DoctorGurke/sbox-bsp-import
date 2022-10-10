@@ -1,4 +1,5 @@
 ﻿using BspImport.Decompiler;
+using System.Linq;
 using Tools.MapDoc;
 using Tools.MapEditor;
 
@@ -38,7 +39,6 @@ public class MapBuilder
 			if ( ent.Model is not null && ent.Model.StartsWith( '*' ) )
 			{
 				var index = int.Parse( ent.Model.TrimStart( '*' ) );
-				Log.Info( $"brush entity {index} {ent.Position} {ent.ClassName}" );
 				ConstructModel( index, ent.Position, ent.ClassName );
 				continue;
 			}
@@ -60,9 +60,9 @@ public class MapBuilder
 		ConstructModel( 0, "worldspawn" );
 	}
 
-	private MapMesh ConstructModel( int index, string? name = null ) => ConstructModel( index, Vector3.Zero, name );
+	private MapMesh? ConstructModel( int index, string? name = null ) => ConstructModel( index, Vector3.Zero, name );
 
-	private MapMesh ConstructModel( int index, Vector3 origin, string? name = null )
+	private MapMesh? ConstructModel( int index, Vector3 origin, string? name = null )
 	{
 		var geo = Context.MapGeometry;
 
@@ -82,6 +82,7 @@ public class MapBuilder
 
 		// get original faces from split faces
 		var originalfaces = new HashSet<int>();
+		var test = new Dictionary<int, int>();
 		for ( int i = 0; i < model.FaceCount; i++ )
 		{
 			var face = geo.Faces.ElementAt( model.FirstFace + i );
@@ -91,16 +92,45 @@ public class MapBuilder
 				continue;
 
 			originalfaces.Add( face.OriginalFaceIndex );
+			test.TryAdd( face.OriginalFaceIndex, face.TexInfo );
 		}
 
 		// construct original faces
-		foreach ( var origface in originalfaces )
+		foreach ( var pair in test )
 		{
+			var origface = pair.Key;
+			var texinfo = pair.Value;
 			var face = geo.OriginalFaces.ElementAt( origface );
 
 			// only construct valid primitives
 			if ( face.EdgeCount < 3 )
 				continue;
+
+			// if split face texinfo is invalid, try it with original face texinfo?
+			if ( texinfo > Context.TexInfo?.Count() )
+			{
+				texinfo = face.TexInfo;
+			}
+
+			// still invalid
+			if ( texinfo > Context.TexInfo?.Count() )
+			{
+				Log.Info( $"skipping face with invalid texinfo: {texinfo}" );
+				continue;
+			}
+
+			// get texture/material for face
+			var texdata = Context.TexInfo?.ElementAtOrDefault( texinfo ).TexData;
+
+			if ( texdata is null )
+				continue;
+
+			var stringtableindex = Context.TexDataStringTable?.ElementAtOrDefault( texdata.Value );
+
+			if ( stringtableindex is null )
+				continue;
+
+			var material = $"materials/{Context.TexDataStringData.FromStringTableIndex( stringtableindex.Value ).ToLower()}.vmat";
 
 			var verts = new List<Vector3>();
 
@@ -119,16 +149,26 @@ public class MapBuilder
 			}
 
 			// construct mesh vertex from vert pos (temp until we have texinfo uv)
-			var meshverts = new List<MeshVertex>();
+			var indices = new List<int>();
 			foreach ( var vert in verts )
 			{
 				var meshvert = new MeshVertex();
 				meshvert.Position = vert + origin;
-				meshverts.Add( meshvert );
+				polymesh.Vertices.Add( meshvert );
+				indices.Add( polymesh.Vertices.Count() - 1 );
 			}
 
-			meshverts.Reverse();
-			polymesh.AddFace( meshverts.ToArray() );
+			indices.Reverse();
+
+			var meshface = new MeshFace( indices, Material.Load( material ) );
+			polymesh.Faces.Add( meshface );
+		}
+
+		// no valid faces in mesh
+		if ( !polymesh.Faces.Any() )
+		{
+			Log.Error( $"ConstructModel failed! No valid faces constructed!" );
+			return null;
 		}
 
 		var mapmesh = new MapMesh( Hammer.ActiveMap );

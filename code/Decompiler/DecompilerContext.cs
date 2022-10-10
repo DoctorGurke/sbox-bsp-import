@@ -16,4 +16,8 @@ public class DecompilerContext
 	public IEnumerable<MapModel>? Models { get; set; }
 	public IEnumerable<GameLump>? GameLumps { get; set; }
 	public MapGeometry MapGeometry { get; private set; }
+	public IEnumerable<TexInfo>? TexInfo { get; set; }
+	public IEnumerable<TexData>? TexData { get; set; }
+	public IEnumerable<int>? TexDataStringTable { get; set; }
+	public TexDataStringData TexDataStringData { get; set; }
 }

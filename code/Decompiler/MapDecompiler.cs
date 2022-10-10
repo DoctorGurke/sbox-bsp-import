@@ -43,6 +43,6 @@ public partial class MapDecompiler
 
 		var revision = parser.Read<int>();
 
-		Log.Info( $"decompiled bsp: [ident: {ident} version: {mapversion} revision: {revision}]" );
+		Log.Info( $"### DECOMPILED BSP: [ident: {ident} version: {mapversion} revision: {revision}]" );
 	}
 }

@@ -10,7 +10,7 @@ public static class Tool
 	{
 		var file = GetFileFromDialog( "Open a bsp file.", "*.bsp" );
 		Log.Info( $"---------------" );
-		Log.Info( $"loading bsp: {file}" );
+		Log.Info( $"LOADING BSP: {file}" );
 
 		if ( file is null )
 			return;
