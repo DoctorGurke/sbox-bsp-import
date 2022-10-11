@@ -33,6 +33,8 @@ public static class Tool
 		var decompiler = new MapDecompiler( Context );
 		decompiler.Decompile( file );
 
+		Log.Info( $"Preparing worldspawn..." );
+
 		var builder = new MapBuilder( Context );
 		builder.PrepareWorldSpawn();
 	}
