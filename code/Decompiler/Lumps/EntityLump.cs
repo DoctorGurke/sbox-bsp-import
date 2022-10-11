@@ -102,7 +102,10 @@ public class LumpEntity
 		if ( split is null || split.Length != 3 )
 			return Angles.Zero;
 
-		return Angles.Parse( $"{split[0]},{split[1]},{split[2]}" );
+		var angle = Angles.Parse( $"{split[0]},{split[1]},{split[2]}" );
+		angle.pitch = -angle.pitch;
+
+		return angle;
 	}
 
 	public Angles Angles => ConstructAngles();
