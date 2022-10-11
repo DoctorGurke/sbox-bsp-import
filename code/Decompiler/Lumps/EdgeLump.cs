@@ -8,9 +8,18 @@ public class EdgeLump : BaseLump
 
 	protected override void Parse( ByteParser data )
 	{
-		var edges = data.TryReadMultiple<EdgeIndices>();
+		var bReader = new BinaryReader( new MemoryStream( data ) );
 
-		Log.Info( $"EDGES: {edges.Count()}" );
+		var edgeCount = data.BufferCapacity / sizeof( int );
+
+		var edges = new EdgeIndices[edgeCount];
+
+		for ( int i = 0; i < edgeCount; i++ )
+		{
+			edges[i] = new EdgeIndices( bReader.ReadUInt16(), bReader.ReadUInt16() );
+		}
+
+		Log.Info( $"SURFACE EDGES: {edges.Length}" );
 
 		Context.MapGeometry.EdgeIndices = edges;
 	}
@@ -18,6 +27,12 @@ public class EdgeLump : BaseLump
 
 public struct EdgeIndices
 {
-	[MarshalAs( UnmanagedType.ByValArray, SizeConst = 2 )]
 	public ushort[] Indices;
+
+	public EdgeIndices( ushort index0, ushort index1 )
+	{
+		Indices = new ushort[2];
+		Indices[0] = index0;
+		Indices[1] = index1;
+	}
 }
