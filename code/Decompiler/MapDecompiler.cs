@@ -10,35 +10,33 @@ public partial class MapDecompiler
 		Context = context;
 	}
 
-	public virtual void Decompile( string file )
+	public virtual void Decompile()
 	{
-		var data = File.ReadAllBytes( file );
-		Context.Data = data;
-
-		var parser = new ByteParser( data );
+		var reader = new BinaryReader( new MemoryStream( Context.Data ) );
 
 		// parse bsp header
-		var ident = parser.Read<int>();
-		var mapversion = parser.Read<int>();
+		var ident = reader.ReadInt32();
+		var mapversion = reader.ReadInt32();
 
 		// 64 lump headers
 		for ( int i = 0; i < 64; i++ )
 		{
+			var offset = reader.ReadInt32();
+			var length = reader.ReadInt32();
+			var version = reader.ReadInt32();
+			reader.Skip( 4 ); // fourCC
+
+			// don't bother
 			if ( !Enum.IsDefined( typeof( LumpType ), i ) )
 			{
-				// skip lump header (offset, length, verion, fourCC)
-				parser.Skip( sizeof( int ) * 3 + 4 );
 				continue;
 			}
 
-			var offset = parser.Read<int>();
-			var length = parser.Read<int>();
-			var version = parser.Read<int>();
-			parser.Skip( 4 ); // fourCC
+			// prepare lump data
+			byte[] lumpData = new byte[length];
+			Array.Copy( Context.Data, offset, lumpData, 0, length );
 
-			var lumpdata = data.Take( new Range( offset, offset + length ) ).ToArray();
-
-			var parsed = ParseLump( i, lumpdata, version );
+			var parsed = ParseLump( i, lumpData, version );
 
 			if ( parsed is null )
 				continue;
@@ -46,7 +44,7 @@ public partial class MapDecompiler
 			Context.Lumps[i] = parsed;
 		}
 
-		var revision = parser.Read<int>();
+		var revision = reader.ReadInt32();
 
 		Log.Info( $"### DECOMPILED BSP: [ident: {ident} version: {mapversion} revision: {revision}]" );
 

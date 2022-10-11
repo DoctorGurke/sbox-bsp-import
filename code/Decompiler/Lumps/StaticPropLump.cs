@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿using BspImport.Extensions;
+using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 
 namespace BspImport.Decompiler.Lumps;
 
@@ -9,42 +11,50 @@ public class StaticPropLump : BaseLump
 
 	public StaticPropLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( ByteParser data )
+	protected override void Parse( BinaryReader reader, int capacity )
 	{
 		// parse static prop names (model names)
-		DictEntryCount = data.Read<int>();
+		DictEntryCount = reader.ReadInt32();
 		Names = new();
 
 		for ( int i = 0; i < DictEntryCount; i++ )
 		{
-			var name = data.Read<StaticPropNameEntry>();
+			var size = Marshal.SizeOf( typeof( StaticPropNameEntry ) );
+			var sReader = new StructReader<StaticPropNameEntry>();
+			var name = sReader.Read( reader.ReadBytes( size ) );
+
 			var entry = new string( name.Name ).Trim( '\0' );
 
 			Names.TryAdd( i, entry );
 		}
 
 		// we don't care about leaf entries
-		var leafs = data.Read<int>(); // leaf entry count
-		data.Skip<ushort>( leafs ); // leaf entries
+		var leafs = reader.ReadInt32(); // leaf entry count
+		reader.Skip<ushort>( leafs ); // leaf entries
 
 		// read static prop entries
-		var entries = data.Read<int>();
+		var entries = reader.ReadInt32();
 
 		// no static props, don't bother
 		if ( entries <= 0 )
 			return;
 
 		// size per static prop
-		var propLength = data.BufferCapacity / entries;
+		var propLength = reader.GetLength() / entries;
+
+		Log.Info( $"static props: buffer: {reader.GetLength()} entries: {entries}" );
 
 		for ( int i = 0; i < entries; i++ )
 		{
-			var sprp = new ByteParser( data.ReadBytes( propLength ) );
+			Log.Info( $"proplength: {propLength} reader: {reader.GetLength()}" );
+			var sprp = reader.Split( propLength );
 
-			var origin = sprp.Read<Vector3>();
-			var angles = sprp.Read<Angles>();
+			Log.Info( $"split: {sprp.GetLength()}" );
 
-			var propType = sprp.Read<ushort>();
+			var origin = sprp.ReadVector3();
+			var angles = sprp.ReadAngles();
+
+			var propType = sprp.ReadUInt16();
 
 			var prop = new LumpEntity();
 			prop.SetClassName( "prop_static" );

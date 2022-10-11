@@ -4,17 +4,15 @@ public class EdgeLump : BaseLump
 {
 	public EdgeLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( ByteParser data )
+	protected override void Parse( BinaryReader reader, int capacity )
 	{
-		var bReader = new BinaryReader( new MemoryStream( data ) );
-
-		var edgeCount = data.BufferCapacity / sizeof( int );
+		var edgeCount = capacity / sizeof( int );
 
 		var edges = new EdgeIndices[edgeCount];
 
 		for ( int i = 0; i < edgeCount; i++ )
 		{
-			edges[i] = new EdgeIndices( bReader.ReadUInt16(), bReader.ReadUInt16() );
+			edges[i] = new EdgeIndices( reader.ReadUInt16(), reader.ReadUInt16() );
 		}
 
 		Log.Info( $"SURFACE EDGES: {edges.Length}" );

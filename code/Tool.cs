@@ -17,16 +17,18 @@ public static class Tool
 		if ( file is null )
 			return;
 
-		Context = new DecompilerContext();
+		var data = File.ReadAllBytes( file );
+
+		Context = new DecompilerContext( data );
 
 		Log.Info( $"Start Compiling" );
 
 		// decompile in parallel, also prepares worldspawn geometry
-		var dTask = new Task( () => Decompile( file ) );
+		var dTask = new Task( () => Decompile() );
 		dTask.Start();
 	}
 
-	private static void Decompile( string file )
+	private static void Decompile()
 	{
 		// run in parallel
 		ThreadSafe.AssertIsNotMainThread();
@@ -35,7 +37,7 @@ public static class Tool
 			return;
 
 		var decompiler = new MapDecompiler( Context );
-		decompiler.Decompile( file );
+		decompiler.Decompile();
 	}
 
 	public static DecompilerContext? Context { get; set; }

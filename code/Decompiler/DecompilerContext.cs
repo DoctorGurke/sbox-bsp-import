@@ -5,8 +5,10 @@ namespace BspImport.Decompiler;
 
 public class DecompilerContext
 {
-	public DecompilerContext()
+	public DecompilerContext( byte[] data )
 	{
+		Data = data;
+
 		Lumps = new BaseLump[64];
 		MapGeometry = new();
 		CachedMaterials = new();
@@ -15,7 +17,7 @@ public class DecompilerContext
 	public bool Decompiled { get; set; } = false;
 	public bool Cached { get; set; } = false;
 
-	public byte[]? Data { get; set; }
+	public byte[] Data { get; private set; }
 	public BaseLump[] Lumps;
 	public LumpEntity[]? Entities { get; set; }
 	public MapModel[]? Models { get; set; }

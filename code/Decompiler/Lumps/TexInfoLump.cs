@@ -1,4 +1,5 @@
 ﻿using BspImport.Extensions;
+using Sandbox;
 using System.Runtime.InteropServices;
 
 namespace BspImport.Decompiler.Lumps;
@@ -7,21 +8,19 @@ public class TexInfoLump : BaseLump
 {
 	public TexInfoLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( ByteParser data )
+	protected override void Parse( BinaryReader reader, int capacity )
 	{
-		var bReader = new BinaryReader( new MemoryStream( data ) );
-
-		var texInfoCount = data.BufferCapacity / 72;
+		var texInfoCount = reader.GetLength() / 72;
 
 		var texInfos = new TexInfo[texInfoCount];
 
 		for ( int i = 0; i < texInfoCount; i++ )
 		{
-			var tv0 = new Vector4( bReader.ReadSingle(), bReader.ReadSingle(), bReader.ReadSingle(), bReader.ReadSingle() );
-			var tv1 = new Vector4( bReader.ReadSingle(), bReader.ReadSingle(), bReader.ReadSingle(), bReader.ReadSingle() );
-			bReader.ReadBytes( sizeof( float ) * 4 * 2 ); // vec4 * 2 : lightmapVecs[2][4]
-			bReader.ReadInt32(); // int flags
-			var texData = bReader.ReadInt32();
+			var tv0 = reader.ReadVector4();
+			var tv1 = reader.ReadVector4();
+			reader.Skip<Vector4>( 2 ); // vec4 * 2 : lightmapVecs[2][4]
+			reader.Skip<int>(); // int flags
+			var texData = reader.ReadInt32();
 
 			var texInfo = new TexInfo( tv0, tv1, texData );
 			texInfos[i] = texInfo;

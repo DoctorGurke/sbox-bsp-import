@@ -1,12 +1,14 @@
-﻿namespace BspImport.Decompiler.Lumps;
+﻿using BspImport.Extensions;
+
+namespace BspImport.Decompiler.Lumps;
 
 public class TexDataStringDataLump : BaseLump
 {
 	public TexDataStringDataLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( ByteParser data )
+	protected override void Parse( BinaryReader reader, int capacity )
 	{
-		var chars = Encoding.ASCII.GetChars( data );
+		var chars = Encoding.ASCII.GetChars( reader.ReadBytes( reader.GetLength() ) );
 		var text = new string( chars );
 
 		var texData = new TexDataStringData( text );

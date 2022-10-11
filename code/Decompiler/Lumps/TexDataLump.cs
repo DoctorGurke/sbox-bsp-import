@@ -1,24 +1,24 @@
-﻿namespace BspImport.Decompiler.Lumps;
+﻿using BspImport.Extensions;
+
+namespace BspImport.Decompiler.Lumps;
 
 public class TexDataLump : BaseLump
 {
 	public TexDataLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( ByteParser data )
+	protected override void Parse( BinaryReader reader, int capacity )
 	{
-		var bReader = new BinaryReader( new MemoryStream( data ) );
-
-		var texDataCount = data.BufferCapacity / 32;
+		var texDataCount = reader.GetLength() / 32;
 
 		var texDatas = new TexData[texDataCount];
 
 		for ( int i = 0; i < texDataCount; i++ )
 		{
-			bReader.ReadBytes( sizeof( float ) * 3 ); // vec3 reflectivity
-			var nameStringTableID = bReader.ReadInt32();
-			var width = bReader.ReadInt32();
-			var height = bReader.ReadInt32();
-			bReader.ReadBytes( sizeof( int ) * 2 ); // int view_width, view_height
+			reader.Skip<Vector3>(); // vec3 reflectivity
+			var nameStringTableID = reader.ReadInt32();
+			var width = reader.ReadInt32();
+			var height = reader.ReadInt32();
+			reader.Skip<int>( 2 ); // int view_width, view_height
 
 			var texData = new TexData( nameStringTableID, width, height );
 			texDatas[i] = texData;

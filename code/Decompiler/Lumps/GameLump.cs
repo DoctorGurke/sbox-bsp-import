@@ -6,16 +6,16 @@
 
 		public GameLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-		protected override void Parse( ByteParser data )
+		protected override void Parse( BinaryReader reader, int capacity )
 		{
 			if ( Context.Data is null )
 				return;
 
-			Id = data.Read<int>();
-			data.Skip<ushort>(); // flags
-			data.Skip<ushort>(); // version
-			var offset = data.Read<int>();
-			var length = data.Read<int>();
+			Id = reader.ReadInt32();
+			reader.ReadUInt16(); // ushort flags
+			reader.ReadUInt16(); // ushort version
+			var offset = reader.ReadInt32();
+			var length = reader.ReadInt32();
 
 			// offset is based on full file start, aka raw initial data
 			var gameLumpData = Context.Data.Take( new Range( offset, offset + length ) ).ToArray();
