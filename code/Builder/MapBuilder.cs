@@ -1,6 +1,6 @@
 ﻿using BspImport.Decompiler;
+using BspImport.Decompiler.Lumps;
 using Sandbox;
-using System.Linq;
 using Tools.MapDoc;
 using Tools.MapEditor;
 
@@ -40,7 +40,7 @@ public class MapBuilder
 			if ( ent.Model is not null && ent.Model.StartsWith( '*' ) )
 			{
 				var index = int.Parse( ent.Model.TrimStart( '*' ) );
-				ConstructModel( index, ent.Position, ent.ClassName );
+				ConstructModel( index, ent.Position, ent.Angles, ent.ClassName );
 				continue;
 			}
 
@@ -61,9 +61,9 @@ public class MapBuilder
 		ConstructModel( 0, "worldspawn" );
 	}
 
-	private MapMesh? ConstructModel( int index, string? name = null ) => ConstructModel( index, Vector3.Zero, name );
+	private MapMesh? ConstructModel( int index, string? name = null ) => ConstructModel( index, Vector3.Zero, Angles.Zero, name );
 
-	private MapMesh? ConstructModel( int index, Vector3 origin, string? name = null )
+	private MapMesh? ConstructModel( int index, Vector3 origin, Angles angles, string? name = null )
 	{
 		var geo = Context.MapGeometry;
 
@@ -150,12 +150,30 @@ public class MapBuilder
 				}
 			}
 
-			// construct mesh vertex from vert pos (temp until we have texinfo uv)
+			// construct mesh vertex from vert pos and calculated uv
 			var indices = new List<int>();
 			foreach ( var vert in verts )
 			{
 				var meshVert = new MeshVertex();
 				meshVert.Position = vert + origin;
+
+				var width = 1024;
+				var height = 1024;
+
+				// get texture width/height from texdata via texinfo
+				if ( Context.TexInfo?.ElementAt( texInfo ) is TexInfo ti )
+				{
+					var texData = Context.TexData?.ElementAt( ti.TexData );
+					if ( texData is TexData t )
+					{
+						width = t.Width;
+						height = t.Height;
+					}
+
+					var texCoords = ti.GetUvs( vert, angles, width, height );
+					meshVert.TexCoord = texCoords;
+				}
+
 				polyMesh.Vertices.Add( meshVert );
 				indices.Add( polyMesh.Vertices.Count() - 1 );
 			}

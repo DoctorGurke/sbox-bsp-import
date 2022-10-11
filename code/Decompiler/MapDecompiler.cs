@@ -24,6 +24,13 @@ public partial class MapDecompiler
 		// 64 lump headers
 		for ( int i = 0; i < 64; i++ )
 		{
+			if ( !Enum.IsDefined( typeof( LumpType ), i ) )
+			{
+				// skip lump header (offset, length, verion, fourCC)
+				parser.Skip( sizeof( int ) * 3 + 4 );
+				continue;
+			}
+
 			var offset = parser.Read<int>();
 			var length = parser.Read<int>();
 			var version = parser.Read<int>();
