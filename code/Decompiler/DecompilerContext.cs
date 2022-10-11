@@ -1,4 +1,5 @@
 ﻿using BspImport.Decompiler.Lumps;
+using Tools.MapDoc;
 
 namespace BspImport.Decompiler;
 
@@ -12,6 +13,7 @@ public class DecompilerContext
 
 	public bool Decompiled { get; set; } = false;
 	public bool Decompiling { get; set; } = false;
+	public bool PreparedWorldSpawn { get; set; } = false;
 
 	public IEnumerable<byte>? Data { get; set; }
 	public BaseLump[] Lumps;
@@ -23,4 +25,6 @@ public class DecompilerContext
 	public IEnumerable<TexData>? TexData { get; set; }
 	public IEnumerable<int>? TexDataStringTable { get; set; }
 	public TexDataStringData TexDataStringData { get; set; }
+
+	public PolygonMesh? WorldSpawn { get; set; }
 }

@@ -20,9 +20,9 @@ public static class Tool
 
 		Context = new DecompilerContext();
 
-		// decompile in parallel
-		var task = new Task( () => Decompile( file ) );
-		task.Start();
+		// decompile in parallel, also prepares worldspawn geometry
+		var dTask = new Task( () => Decompile( file ) );
+		dTask.Start();
 	}
 
 	private static void Decompile( string file )
@@ -32,6 +32,9 @@ public static class Tool
 
 		var decompiler = new MapDecompiler( Context );
 		decompiler.Decompile( file );
+
+		var builder = new MapBuilder( Context );
+		builder.PrepareWorldSpawn();
 	}
 
 	public static DecompilerContext? Context { get; set; }
@@ -49,7 +52,7 @@ public static class Tool
 		TimeSinceDecompileChecked = 0;
 
 		// check decompile status
-		if ( Context.Decompiling || !Context.Decompiled )
+		if ( Context.Decompiling || !Context.Decompiled || !Context.PreparedWorldSpawn )
 			return;
 
 		Log.Info( $"Finished decompile found, building..." );

@@ -1,6 +1,8 @@
 ﻿using BspImport.Decompiler;
 using BspImport.Decompiler.Lumps;
 using Sandbox;
+using System;
+using System.Diagnostics;
 using Tools.MapDoc;
 using Tools.MapEditor;
 
@@ -40,7 +42,12 @@ public class MapBuilder
 			if ( ent.Model is not null && ent.Model.StartsWith( '*' ) )
 			{
 				var index = int.Parse( ent.Model.TrimStart( '*' ) );
-				ConstructModel( index, ent.Position, ent.Angles, ent.ClassName );
+				var polyMesh = ConstructModel( index, ent.Position, ent.Angles );
+
+				var mapMesh = new MapMesh( Hammer.ActiveMap );
+				mapMesh.ConstructFromPolygons( polyMesh );
+				mapMesh.Name = ent.ClassName;
+
 				continue;
 			}
 
@@ -58,12 +65,31 @@ public class MapBuilder
 
 	protected virtual void BuildGeometry()
 	{
-		ConstructModel( 0, "worldspawn" );
+		var polyMesh = Context.WorldSpawn;
+
+		if ( polyMesh is null )
+		{
+			Log.Error( $"Tried building world geometry without a valid WorldSpawn present in the current DecompilerContext!" );
+			return;
+		}
+
+		var mapMesh = new MapMesh( Hammer.ActiveMap );
+		mapMesh.ConstructFromPolygons( polyMesh );
+		mapMesh.Name = $"worldspawn";
 	}
 
-	private MapMesh? ConstructModel( int index, string? name = null ) => ConstructModel( index, Vector3.Zero, Angles.Zero, name );
+	public void PrepareWorldSpawn()
+	{
+		Context.PreparedWorldSpawn = false;
+		Context.WorldSpawn = ConstructModel( 0 );
+		Context.PreparedWorldSpawn = true;
+	}
 
-	private MapMesh? ConstructModel( int index, Vector3 origin, Angles angles, string? name = null )
+	private RealTimeSince TimeSinceUpdate { get; set; }
+
+	private PolygonMesh? ConstructModel( int index ) => ConstructModel( index, Vector3.Zero, Angles.Zero );
+
+	private PolygonMesh? ConstructModel( int index, Vector3 origin, Angles angles )
 	{
 		var geo = Context.MapGeometry;
 
@@ -95,9 +121,18 @@ public class MapBuilder
 			originalfaces.TryAdd( face.OriginalFaceIndex, face.TexInfo );
 		}
 
+		var total = originalfaces.Count();
+		var current = 0;
+
+		Log.Info( $"ORIGINAL FACES: {total}" );
+
+		var time = new Stopwatch();
+
 		// construct original faces
 		foreach ( var pair in originalfaces )
 		{
+			time.Restart();
+
 			var oFaceIndex = pair.Key;
 			var texInfo = pair.Value;
 			var oFace = geo.OriginalFaces.ElementAt( oFaceIndex );
@@ -132,6 +167,9 @@ public class MapBuilder
 				material = $"materials/dev/reflectivity_30.vmat";
 			}
 
+			// time elapsed to parse material data
+			var materialTime = time.ElapsedMilliseconds;
+
 			var verts = new List<Vector3>();
 
 			// get verts from surf edges -> edges -> vertices
@@ -149,6 +187,9 @@ public class MapBuilder
 					verts.Add( geo.VertexPositions.ElementAt( geo.EdgeIndices.ElementAt( -edge ).Indices[1] ) );
 				}
 			}
+
+			// time elapsed to fetch verts
+			var vertsTime = time.ElapsedMilliseconds - materialTime;
 
 			// construct mesh vertex from vert pos and calculated uv
 			var indices = new List<int>();
@@ -180,8 +221,26 @@ public class MapBuilder
 
 			indices.Reverse();
 
-			var meshFace = new MeshFace( indices, Material.Load( material ) );
+			// time elapsed to construct meshvertices and fetch indices
+			var indicesTime = time.ElapsedMilliseconds - (vertsTime + materialTime);
+
+			var meshFace = new MeshFace( indices, null ); //Material.Load( material )
 			polyMesh.Faces.Add( meshFace );
+
+			// time elapsed to construct meshfaces
+			var meshFaceTime = time.ElapsedMilliseconds - (indicesTime + vertsTime + materialTime);
+
+			if ( TimeSinceUpdate >= 1.0f )
+			{
+				Log.Info( $"##### Original faces built: {current} / {total} : {(current / total) * 100.0f}%" );
+
+				TimeSinceUpdate = 0;
+			}
+
+			Log.Info( $"@Original Face Took: {time.ElapsedMilliseconds}ms | material time: {materialTime}ms verts time: {vertsTime}ms indices time: {indicesTime}ms meshFace time: {meshFaceTime}ms" );
+			time.Reset();
+
+			current++;
 		}
 
 		// no valid faces in mesh
@@ -191,11 +250,9 @@ public class MapBuilder
 			return null;
 		}
 
-		var mapMesh = new MapMesh( Hammer.ActiveMap );
-		mapMesh.ConstructFromPolygons( polyMesh );
-		mapMesh.Name = name;
+		Log.Info( $"PolyMesh constructed." );
 
-		return mapMesh;
+		return polyMesh;
 	}
 
 	private string? ParseFaceMaterial( int texInfo )
