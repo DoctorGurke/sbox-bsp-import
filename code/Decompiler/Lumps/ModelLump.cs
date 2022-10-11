@@ -2,14 +2,15 @@
 
 public class ModelLump : BaseLump
 {
-	public ModelLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+	public ModelLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( ByteParser data )
 	{
-		var list = new List<MapModel>();
+		var modelCount = data.BufferCapacity / 48;
 
-		var models = data.BufferCapacity / 48;
-		for ( int i = 0; i < models; i++ )
+		var models = new MapModel[modelCount];
+
+		for ( int i = 0; i < modelCount; i++ )
 		{
 			data.Skip<Vector3>(); // mins
 			data.Skip<Vector3>(); // maxs
@@ -19,12 +20,12 @@ public class ModelLump : BaseLump
 			int numFaces = data.Read<int>();
 
 			var model = new MapModel( origin, firstFace, numFaces );
-			list.Add( model );
+			models[i] = model;
 		}
 
-		Log.Info( $"MODELS: {list.Count()}" );
+		Log.Info( $"MODELS: {models.Length}" );
 
-		Context.Models = list;
+		Context.Models = models;
 	}
 }
 

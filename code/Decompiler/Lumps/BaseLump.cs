@@ -5,7 +5,7 @@ public abstract class BaseLump
 	protected DecompilerContext Context { get; set; }
 	public int Version { get; private set; }
 
-	public BaseLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 )
+	public BaseLump( DecompilerContext context, byte[] data, int version = 0 )
 	{
 		Context = context;
 		Version = version;

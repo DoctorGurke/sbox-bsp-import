@@ -2,43 +2,45 @@
 
 public class FaceLump : BaseLump
 {
-	public FaceLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+	public FaceLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( ByteParser data )
 	{
+		var bReader = new BinaryReader( new MemoryStream( data ) );
+
 		// each face is 56 bytes
-		var faces = data.BufferCapacity / 56;
+		var faceCount = data.BufferCapacity / 56;
 
-		var list = new List<Face>();
+		var faces = new Face[faceCount];
 
-		for ( int i = 0; i < faces; i++ )
+		for ( int i = 0; i < faceCount; i++ )
 		{
-			var faceParser = new ByteParser( data.ReadBytes( 56 ) );
-			faceParser.Skip<ushort>(); // planenum
-			faceParser.Skip<byte>(); // side
-			faceParser.Skip<byte>(); // onNode
+			var faceParser = new BinaryReader( new MemoryStream( bReader.ReadBytes( 56 ) ) );
+			faceParser.ReadUInt16(); // planenum
+			faceParser.ReadByte(); // side
+			faceParser.ReadByte(); // onNode
 
-			var firstEdge = faceParser.Read<int>();
-			var numEdges = faceParser.Read<short>();
-			var texInfo = faceParser.Read<short>();
-			var dispInfo = faceParser.Read<short>();
+			var firstEdge = faceParser.ReadInt32();
+			var numEdges = faceParser.ReadInt16();
+			var texInfo = faceParser.ReadInt16();
+			var dispInfo = faceParser.ReadInt16();
 
 			// don't need any of this
-			faceParser.Skip<short>(); // surfaceFogVolumeID
-			faceParser.Skip<byte>( 4 ); // styles[4]
-			faceParser.Skip<int>(); // lightofs
-			faceParser.Skip<float>(); // area
-			faceParser.Skip<int>( 2 ); // LightmapTextureMinsInLuxels[2]
-			faceParser.Skip<int>( 2 ); // LightmapTextureSizeInLuxels[2]
+			faceParser.ReadInt16(); // short surfaceFogVolumeID
+			faceParser.ReadBytes( 4 ); // byte styles[4]
+			faceParser.ReadInt32(); // int lightofs
+			faceParser.ReadSingle(); // float area
+			faceParser.ReadBytes( sizeof( int ) * 2 ); // int LightmapTextureMinsInLuxels[2]
+			faceParser.ReadBytes( sizeof( int ) * 2 ); // int LightmapTextureSizeInLuxels[2]
 
-			var oFace = faceParser.Read<int>();
+			var oFace = faceParser.ReadInt32();
 
-			list.Add( new Face( firstEdge, numEdges, texInfo, dispInfo, oFace ) );
+			faces[i] = new Face( firstEdge, numEdges, texInfo, dispInfo, oFace );
 		}
 
-		Log.Info( $"FACES: {list.Count()}" );
+		Log.Info( $"FACES: {faces.Count()}" );
 
-		Context.MapGeometry.Faces = list;
+		Context.MapGeometry.Faces = faces;
 	}
 }
 

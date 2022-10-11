@@ -4,7 +4,7 @@
 	{
 		public int Id { get; set; }
 
-		public GameLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+		public GameLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 		protected override void Parse( ByteParser data )
 		{
@@ -18,7 +18,7 @@
 			var length = data.Read<int>();
 
 			// offset is based on full file start, aka raw initial data
-			var gameLumpData = Context.Data.Take( new Range( offset, offset + length ) );
+			var gameLumpData = Context.Data.Take( new Range( offset, offset + length ) ).ToArray();
 
 			switch ( (GameLumpType)Id )
 			{

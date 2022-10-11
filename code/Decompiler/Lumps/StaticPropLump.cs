@@ -7,7 +7,7 @@ public class StaticPropLump : BaseLump
 	private int DictEntryCount { get; set; }
 	private Dictionary<int, string>? Names { get; set; }
 
-	public StaticPropLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+	public StaticPropLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( ByteParser data )
 	{
@@ -29,8 +29,6 @@ public class StaticPropLump : BaseLump
 
 		// read static prop entries
 		var entries = data.Read<int>();
-
-		Log.Info( $"STATIC PROPS: {entries}" );
 
 		// no static props, don't bother
 		if ( entries <= 0 )
@@ -54,8 +52,11 @@ public class StaticPropLump : BaseLump
 			prop.SetAngles( angles );
 			prop.SetModel( Names[propType] );
 
-			Context.Entities = Context.Entities?.Append( prop );
+			// bit dirty but we only throw props into the entity lump once
+			Context.Entities = Context.Entities?.Append( prop ).ToArray();
 		}
+
+		Log.Info( $"STATIC PROPS: {entries}" );
 	}
 
 	// helper for getting the dict entries

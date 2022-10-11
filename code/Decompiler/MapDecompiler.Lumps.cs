@@ -4,7 +4,7 @@ namespace BspImport.Decompiler;
 
 public partial class MapDecompiler
 {
-	protected virtual BaseLump? ParseLump( int index, IEnumerable<byte> data, int version )
+	protected virtual BaseLump? ParseLump( int index, byte[] data, int version )
 	{
 		switch ( (LumpType)index )
 		{

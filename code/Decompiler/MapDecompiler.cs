@@ -39,7 +39,7 @@ public partial class MapDecompiler
 			var version = parser.Read<int>();
 			parser.Skip( 4 ); // fourCC
 
-			var lumpdata = data.Take( new Range( offset, offset + length ) );
+			var lumpdata = data.Take( new Range( offset, offset + length ) ).ToArray();
 
 			var parsed = ParseLump( i, lumpdata, version );
 

@@ -51,10 +51,12 @@ public class MapBuilder
 				continue;
 			}
 
+			// regular entity
 			var mapent = new MapEntity( Hammer.ActiveMap );
 			mapent.ClassName = ent.ClassName;
 			mapent.Position = ent.Position;
 			mapent.Angles = ent.Angles;
+			mapent.Name = ent.GetValue( "targetname" ) ?? "";
 
 			foreach ( var kvp in ent.Data )
 			{
@@ -161,12 +163,6 @@ public class MapBuilder
 				material = ParseFaceMaterial( texInfo );
 			}
 
-			// fall back to default material if parsing failed
-			if ( material is null )
-			{
-				material = $"materials/dev/reflectivity_30.vmat";
-			}
-
 			// time elapsed to parse material data
 			var materialTime = time.ElapsedMilliseconds;
 
@@ -237,7 +233,7 @@ public class MapBuilder
 				TimeSinceUpdate = 0;
 			}
 
-			Log.Info( $"@Original Face Took: {time.ElapsedMilliseconds}ms | material time: {materialTime}ms verts time: {vertsTime}ms indices time: {indicesTime}ms meshFace time: {meshFaceTime}ms" );
+			//Log.Info( $"@Original Face Took: {time.ElapsedMilliseconds}ms | material time: {materialTime}ms verts time: {vertsTime}ms indices time: {indicesTime}ms meshFace time: {meshFaceTime}ms" );
 			time.Reset();
 
 			current++;

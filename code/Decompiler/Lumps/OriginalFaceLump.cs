@@ -2,14 +2,14 @@
 
 public class OriginalFaceLump : BaseLump
 {
-	public OriginalFaceLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+	public OriginalFaceLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( ByteParser data )
 	{
 		// each face is 56 bytes
 		var faces = data.BufferCapacity / 56;
 
-		var list = new List<Face>();
+		var oFaces = new Face[faces];
 
 		for ( int i = 0; i < faces; i++ )
 		{
@@ -23,11 +23,11 @@ public class OriginalFaceLump : BaseLump
 			var texInfo = faceParser.Read<short>();
 			var dispInfo = faceParser.Read<short>();
 
-			list.Add( new Face( firstEdge, numEdges, texInfo, dispInfo, 0 ) );
+			oFaces[i] = new Face( firstEdge, numEdges, texInfo, dispInfo, 0 );
 		}
 
-		Log.Info( $"ORIGINAL FACES: {list.Count()}" );
+		Log.Info( $"ORIGINAL FACES: {oFaces.Count()}" );
 
-		Context.MapGeometry.OriginalFaces = list;
+		Context.MapGeometry.OriginalFaces = oFaces;
 	}
 }

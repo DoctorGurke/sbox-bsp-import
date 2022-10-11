@@ -2,7 +2,7 @@
 
 public class TexDataStringDataLump : BaseLump
 {
-	public TexDataStringDataLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+	public TexDataStringDataLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( ByteParser data )
 	{

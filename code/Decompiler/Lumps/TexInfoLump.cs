@@ -5,29 +5,31 @@ namespace BspImport.Decompiler.Lumps;
 
 public class TexInfoLump : BaseLump
 {
-	public TexInfoLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+	public TexInfoLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( ByteParser data )
 	{
-		var list = new List<TexInfo>();
+		var bReader = new BinaryReader( new MemoryStream( data ) );
 
 		var texInfoCount = data.BufferCapacity / 72;
 
+		var texInfos = new TexInfo[texInfoCount];
+
 		for ( int i = 0; i < texInfoCount; i++ )
 		{
-			var tv0 = data.Read<Vector4>();
-			var tv1 = data.Read<Vector4>();
-			data.Skip<Vector4>( 2 ); // lightmapVecs[2][4]
-			data.Skip<int>(); // flags
-			var texData = data.Read<int>();
+			var tv0 = new Vector4( bReader.ReadSingle(), bReader.ReadSingle(), bReader.ReadSingle(), bReader.ReadSingle() );
+			var tv1 = new Vector4( bReader.ReadSingle(), bReader.ReadSingle(), bReader.ReadSingle(), bReader.ReadSingle() );
+			bReader.ReadBytes( sizeof( float ) * 4 * 2 ); // vec4 * 2 : lightmapVecs[2][4]
+			bReader.ReadInt32(); // int flags
+			var texData = bReader.ReadInt32();
 
 			var texInfo = new TexInfo( tv0, tv1, texData );
-			list.Add( texInfo );
+			texInfos[i] = texInfo;
 		}
 
-		Log.Info( $"TEXINFO: {list.Count()}" );
+		Log.Info( $"TEXINFO: {texInfos.Length}" );
 
-		Context.TexInfo = list;
+		Context.TexInfo = texInfos;
 	}
 }
 

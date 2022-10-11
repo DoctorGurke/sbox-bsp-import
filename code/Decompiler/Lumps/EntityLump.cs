@@ -2,7 +2,7 @@
 
 public class EntityLump : BaseLump
 {
-	public EntityLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+	public EntityLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( ByteParser data )
 	{
@@ -11,7 +11,7 @@ public class EntityLump : BaseLump
 
 		Log.Info( $"ENTITIES: {ents.Count()}" );
 
-		Context.Entities = ents;
+		Context.Entities = ents.ToArray();
 	}
 
 	private static IEnumerable<LumpEntity> FromKeyValues( string keyValues )

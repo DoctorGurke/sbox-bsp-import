@@ -2,11 +2,13 @@
 
 public class GameLumpHeader : BaseLump
 {
-	public GameLumpHeader( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+	public GameLumpHeader( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( ByteParser data )
 	{
 		var count = data.Read<int>();
+
+		var gameLumps = new GameLump[count];
 
 		var list = new List<GameLump>();
 
@@ -14,9 +16,9 @@ public class GameLumpHeader : BaseLump
 		{
 			var lump = data.ReadBytes( 16 );
 			var gameLump = new GameLump( Context, lump );
-			list.Add( gameLump );
+			gameLumps[i] = gameLump;
 		}
 
-		Context.GameLumps = list;
+		Context.GameLumps = gameLumps;
 	}
 }

@@ -2,29 +2,31 @@
 
 public class TexDataLump : BaseLump
 {
-	public TexDataLump( DecompilerContext context, IEnumerable<byte> data, int version = 0 ) : base( context, data, version ) { }
+	public TexDataLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( ByteParser data )
 	{
-		var texDatas = data.BufferCapacity / 32;
+		var bReader = new BinaryReader( new MemoryStream( data ) );
 
-		var list = new List<TexData>();
+		var texDataCount = data.BufferCapacity / 32;
 
-		for ( int i = 0; i < texDatas; i++ )
+		var texDatas = new TexData[texDataCount];
+
+		for ( int i = 0; i < texDataCount; i++ )
 		{
-			data.Skip<Vector3>(); // reflectivity
-			var nameStringTableID = data.Read<int>();
-			var width = data.Read<int>();
-			var height = data.Read<int>();
-			data.Skip<int>( 2 ); // view_width, view_height
+			bReader.ReadBytes( sizeof( float ) * 3 ); // vec3 reflectivity
+			var nameStringTableID = bReader.ReadInt32();
+			var width = bReader.ReadInt32();
+			var height = bReader.ReadInt32();
+			bReader.ReadBytes( sizeof( int ) * 2 ); // int view_width, view_height
 
 			var texData = new TexData( nameStringTableID, width, height );
-			list.Add( texData );
+			texDatas[i] = texData;
 		}
 
-		Log.Info( $"TEXDATA: {list.Count()}" );
+		Log.Info( $"TEXDATA: {texDatas.Length}" );
 
-		Context.TexData = list;
+		Context.TexData = texDatas;
 	}
 }
 

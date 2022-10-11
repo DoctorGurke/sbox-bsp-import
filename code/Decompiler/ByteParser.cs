@@ -4,12 +4,12 @@ namespace BspImport.Decompiler;
 
 public class ByteParser
 {
-	public IEnumerable<byte> Data { get; private set; }
-	private IEnumerable<byte> _buffer;
+	public byte[] Data { get; private set; }
+	private byte[] _buffer;
 
 	private int SizeOf( Type t ) => Marshal.SizeOf( t );
 
-	public ByteParser( IEnumerable<byte> data )
+	public ByteParser( byte[] data )
 	{
 		Data = data;
 		_buffer = data;
@@ -36,7 +36,7 @@ public class ByteParser
 		if ( !condition )
 			return;
 
-		_buffer = _buffer.Skip( num );
+		_buffer = _buffer.Skip( num ).ToArray();
 	}
 
 	/// <summary>
@@ -56,13 +56,13 @@ public class ByteParser
 	/// <param name="num">Number of bytes to read.</param>
 	/// <param name="skip">Whether to skip/progress the buffer or not.</param>
 	/// <returns>IEnumerable of bytes with n length.</returns>
-	public IEnumerable<byte> ReadBytes( int num, bool skip = true )
+	public byte[] ReadBytes( int num, bool skip = true )
 	{
-		var result = _buffer.Take( num );
+		var array = _buffer.Take( num ).ToArray();
 
 		Skip( num, skip );
 
-		return result;
+		return array;
 	}
 
 	/// <summary>
@@ -70,11 +70,10 @@ public class ByteParser
 	/// </summary>
 	/// <param name="num">Number of bytes to copy.</param>
 	/// <returns>Collection of bytes.</returns>
-	public IEnumerable<byte> CopyBytes( int num )
+	public byte[] CopyBytes( int num )
 	{
-		var result = _buffer.Take( num );
-
-		return result;
+		var array = _buffer.Take( num ).ToArray();
+		return array;
 	}
 
 	/// <summary>
@@ -115,19 +114,22 @@ public class ByteParser
 	/// <param name="num">Number of times to read.</param>
 	/// <returns>IEnumerable of Type with n elements.</returns>
 	/// <exception cref="Exception">Throws if trying to read beyond buffer capacity.</exception>
-	public IEnumerable<T> Read<T>( int num, bool skip = true ) where T : struct
+	public T[] Read<T>( int num, bool skip = true ) where T : struct
 	{
 		var size = SizeOf( typeof( T ) );
+		var array = new T[num];
 
 		if ( _buffer.Count() < size * num )
 			throw new Exception( $"Type size exceeds ByteParser buffer size!" );
 
 		for ( int i = 0; i < num; i++ )
 		{
-			yield return Read<T>();
+			array[i] = Read<T>();
 
 			Skip( size, skip );
 		}
+
+		return array;
 	}
 
 	/// <summary>
@@ -136,7 +138,7 @@ public class ByteParser
 	/// <typeparam name="T">Type.</typeparam>
 	/// <returns>IEnumerable of type instances read from byte buffer.</returns>
 	/// <exception cref="Exception">Throws if reading exceeds buffer capacity.</exception>
-	public IEnumerable<T> TryReadMultiple<T>( bool skip = true ) where T : struct
+	public T[] TryReadMultiple<T>( bool skip = true ) where T : struct
 	{
 		var size = SizeOf( typeof( T ) );
 
@@ -148,6 +150,6 @@ public class ByteParser
 
 		Skip( size, skip );
 
-		return result;
+		return result.ToArray();
 	}
 }

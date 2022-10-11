@@ -4,10 +4,10 @@ namespace BspImport.Decompiler;
 
 public class MapGeometry
 {
-	public IEnumerable<Vector3>? VertexPositions { get; set; }
-	public IEnumerable<EdgeIndices>? EdgeIndices { get; set; }
-	public IEnumerable<int>? SurfaceEdges { get; set; }
-	public IEnumerable<Face>? Faces { get; set; }
-	public IEnumerable<Face>? OriginalFaces { get; set; }
+	public Vector3[]? VertexPositions { get; set; }
+	public EdgeIndices[]? EdgeIndices { get; set; }
+	public int[]? SurfaceEdges { get; set; }
+	public Face[]? Faces { get; set; }
+	public Face[]? OriginalFaces { get; set; }
 
 }
