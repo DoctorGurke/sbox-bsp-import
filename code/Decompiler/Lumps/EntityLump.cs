@@ -4,7 +4,7 @@ public class EntityLump : BaseLump
 {
 	public EntityLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( BinaryReader reader, int capacity )
+	protected override void Parse( BinaryReader reader )
 	{
 		var pairs = Encoding.ASCII.GetString( Data );
 		var ents = FromKeyValues( pairs );

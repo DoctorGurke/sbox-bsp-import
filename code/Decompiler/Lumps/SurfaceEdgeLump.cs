@@ -6,7 +6,7 @@ public class SurfaceEdgeLump : BaseLump
 {
 	public SurfaceEdgeLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( BinaryReader reader, int capacity )
+	protected override void Parse( BinaryReader reader )
 	{
 		var surfEdgeCount = reader.GetLength() / sizeof( int );
 

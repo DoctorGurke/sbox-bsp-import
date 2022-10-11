@@ -4,13 +4,11 @@ public class GameLumpHeader : BaseLump
 {
 	public GameLumpHeader( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( BinaryReader reader, int capacity )
+	protected override void Parse( BinaryReader reader )
 	{
 		var count = reader.ReadInt32();
 
 		var gameLumps = new GameLump[count];
-
-		var list = new List<GameLump>();
 
 		for ( int i = 0; i < count; i++ )
 		{

@@ -4,9 +4,9 @@ public class EdgeLump : BaseLump
 {
 	public EdgeLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( BinaryReader reader, int capacity )
+	protected override void Parse( BinaryReader reader )
 	{
-		var edgeCount = capacity / sizeof( int );
+		var edgeCount = reader.GetLength() / sizeof( int );
 
 		var edges = new EdgeIndices[edgeCount];
 

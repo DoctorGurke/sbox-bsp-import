@@ -20,19 +20,19 @@ public static class BinaryReaderX
 		var dispInfo = reader.ReadInt16();
 
 		// don't need any of this
-		reader.ReadInt16(); // short surfaceFogVolumeID
-		reader.ReadBytes( 4 ); // byte styles[4]
-		reader.ReadInt32(); // int lightofs
-		reader.ReadSingle(); // float area
-		reader.ReadBytes( sizeof( int ) * 2 ); // int LightmapTextureMinsInLuxels[2]
-		reader.ReadBytes( sizeof( int ) * 2 ); // int LightmapTextureSizeInLuxels[2]
+		reader.Skip<short>(); // short surfaceFogVolumeID
+		reader.Skip( 4 ); // byte styles[4]
+		reader.Skip<int>(); // int lightofs
+		reader.Skip<float>(); // float area
+		reader.Skip<int>( 2 ); // int LightmapTextureMinsInLuxels[2]
+		reader.Skip<int>( 2 ); // int LightmapTextureSizeInLuxels[2]
 
 		var oFace = reader.ReadInt32();
 
 		// don't need this either, but need to get rid of the padding
-		reader.ReadUInt16(); // ushort numPrims
-		reader.ReadUInt16(); // ushort firstPrimID
-		reader.ReadUInt32(); // uint smoothingGroups
+		reader.Skip<ushort>(); // ushort numPrims
+		reader.Skip<ushort>(); // ushort firstPrimID
+		reader.Skip<uint>(); // uint smoothingGroups
 
 		return new Face( firstEdge, numEdges, texInfo, dispInfo, oFace );
 	}

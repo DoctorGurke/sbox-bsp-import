@@ -7,7 +7,7 @@ public class VertexLump : BaseLump
 {
 	public VertexLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( BinaryReader reader, int capacity )
+	protected override void Parse( BinaryReader reader )
 	{
 		var vertexCount = reader.GetLength() / Marshal.SizeOf<Vector3>(); // how many vec3s are in the buffer
 

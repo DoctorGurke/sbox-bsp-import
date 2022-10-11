@@ -6,13 +6,13 @@
 
 		public GameLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-		protected override void Parse( BinaryReader reader, int capacity )
+		protected override void Parse( BinaryReader reader )
 		{
 			if ( Context.Data is null )
 				return;
 
 			Id = reader.ReadInt32();
-			reader.ReadUInt16(); // ushort flags
+			reader.Skip<short>(); // ushort flags
 			reader.ReadUInt16(); // ushort version
 			var offset = reader.ReadInt32();
 			var length = reader.ReadInt32();

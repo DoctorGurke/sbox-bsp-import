@@ -6,7 +6,7 @@ public class TexDataLump : BaseLump
 {
 	public TexDataLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( BinaryReader reader, int capacity )
+	protected override void Parse( BinaryReader reader )
 	{
 		var texDataCount = reader.GetLength() / 32;
 

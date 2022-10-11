@@ -6,10 +6,10 @@ public class OriginalFaceLump : BaseLump
 {
 	public OriginalFaceLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
-	protected override void Parse( BinaryReader reader, int capacity )
+	protected override void Parse( BinaryReader reader )
 	{
 		// each face is 56 bytes
-		var oFaceCount = capacity / 56;
+		var oFaceCount = reader.GetLength() / 56;
 
 		var oFaces = new Face[oFaceCount];
 

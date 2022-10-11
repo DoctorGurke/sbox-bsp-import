@@ -13,8 +13,8 @@ public abstract class BaseLump
 		Version = version;
 
 		var bReader = new BinaryReader( new MemoryStream( data ) );
-		Parse( bReader, data.Length );
+		Parse( bReader );
 	}
 
-	protected abstract void Parse( BinaryReader reader, int capacity );
+	protected abstract void Parse( BinaryReader reader );
 }
