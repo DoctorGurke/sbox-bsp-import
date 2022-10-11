@@ -17,8 +17,89 @@ public class MapBuilder
 		Context = context;
 	}
 
+	public void CacheMaterials()
+	{
+		// materials can only be loaded on the main thread
+		ThreadSafe.AssertIsMainThread( $"MapBuilder.CacheMaterials()" );
+
+		Log.Info( $"Caching Materials..." );
+
+		// cache all texData strings as materials
+		var splitTexData = $"{Context.TexDataStringData}".Split( ' ' );
+		var materialCount = splitTexData.Length;
+
+		for ( int i = 0; i < materialCount; i++ )
+		{
+			var materialName = splitTexData[i].ToLower();
+			var materialPath = $"materials/{materialName}.vmat";
+			var material = Material.Load( materialPath );
+
+			if ( material is null )
+				continue;
+
+			Context.CachedMaterials.TryAdd( materialName, material );
+		}
+
+		Log.Info( $"Done." );
+	}
+
+	public void CachePolygonMeshes()
+	{
+		// caching is always done in parallel
+		ThreadSafe.AssertIsNotMainThread();
+
+		Log.Info( $"Caching PolygonMeshes..." );
+
+		var modelCount = Context.Models?.Length ?? 0;
+
+		if ( modelCount <= 0 )
+		{
+			Log.Error( $"Unable to CachePolygonMeshes, Context has no Models!" );
+			return;
+		}
+
+		var polyMeshes = new PolygonMesh[modelCount];
+
+		for ( int i = 0; i < modelCount; i++ )
+		{
+			var origin = Vector3.Zero;
+			var angles = Angles.Zero;
+
+			// index 0 = worldspawn
+			if ( i != 0 )
+			{
+				// get any entity with this model, needed to build uvs for brush entity meshes properly
+				var entity = Context.Entities?.Where( x => x.Data.Where( x => x.Key == "model" ).FirstOrDefault().Value == $"*{i}" ).FirstOrDefault();
+
+				// no entity found, don't bother
+				if ( entity is null )
+				{
+					continue;
+				}
+
+				origin = entity.Position;
+				angles = entity.Angles;
+			}
+
+			var polyMesh = ConstructModel( i, origin, angles );
+
+			if ( polyMesh is null )
+				continue;
+
+			polyMeshes[i] = polyMesh;
+		}
+
+		Context.CachedPolygonMeshes = polyMeshes;
+		Context.Cached = true;
+
+		Log.Info( $"Done." );
+	}
+
 	public void Build()
 	{
+		// MapEntity and MapMesh can only be created on the main thread
+		ThreadSafe.AssertIsMainThread( $"MapBuilder.Build()" );
+
 		BuildEntities();
 
 		BuildGeometry();
@@ -29,6 +110,8 @@ public class MapBuilder
 	/// </summary>
 	protected virtual void BuildEntities()
 	{
+		ThreadSafe.AssertIsMainThread( $"MapBuilder.Build()" );
+
 		if ( Context.Entities is null )
 			return;
 
@@ -41,12 +124,20 @@ public class MapBuilder
 			// brush entities
 			if ( ent.Model is not null && ent.Model.StartsWith( '*' ) )
 			{
-				var index = int.Parse( ent.Model.TrimStart( '*' ) );
-				var polyMesh = ConstructModel( index, ent.Position, ent.Angles );
+				var modelIndex = int.Parse( ent.Model.TrimStart( '*' ) );
+				var polyMesh = Context.CachedPolygonMeshes?[modelIndex];//ConstructModel( modelIndex, ent.Position, ent.Angles );
+
+				if ( polyMesh is null )
+				{
+
+					continue;
+				}
 
 				var mapMesh = new MapMesh( Hammer.ActiveMap );
 				mapMesh.ConstructFromPolygons( polyMesh );
 				mapMesh.Name = ent.ClassName;
+				mapMesh.Position = ent.Position;
+				mapMesh.Angles = ent.Angles;
 
 				continue;
 			}
@@ -67,12 +158,13 @@ public class MapBuilder
 
 	protected virtual void BuildGeometry()
 	{
-		var polyMesh = Context.WorldSpawn;
+		ThreadSafe.AssertIsMainThread( $"MapBuilder.Build()" );
+
+		var polyMesh = Context.CachedPolygonMeshes?[0];
 
 		if ( polyMesh is null )
 		{
-			Log.Error( $"Tried building world geometry without a valid WorldSpawn present in the current DecompilerContext!" );
-			return;
+			throw new Exception( $"Tried building WorldSpawn geometry, but Context has no Cached PolygonMeshes!" );
 		}
 
 		var mapMesh = new MapMesh( Hammer.ActiveMap );
@@ -80,19 +172,14 @@ public class MapBuilder
 		mapMesh.Name = $"worldspawn";
 	}
 
-	public void PrepareWorldSpawn()
+	private PolygonMesh? ConstructModel( int modelIndex, Vector3 origin, Angles angles )
 	{
-		Context.PreparedWorldSpawn = false;
-		Context.WorldSpawn = ConstructModel( 0 );
-		Context.PreparedWorldSpawn = true;
-	}
+		// if model is already cached, throw
+		if ( Context.CachedPolygonMeshes?[modelIndex] is not null )
+		{
+			throw new Exception( $"Trying to reconstruct already cached model with index: {modelIndex}!" );
+		}
 
-	private RealTimeSince TimeSinceUpdate { get; set; }
-
-	private PolygonMesh? ConstructModel( int index ) => ConstructModel( index, Vector3.Zero, Angles.Zero );
-
-	private PolygonMesh? ConstructModel( int index, Vector3 origin, Angles angles )
-	{
 		var geo = Context.MapGeometry;
 
 		if ( Context.Models is null || geo.VertexPositions is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
@@ -100,12 +187,12 @@ public class MapBuilder
 			throw new Exception( "No valid map geometry to construct!" );
 		}
 
-		if ( index > Context.Models.Count() - 1 )
+		if ( modelIndex > Context.Models.Length - 1 )
 		{
-			throw new Exception( $"Tried to construct map model with index: {index}. Exceeds available Models!" );
+			throw new Exception( $"Tried to construct map model with index: {modelIndex}. Exceeds available Models!" );
 		}
 
-		var model = Context.Models.ElementAt( index );
+		var model = Context.Models[modelIndex];
 
 		var polyMesh = new PolygonMesh();
 
@@ -113,101 +200,74 @@ public class MapBuilder
 		var originalfaces = new Dictionary<int, int>();
 		for ( int i = 0; i < model.FaceCount; i++ )
 		{
-			var face = geo.Faces.ElementAt( model.FirstFace + i );
+			var face = geo.Faces[model.FirstFace + i];
 
 			// no texture info, skip face (SKIP, CLIP, INVISIBLE, etc)
-			if ( face.TexInfo == -1 )
+			if ( face.OriginalFaceIndex <= 0 || face.TexInfo < 0 )
 				continue;
 
 			// we need the texinfo of the split face
 			originalfaces.TryAdd( face.OriginalFaceIndex, face.TexInfo );
 		}
 
-		var total = originalfaces.Count();
-		var current = 0;
-
-		Log.Info( $"ORIGINAL FACES: {total}" );
-
-		var time = new Stopwatch();
-
 		// construct original faces
 		foreach ( var pair in originalfaces )
 		{
-			time.Restart();
-
 			var oFaceIndex = pair.Key;
 			var texInfo = pair.Value;
-			var oFace = geo.OriginalFaces.ElementAt( oFaceIndex );
+			var oFace = geo.OriginalFaces[oFaceIndex];
 
 			// only construct valid primitives
 			if ( oFace.EdgeCount < 3 )
 				continue;
 
-			// if split face texinfo is invalid, try it with original face texinfo?
-			if ( texInfo > Context.TexInfo?.Count() )
-			{
-				//texinfo = face.TexInfo;
-				Log.Info( $"invalid texinfo: {texInfo} {oFace.TexInfo}" );
-			}
+			string? material = null;
 
-			string? material;
-
-			// still invalid, just use default material
-			if ( texInfo > Context.TexInfo?.Count() )
-			{
-				//Log.Info( $"skipping face with invalid texinfo: {texinfo}" );
-				material = null;
-			}
-			else
+			// check for valid texinfo, null material falls back to reflectivity 30
+			if ( !(texInfo > Context.TexInfo?.Length) )
 			{
 				material = ParseFaceMaterial( texInfo );
 			}
-
-			// time elapsed to parse material data
-			var materialTime = time.ElapsedMilliseconds;
 
 			var verts = new List<Vector3>();
 
 			// get verts from surf edges -> edges -> vertices
 			for ( int i = 0; i < oFace.EdgeCount; i++ )
 			{
-				var edge = geo.SurfaceEdges.ElementAt( oFace.FirstEdge + i );
+				var edge = geo.SurfaceEdges[oFace.FirstEdge + i];
 
 				// edge sign affects winding order, indexing back to front or vice versa on the edge vertices
 				if ( edge >= 0 )
 				{
-					verts.Add( geo.VertexPositions.ElementAt( geo.EdgeIndices.ElementAt( edge ).Indices[0] ) );
+					verts.Add( geo.VertexPositions[geo.EdgeIndices[edge].Indices[0]] );
 				}
 				else
 				{
-					verts.Add( geo.VertexPositions.ElementAt( geo.EdgeIndices.ElementAt( -edge ).Indices[1] ) );
+					verts.Add( geo.VertexPositions[geo.EdgeIndices[-edge].Indices[1]] );
 				}
 			}
-
-			// time elapsed to fetch verts
-			var vertsTime = time.ElapsedMilliseconds - materialTime;
 
 			// construct mesh vertex from vert pos and calculated uv
 			var indices = new List<int>();
 			foreach ( var vert in verts )
 			{
 				var meshVert = new MeshVertex();
-				meshVert.Position = vert + origin;
+				meshVert.Position = vert;
 
 				var width = 1024;
 				var height = 1024;
 
 				// get texture width/height from texdata via texinfo
-				if ( Context.TexInfo?.ElementAt( texInfo ) is TexInfo ti )
+				if ( Context.TexInfo?[texInfo] is TexInfo ti )
 				{
-					var texData = Context.TexData?.ElementAt( ti.TexData );
+					var texData = Context.TexData?[ti.TexData];
 					if ( texData is TexData t )
 					{
 						width = t.Width;
 						height = t.Height;
 					}
 
-					var texCoords = ti.GetUvs( vert, angles, width, height );
+					var texCoords = ti.GetUvs( vert + origin, angles, width, height );
 					meshVert.TexCoord = texCoords;
 				}
 
@@ -217,26 +277,14 @@ public class MapBuilder
 
 			indices.Reverse();
 
-			// time elapsed to construct meshvertices and fetch indices
-			var indicesTime = time.ElapsedMilliseconds - (vertsTime + materialTime);
+			// get material
+			Material? cachedMaterial = null;
+			if ( material is not null )
+				Context.CachedMaterials.TryGetValue( material, out cachedMaterial );
 
-			var meshFace = new MeshFace( indices, null ); //Material.Load( material )
+			// null material falls back to reflectivity 30, so we can just pass it
+			var meshFace = new MeshFace( indices, null );// cachedMaterial );
 			polyMesh.Faces.Add( meshFace );
-
-			// time elapsed to construct meshfaces
-			var meshFaceTime = time.ElapsedMilliseconds - (indicesTime + vertsTime + materialTime);
-
-			if ( TimeSinceUpdate >= 1.0f )
-			{
-				Log.Info( $"##### Original faces built: {current} / {total} : {(current / total) * 100.0f}%" );
-
-				TimeSinceUpdate = 0;
-			}
-
-			//Log.Info( $"@Original Face Took: {time.ElapsedMilliseconds}ms | material time: {materialTime}ms verts time: {vertsTime}ms indices time: {indicesTime}ms meshFace time: {meshFaceTime}ms" );
-			time.Reset();
-
-			current++;
 		}
 
 		// no valid faces in mesh
@@ -254,16 +302,16 @@ public class MapBuilder
 	private string? ParseFaceMaterial( int texInfo )
 	{
 		// get texture/material for face
-		var texData = Context.TexInfo?.ElementAtOrDefault( texInfo ).TexData;
+		var texData = Context.TexInfo?[texInfo].TexData;
 
 		if ( texData is null )
 			return null;
 
-		var stringTableIndex = Context.TexDataStringTable?.ElementAtOrDefault( texData.Value );
+		var stringTableIndex = Context.TexDataStringTable?[texData.Value];
 
 		if ( stringTableIndex is null )
 			return null;
 
-		return $"materials/{Context.TexDataStringData.FromStringTableIndex( stringTableIndex.Value ).ToLower()}.vmat";
+		return Context.TexDataStringData.FromStringTableIndex( stringTableIndex.Value ).ToLower();
 	}
 }

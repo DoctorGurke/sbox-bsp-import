@@ -9,11 +9,11 @@ public class DecompilerContext
 	{
 		Lumps = new BaseLump[64];
 		MapGeometry = new();
+		CachedMaterials = new();
 	}
 
 	public bool Decompiled { get; set; } = false;
-	public bool Decompiling { get; set; } = false;
-	public bool PreparedWorldSpawn { get; set; } = false;
+	public bool Cached { get; set; } = false;
 
 	public byte[]? Data { get; set; }
 	public BaseLump[] Lumps;
@@ -27,4 +27,6 @@ public class DecompilerContext
 	public TexDataStringData TexDataStringData { get; set; }
 
 	public PolygonMesh? WorldSpawn { get; set; }
+	public PolygonMesh[]? CachedPolygonMeshes { get; set; }
+	public Dictionary<string, Material> CachedMaterials { get; set; }
 }

@@ -1,7 +1,6 @@
 ﻿using BspImport.Builder;
 using BspImport.Decompiler;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace BspImport;
@@ -20,6 +19,8 @@ public static class Tool
 
 		Context = new DecompilerContext();
 
+		Log.Info( $"Start Compiling" );
+
 		// decompile in parallel, also prepares worldspawn geometry
 		var dTask = new Task( () => Decompile( file ) );
 		dTask.Start();
@@ -27,44 +28,61 @@ public static class Tool
 
 	private static void Decompile( string file )
 	{
+		// run in parallel
+		ThreadSafe.AssertIsNotMainThread();
+
 		if ( Context is null )
 			return;
 
 		var decompiler = new MapDecompiler( Context );
 		decompiler.Decompile( file );
-
-		Log.Info( $"Preparing worldspawn..." );
-
-		var builder = new MapBuilder( Context );
-		builder.PrepareWorldSpawn();
 	}
 
 	public static DecompilerContext? Context { get; set; }
 
-	private static RealTimeSince TimeSinceDecompileChecked = 0;
+	[Event.Frame] // main thread
+	public static void CheckDecompile()
+	{
+		// main thread
+		ThreadSafe.AssertIsMainThread();
+
+		// check Context state
+		if ( Context is null || !Context.Decompiled )
+			return;
+
+		Log.Info( $"Decompiled Context found, Caching..." );
+
+		// reset context
+		Context.Decompiled = false;
+
+		// cache materials, block main thread
+		var builder = new MapBuilder( Context );
+		builder.CacheMaterials();
+
+		// cache meshes in parallel
+		var cTask = new Task( () => builder.CachePolygonMeshes() );
+		cTask.Start();
+	}
 
 	[Event.Frame]
-	public static void Tick()
+	public static void CheckCached()
 	{
-		// check once a second
-		if ( !(TimeSinceDecompileChecked >= 1.0f) || Context is null )
+		// main thread
+		ThreadSafe.AssertIsMainThread();
+
+		// check Context state
+		if ( Context is null || !Context.Cached )
 			return;
 
-		// reset timer
-		TimeSinceDecompileChecked = 0;
+		Log.Info( $"Cached Context found, Building..." );
 
-		// check decompile status
-		if ( Context.Decompiling || !Context.Decompiled || !Context.PreparedWorldSpawn )
-			return;
-
-		Log.Info( $"Finished decompile found, building..." );
+		// reset context
+		Context.Cached = false;
 
 		var builder = new MapBuilder( Context );
 		builder.Build();
 
-		// reset decompile status
-		Context.Decompiling = true;
-		Context.Decompiled = false;
+		Log.Info( $"Done building." );
 	}
 
 	private static string? GetFileFromDialog( string title = "Open File", string filter = "*.*" )
