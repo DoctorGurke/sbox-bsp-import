@@ -6,22 +6,24 @@ public class OriginalFaceLump : BaseLump
 
 	protected override void Parse( ByteParser data )
 	{
+		var bReader = new BinaryReader( new MemoryStream( data ) );
+
 		// each face is 56 bytes
-		var faces = data.BufferCapacity / 56;
+		var oFaceCount = data.BufferCapacity / 56;
 
-		var oFaces = new Face[faces];
+		var oFaces = new Face[oFaceCount];
 
-		for ( int i = 0; i < faces; i++ )
+		for ( int i = 0; i < oFaceCount; i++ )
 		{
-			var faceParser = new ByteParser( data.ReadBytes( 56 ) );
-			faceParser.Skip<ushort>(); // planenum
-			faceParser.Skip<byte>(); // side
-			faceParser.Skip<byte>(); // onNode
+			var faceParser = new BinaryReader( new MemoryStream( bReader.ReadBytes( 56 ) ) );
+			faceParser.ReadUInt16(); // planenum
+			faceParser.ReadByte(); // side
+			faceParser.ReadByte(); // onNode
 
-			var firstEdge = faceParser.Read<int>();
-			var numEdges = faceParser.Read<short>();
-			var texInfo = faceParser.Read<short>();
-			var dispInfo = faceParser.Read<short>();
+			var firstEdge = faceParser.ReadInt32();
+			var numEdges = faceParser.ReadInt16();
+			var texInfo = faceParser.ReadInt16();
+			var dispInfo = faceParser.ReadInt16();
 
 			oFaces[i] = new Face( firstEdge, numEdges, texInfo, dispInfo, 0 );
 		}
