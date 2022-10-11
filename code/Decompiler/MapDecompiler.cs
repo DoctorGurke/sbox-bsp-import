@@ -1,4 +1,6 @@
-﻿namespace BspImport.Decompiler;
+﻿using System.Threading.Tasks;
+
+namespace BspImport.Decompiler;
 
 [MapDecompiler( "Default" )]
 public partial class MapDecompiler
@@ -10,13 +12,17 @@ public partial class MapDecompiler
 		Context = context;
 	}
 
-	public virtual void Decompile()
+	public async virtual void Decompile()
 	{
+		Log.Info( $"Decompiling Context..." );
+
 		var reader = new BinaryReader( new MemoryStream( Context.Data ) );
 
 		// parse bsp header
 		var ident = reader.ReadInt32();
 		var mapversion = reader.ReadInt32();
+
+		var tasks = new List<Task>();
 
 		// 64 lump headers
 		for ( int i = 0; i < 64; i++ )
@@ -36,17 +42,24 @@ public partial class MapDecompiler
 			byte[] lumpData = new byte[length];
 			Array.Copy( Context.Data, offset, lumpData, 0, length );
 
-			var parsed = ParseLump( i, lumpData, version );
+			var lump = ParseLump( i, lumpData, version );
 
-			if ( parsed is null )
+			if ( lump is null )
 				continue;
 
-			Context.Lumps[i] = parsed;
+			Context.Lumps[i] = lump;
+
+			var task = new Task( () => lump.Parse() );
+			task.Start();
+			tasks.Add( task );
 		}
+
+		// wait for all lumps to finish compiling
+		await Task.WhenAll( tasks.ToArray() );
 
 		var revision = reader.ReadInt32();
 
-		Log.Info( $"### DECOMPILED BSP: [ident: {ident} version: {mapversion} revision: {revision}]" );
+		Log.Info( $"Finished Decompiling: [ident: {ident} version: {mapversion} revision: {revision}]" );
 
 		Context.Decompiled = true;
 	}

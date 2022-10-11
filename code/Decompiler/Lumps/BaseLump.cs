@@ -11,8 +11,11 @@ public abstract class BaseLump
 		Context = context;
 		Data = data;
 		Version = version;
+	}
 
-		var bReader = new BinaryReader( new MemoryStream( data ) );
+	public void Parse()
+	{
+		var bReader = new BinaryReader( new MemoryStream( Data ) );
 		Parse( bReader );
 	}
 

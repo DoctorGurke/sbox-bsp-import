@@ -11,8 +11,7 @@ public static class Tool
 	public static void OpenLoadMenu()
 	{
 		var file = GetFileFromDialog( "Open a bsp file.", "*.bsp" );
-		Log.Info( $"---------------" );
-		Log.Info( $"LOADING BSP: {file}" );
+		Log.Info( $"### Loading bsp: {file}" );
 
 		if ( file is null )
 			return;
@@ -20,8 +19,6 @@ public static class Tool
 		var data = File.ReadAllBytes( file );
 
 		Context = new DecompilerContext( data );
-
-		Log.Info( $"Start Compiling" );
 
 		// decompile in parallel, also prepares worldspawn geometry
 		var dTask = new Task( () => Decompile() );
