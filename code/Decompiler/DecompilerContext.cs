@@ -1,4 +1,5 @@
 ﻿using BspImport.Decompiler.Lumps;
+using System.Threading.Tasks;
 using Tools.MapDoc;
 
 namespace BspImport.Decompiler;
@@ -14,8 +15,8 @@ public class DecompilerContext
 		CachedMaterials = new();
 	}
 
-	public bool Decompiled { get; set; } = false;
-	public bool Cached { get; set; } = false;
+	public Task? DecompileTask { get; set; }
+	public Task? CacheTask { get; set; }
 
 	public byte[] Data { get; private set; }
 	public BaseLump[] Lumps;

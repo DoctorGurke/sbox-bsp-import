@@ -21,8 +21,8 @@ public static class Tool
 		Context = new DecompilerContext( data );
 
 		// decompile in parallel, also prepares worldspawn geometry
-		var dTask = new Task( () => Decompile() );
-		dTask.Start();
+		Context.DecompileTask = new Task( () => Decompile() );
+		Context.DecompileTask.Start();
 	}
 
 	private static void Decompile()
@@ -46,21 +46,21 @@ public static class Tool
 		ThreadSafe.AssertIsMainThread();
 
 		// check Context state
-		if ( Context is null || !Context.Decompiled )
+		if ( Context is null || Context.DecompileTask is null || Context.DecompileTask.Status != TaskStatus.RanToCompletion )
 			return;
 
-		Log.Info( $"Decompiled Context found, Caching..." );
+		// reset decompile task
+		Context.DecompileTask = null;
 
-		// reset context
-		Context.Decompiled = false;
+		Log.Info( $"Decompiled Context found, Caching..." );
 
 		// cache materials, block main thread
 		var builder = new MapBuilder( Context );
 		builder.CacheMaterials();
 
 		// cache meshes in parallel
-		var cTask = new Task( () => builder.CachePolygonMeshes() );
-		cTask.Start();
+		Context.CacheTask = new Task( () => builder.CachePolygonMeshes() );
+		Context.CacheTask.Start();
 	}
 
 	[Event.Frame]
@@ -70,13 +70,13 @@ public static class Tool
 		ThreadSafe.AssertIsMainThread();
 
 		// check Context state
-		if ( Context is null || !Context.Cached )
+		if ( Context is null || Context.CacheTask is null || Context.CacheTask.Status != TaskStatus.RanToCompletion )
 			return;
 
-		Log.Info( $"Cached Context found, Building..." );
+		// reset cache task
+		Context.CacheTask = null;
 
-		// reset context
-		Context.Cached = false;
+		Log.Info( $"Cached Context found, Building..." );
 
 		var builder = new MapBuilder( Context );
 		builder.Build();

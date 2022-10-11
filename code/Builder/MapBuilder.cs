@@ -90,9 +90,8 @@ public class MapBuilder
 		}
 
 		Context.CachedPolygonMeshes = polyMeshes;
-		Context.Cached = true;
 
-		Log.Info( $"Done." );
+		Log.Info( $"Done Caching PolygonMeshes." );
 	}
 
 	public void Build()
@@ -174,6 +173,8 @@ public class MapBuilder
 
 	private PolygonMesh? ConstructModel( int modelIndex, Vector3 origin, Angles angles )
 	{
+		Log.Info( $"Constructing PolyMesh for {modelIndex}." );
+
 		// if model is already cached, throw
 		if ( Context.CachedPolygonMeshes?[modelIndex] is not null )
 		{
@@ -203,7 +204,7 @@ public class MapBuilder
 			var face = geo.Faces[model.FirstFace + i];
 
 			// no texture info, skip face (SKIP, CLIP, INVISIBLE, etc)
-			if ( face.OriginalFaceIndex <= 0 || face.TexInfo < 0 )
+			if ( face.OriginalFaceIndex < 0 || face.TexInfo < 0 )
 				continue;
 
 			// we need the texinfo of the split face
@@ -218,7 +219,7 @@ public class MapBuilder
 			var oFace = geo.OriginalFaces[oFaceIndex];
 
 			// only construct valid primitives
-			if ( oFace.EdgeCount < 3 )
+			if ( oFace.EdgeCount < 2 )
 				continue;
 
 			string? material = null;
@@ -272,7 +273,8 @@ public class MapBuilder
 				}
 
 				polyMesh.Vertices.Add( meshVert );
-				indices.Add( polyMesh.Vertices.Count() - 1 );
+				var index = polyMesh.Vertices.Count() - 1;
+				indices.Add( index );
 			}
 
 			indices.Reverse();
@@ -283,18 +285,18 @@ public class MapBuilder
 				Context.CachedMaterials.TryGetValue( material, out cachedMaterial );
 
 			// null material falls back to reflectivity 30, so we can just pass it
-			var meshFace = new MeshFace( indices, cachedMaterial );
+			var meshFace = new MeshFace( indices, null );//cachedMaterial );
 			polyMesh.Faces.Add( meshFace );
 		}
 
 		// no valid faces in mesh
 		if ( !polyMesh.Faces.Any() )
 		{
-			Log.Error( $"ConstructModel failed! No valid faces constructed!" );
+			Log.Error( $"ConstructModel failed, no valid faces constructed!" );
 			return null;
 		}
 
-		Log.Info( $"PolyMesh constructed." );
+		Log.Info( $"PolyMesh constructed for {modelIndex}." );
 
 		return polyMesh;
 	}

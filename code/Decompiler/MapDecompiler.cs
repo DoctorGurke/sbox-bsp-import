@@ -60,7 +60,5 @@ public partial class MapDecompiler
 		var revision = reader.ReadInt32();
 
 		Log.Info( $"Finished Decompiling: [ident: {ident} version: {mapversion} revision: {revision}]" );
-
-		Context.Decompiled = true;
 	}
 }
