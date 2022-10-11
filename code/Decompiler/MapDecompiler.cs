@@ -12,6 +12,9 @@ public partial class MapDecompiler
 
 	public virtual void Decompile( string file )
 	{
+		Context.Decompiling = true;
+		Context.Decompiled = false;
+
 		var data = File.ReadAllBytes( file );
 		Context.Data = data;
 
@@ -49,5 +52,8 @@ public partial class MapDecompiler
 		var revision = parser.Read<int>();
 
 		Log.Info( $"### DECOMPILED BSP: [ident: {ident} version: {mapversion} revision: {revision}]" );
+
+		Context.Decompiling = false;
+		Context.Decompiled = true;
 	}
 }

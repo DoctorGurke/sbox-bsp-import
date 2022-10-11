@@ -18,13 +18,48 @@ public static class Tool
 		if ( file is null )
 			return;
 
-		var context = new DecompilerContext();
+		Context = new DecompilerContext();
 
-		var decompiler = new MapDecompiler( context );
+		// decompile in parallel
+		var task = new Task( () => Decompile( file ) );
+		task.Start();
+	}
+
+	private static void Decompile( string file )
+	{
+		if ( Context is null )
+			return;
+
+		var decompiler = new MapDecompiler( Context );
 		decompiler.Decompile( file );
+	}
 
-		var builder = new MapBuilder( context );
+	public static DecompilerContext? Context { get; set; }
+
+	private static RealTimeSince TimeSinceDecompileChecked = 0;
+
+	[Event.Frame]
+	public static void Tick()
+	{
+		// check once a second
+		if ( !(TimeSinceDecompileChecked >= 1.0f) || Context is null )
+			return;
+
+		// reset timer
+		TimeSinceDecompileChecked = 0;
+
+		// check decompile status
+		if ( Context.Decompiling || !Context.Decompiled )
+			return;
+
+		Log.Info( $"Finished decompile found, building..." );
+
+		var builder = new MapBuilder( Context );
 		builder.Build();
+
+		// reset decompile status
+		Context.Decompiling = true;
+		Context.Decompiled = false;
 	}
 
 	private static string? GetFileFromDialog( string title = "Open File", string filter = "*.*" )

@@ -10,6 +10,9 @@ public class DecompilerContext
 		MapGeometry = new();
 	}
 
+	public bool Decompiled { get; set; } = false;
+	public bool Decompiling { get; set; } = false;
+
 	public IEnumerable<byte>? Data { get; set; }
 	public BaseLump[] Lumps;
 	public IEnumerable<LumpEntity>? Entities { get; set; }
