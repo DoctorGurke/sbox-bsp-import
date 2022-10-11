@@ -188,7 +188,7 @@ public class MapBuilder
 			throw new Exception( "No valid map geometry to construct!" );
 		}
 
-		if ( modelIndex > Context.Models.Length - 1 )
+		if ( modelIndex < 0 || modelIndex >= Context.Models.Length )
 		{
 			throw new Exception( $"Tried to construct map model with index: {modelIndex}. Exceeds available Models!" );
 		}
