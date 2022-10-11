@@ -285,7 +285,7 @@ public class MapBuilder
 				Context.CachedMaterials.TryGetValue( material, out cachedMaterial );
 
 			// null material falls back to reflectivity 30, so we can just pass it
-			var meshFace = new MeshFace( indices, null );//cachedMaterial );
+			var meshFace = new MeshFace( indices, cachedMaterial );
 			polyMesh.Faces.Add( meshFace );
 		}
 
