@@ -1,6 +1,5 @@
 ﻿using BspImport.Builder;
 using BspImport.Decompiler;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace BspImport;
@@ -46,7 +45,10 @@ public static class Tool
 		ThreadSafe.AssertIsMainThread();
 
 		// check Context state
-		if ( Context is null || Context.DecompileTask is null || Context.DecompileTask.Status != TaskStatus.RanToCompletion )
+		if ( Context is null || Context.DecompileTask is null )
+			return;
+
+		if ( !Context.DecompileTask.IsCompleted )
 			return;
 
 		// reset decompile task
@@ -70,7 +72,10 @@ public static class Tool
 		ThreadSafe.AssertIsMainThread();
 
 		// check Context state
-		if ( Context is null || Context.CacheTask is null || Context.CacheTask.Status != TaskStatus.RanToCompletion )
+		if ( Context is null || Context.CacheTask is null )
+			return;
+
+		if ( !Context.CacheTask.IsCompleted )
 			return;
 
 		// reset cache task
