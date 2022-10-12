@@ -42,14 +42,9 @@ public class StaticPropLump : BaseLump
 		// size per static prop
 		var propLength = reader.GetLength() / entries;
 
-		Log.Info( $"static props: buffer: {reader.GetLength()} entries: {entries}" );
-
 		for ( int i = 0; i < entries; i++ )
 		{
-			Log.Info( $"proplength: {propLength} reader: {reader.GetLength()}" );
 			var sprp = reader.Split( propLength );
-
-			Log.Info( $"split: {sprp.GetLength()}" );
 
 			var origin = sprp.ReadVector3();
 			var angles = sprp.ReadAngles();
