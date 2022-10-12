@@ -68,22 +68,22 @@ public struct TexInfo
 		}
 
 		// rotate texture
-		//if ( !angles.AlmostEqual( Angles.Zero ) )
-		//{
-		//	var rotation = angles.ToRotation();
+		if ( !angles.AlmostEqual( Angles.Zero ) )
+		{
+			var rotation = angles.ToRotation();
 
-		//	uaxis *= rotation;
-		//	vaxis *= rotation;
+			uaxis *= rotation;
+			vaxis *= rotation;
 
-		//	// calculate shift uv space due to the rotation
-		//	var shift = Vector3.Zero;
-		//	shift -= origin;
-		//	shift *= rotation;
-		//	shift += origin;
+			// calculate shift uv space due to the rotation
+			var shift = Vector3.Zero;
+			shift -= origin;
+			shift *= rotation;
+			shift += origin;
 
-		//	ushift -= shift.Dot( uaxis ) / utw;
-		//	vshift -= shift.Dot( vaxis ) / vtw;
-		//}
+			ushift -= shift.Dot( uaxis ) / utw;
+			vshift -= shift.Dot( vaxis ) / vtw;
+		}
 
 		ushift /= width;
 		vshift /= height;

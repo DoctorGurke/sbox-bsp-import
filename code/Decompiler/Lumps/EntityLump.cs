@@ -103,9 +103,6 @@ public class LumpEntity
 			return Angles.Zero;
 
 		var angle = Angles.Parse( $"{split[0]},{split[1]},{split[2]}" );
-		angle.pitch = -angle.pitch;
-		angle.yaw = -angle.yaw;
-		angle.roll = -angle.roll;
 
 		return angle;
 	}

@@ -1,6 +1,4 @@
-﻿using BspImport.Extensions;
-
-namespace BspImport.Decompiler.Lumps;
+﻿namespace BspImport.Decompiler.Lumps;
 
 public class TexDataStringDataLump : BaseLump
 {
@@ -35,6 +33,4 @@ public struct TexDataStringData
 	}
 
 	public int Count => Data.Split( '\0' ).Count();
-
-	public override string ToString() => Data.Replace( '\0', ' ' );
 }

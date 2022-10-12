@@ -14,6 +14,7 @@ public static class Tool
 		var data = File.ReadAllBytes( file );
 
 		var context = new ImportContext( data );
+		context.Decompile();
 		context.Build();
 	}
 

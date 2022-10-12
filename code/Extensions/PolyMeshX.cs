@@ -17,12 +17,12 @@ public static class PolyMeshX
 		if ( face.EdgeCount < 2 )
 			return;
 
-		string? material = null;
+		string? materialName = null;
 
 		// check for valid texinfo and fetch material name
 		if ( !(texInfo > context.TexInfo?.Length) )
 		{
-			material = face.GetFaceMaterial( context );
+			materialName = face.GetFaceMaterial( context );
 		}
 
 		var verts = new List<Vector3>();
@@ -75,9 +75,7 @@ public static class PolyMeshX
 		indices.Reverse();
 
 		// get material
-		Material? cachedMaterial = null;
-		if ( material is not null )
-			context.CachedMaterials.TryGetValue( material, out cachedMaterial );
+		var material = Material.Load( $"materials/{materialName}.vmat" );
 
 		// fallback to active material on error material
 		// TODO: setting
@@ -87,7 +85,7 @@ public static class PolyMeshX
 		//}
 
 		// null material falls back to reflectivity 30, so we can just pass it
-		var meshFace = new MeshFace( indices, cachedMaterial );
+		var meshFace = new MeshFace( indices, material );
 
 		mesh.Faces.Add( meshFace );
 	}

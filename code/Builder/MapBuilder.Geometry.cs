@@ -2,15 +2,15 @@
 
 public partial class MapBuilder
 {
-	public void CachePolygonMeshes()
+	public void BuildPolygonMeshes()
 	{
-		Log.Info( $"Caching PolygonMeshes..." );
+		Log.Info( $"Building PolygonMeshes..." );
 
 		var modelCount = Context.Models?.Length ?? 0;
 
 		if ( modelCount <= 0 )
 		{
-			Log.Error( $"Unable to CachePolygonMeshes, Context has no Models!" );
+			Log.Error( $"Unable to BuildPolygonMeshes, Context has no Models!" );
 			return;
 		}
 
@@ -47,7 +47,7 @@ public partial class MapBuilder
 
 		Context.CachedPolygonMeshes = polyMeshes;
 
-		Log.Info( $"Done Caching PolygonMeshes." );
+		Log.Info( $"Done Building PolygonMeshes." );
 	}
 
 	private PolygonMesh? ConstructModel( int modelIndex, Vector3 origin, Angles angles )
@@ -139,11 +139,9 @@ public partial class MapBuilder
 		// no valid faces in mesh
 		if ( !polyMesh.Faces.Any() )
 		{
-			Log.Error( $"ConstructModel failed, no valid faces constructed!" );
+			Log.Error( $"ConstructModel failed, Model [{modelIndex}] has no valid faces!" );
 			return null;
 		}
-
-		Log.Info( $"PolyMesh constructed for {modelIndex}." );
 
 		return polyMesh;
 	}

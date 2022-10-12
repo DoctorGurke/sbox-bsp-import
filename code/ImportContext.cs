@@ -11,7 +11,13 @@ public class ImportContext
 		Lumps = new BaseLump[64];
 		Geometry = new();
 		CachedMaterials = new();
+	}
 
+	/// <summary>
+	/// Decompiles the data of the context.
+	/// </summary>
+	public void Decompile()
+	{
 		var decompiler = new MapDecompiler( this );
 		decompiler.Decompile();
 	}
@@ -22,8 +28,6 @@ public class ImportContext
 	public void Build()
 	{
 		var builder = new MapBuilder( this );
-		builder.CacheMaterials();
-		builder.CachePolygonMeshes();
 		builder.Build();
 	}
 

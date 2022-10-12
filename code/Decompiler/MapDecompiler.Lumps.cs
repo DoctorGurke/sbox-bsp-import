@@ -1,6 +1,4 @@
-﻿using BspImport.Decompiler.Lumps;
-
-namespace BspImport.Decompiler;
+﻿namespace BspImport.Decompiler;
 
 public partial class MapDecompiler
 {

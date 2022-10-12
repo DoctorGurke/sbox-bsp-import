@@ -10,39 +10,17 @@ public partial class MapBuilder
 	}
 
 	/// <summary>
-	/// Caches all materials inside the Context's TexDataStringData for later use.
-	/// </summary>
-	/// <remarks>Necessary to be able to generate PolygonMeshes in parallel, since Materials can only be loaded on the main thread.</remarks>
-	public void CacheMaterials()
-	{
-		Log.Info( $"Caching Materials..." );
-
-		// cache all texData strings as materials
-		var splitTexData = $"{Context.TexDataStringData}".Split( ' ' );
-		var materialCount = splitTexData.Length;
-
-		for ( int i = 0; i < materialCount; i++ )
-		{
-			var materialName = splitTexData[i].ToLower();
-			var materialPath = $"materials/{materialName}.vmat";
-			var material = Material.Load( materialPath );
-
-			if ( material is null )
-				continue;
-
-			Context.CachedMaterials.TryAdd( materialName, material );
-		}
-
-		Log.Info( $"Done." );
-	}
-
-	/// <summary>
 	/// Builds the final decompiled context inside of hammer. This will spawn world geometry and map entities, including parsed static props and brush entities.
 	/// </summary>
 	public void Build()
 	{
+		// prepares the polygon meshes
+		BuildPolygonMeshes();
+
+		// builds entities, including prop static and brush entities
 		BuildEntities();
 
+		// build map worldspawn geometry (model 0)
 		BuildGeometry();
 	}
 
@@ -81,9 +59,6 @@ public partial class MapBuilder
 				continue;
 			}
 
-			//// skip point entities for now
-			//return;
-
 			// regular entity
 			var mapent = new MapEntity( Hammer.ActiveMap );
 			mapent.ClassName = ent.ClassName;
@@ -107,7 +82,7 @@ public partial class MapBuilder
 
 		if ( polyMesh is null )
 		{
-			Log.Error( $"Tried building WorldSpawn geometry, but Context has no Cached PolygonMeshes!" );
+			Log.Error( $"Tried building WorldSpawn geometry, but Context has no Cached Worldspawn PolygonMesh!" );
 			return;
 		}
 

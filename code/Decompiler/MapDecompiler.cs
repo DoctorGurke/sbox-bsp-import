@@ -10,7 +10,7 @@ public partial class MapDecompiler
 		Context = context;
 	}
 
-	public async virtual void Decompile()
+	public virtual void Decompile()
 	{
 		Log.Info( $"Decompiling Context..." );
 
@@ -19,8 +19,6 @@ public partial class MapDecompiler
 		// parse bsp header
 		var ident = reader.ReadInt32();
 		var mapversion = reader.ReadInt32();
-
-		var tasks = new List<Task>();
 
 		// 64 lump headers
 		for ( int i = 0; i < 64; i++ )
@@ -46,14 +44,7 @@ public partial class MapDecompiler
 				continue;
 
 			Context.Lumps[i] = lump;
-
-			var task = new Task( () => lump.Parse() );
-			task.Start();
-			tasks.Add( task );
 		}
-
-		// wait for all lumps to finish compiling
-		await Task.WhenAll( tasks.ToArray() );
 
 		var revision = reader.ReadInt32();
 
