@@ -89,6 +89,9 @@ public partial class MapBuilder
 				continue;
 			}
 
+			// skip point entities for now
+			return;
+
 			// regular entity
 			var mapent = new MapEntity( Hammer.ActiveMap );
 			mapent.ClassName = ent.ClassName;
