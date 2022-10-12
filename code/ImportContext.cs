@@ -1,8 +1,8 @@
-﻿namespace BspImport.Decompiler;
+﻿namespace BspImport;
 
-public class DecompilerContext
+public class ImportContext
 {
-	public DecompilerContext( byte[] data )
+	public ImportContext( byte[] data )
 	{
 		Data = data;
 

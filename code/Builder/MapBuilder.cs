@@ -2,9 +2,9 @@
 
 public partial class MapBuilder
 {
-	protected DecompilerContext Context { get; set; }
+	protected ImportContext Context { get; set; }
 
-	public MapBuilder( DecompilerContext context )
+	public MapBuilder( ImportContext context )
 	{
 		Context = context;
 	}

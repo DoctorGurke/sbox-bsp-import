@@ -2,7 +2,7 @@
 
 public class GameLumpHeader : BaseLump
 {
-	public GameLumpHeader( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
+	public GameLumpHeader( ImportContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( BinaryReader reader )
 	{

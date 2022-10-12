@@ -2,11 +2,11 @@
 
 public abstract class BaseLump
 {
-	protected DecompilerContext Context { get; set; }
+	protected ImportContext Context { get; set; }
 	public int Version { get; private set; }
 	protected byte[] Data { get; private set; }
 
-	public BaseLump( DecompilerContext context, byte[] data, int version = 0 )
+	public BaseLump( ImportContext context, byte[] data, int version = 0 )
 	{
 		Context = context;
 		Data = data;

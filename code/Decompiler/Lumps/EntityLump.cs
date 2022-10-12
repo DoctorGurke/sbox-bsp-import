@@ -2,7 +2,7 @@
 
 public class EntityLump : BaseLump
 {
-	public EntityLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
+	public EntityLump( ImportContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( BinaryReader reader )
 	{

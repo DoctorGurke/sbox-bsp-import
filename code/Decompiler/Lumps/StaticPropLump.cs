@@ -9,7 +9,7 @@ public class StaticPropLump : BaseLump
 	private int DictEntryCount { get; set; }
 	private Dictionary<int, string>? Names { get; set; }
 
-	public StaticPropLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
+	public StaticPropLump( ImportContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( BinaryReader reader )
 	{

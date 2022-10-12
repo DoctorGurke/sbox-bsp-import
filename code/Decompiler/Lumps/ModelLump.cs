@@ -2,7 +2,7 @@
 
 public class ModelLump : BaseLump
 {
-	public ModelLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
+	public ModelLump( ImportContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( BinaryReader reader )
 	{

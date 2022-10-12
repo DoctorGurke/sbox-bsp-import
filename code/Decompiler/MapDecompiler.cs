@@ -3,9 +3,9 @@
 [MapDecompiler( "Default" )]
 public partial class MapDecompiler
 {
-	protected DecompilerContext Context { get; set; }
+	protected ImportContext Context { get; set; }
 
-	public MapDecompiler( DecompilerContext context )
+	public MapDecompiler( ImportContext context )
 	{
 		Context = context;
 	}

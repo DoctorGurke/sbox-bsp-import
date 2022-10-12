@@ -4,7 +4,7 @@ namespace BspImport.Decompiler.Lumps;
 
 public class TexDataLump : BaseLump
 {
-	public TexDataLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
+	public TexDataLump( ImportContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( BinaryReader reader )
 	{

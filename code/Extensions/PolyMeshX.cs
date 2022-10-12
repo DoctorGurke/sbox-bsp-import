@@ -2,7 +2,7 @@
 
 public static class PolyMeshX
 {
-	private static void AddMeshFaceInternal( this PolygonMesh mesh, DecompilerContext context, Face face, Vector3 origin, Angles angles )
+	private static void AddMeshFaceInternal( this PolygonMesh mesh, ImportContext context, Face face, Vector3 origin, Angles angles )
 	{
 		var geo = context.Geometry;
 
@@ -92,7 +92,7 @@ public static class PolyMeshX
 		mesh.Faces.Add( meshFace );
 	}
 
-	public static void AddOriginalMeshFace( this PolygonMesh mesh, DecompilerContext context, int oFaceIndex, Vector3 origin, Angles angles )
+	public static void AddOriginalMeshFace( this PolygonMesh mesh, ImportContext context, int oFaceIndex, Vector3 origin, Angles angles )
 	{
 		var geo = context.Geometry;
 
@@ -105,7 +105,7 @@ public static class PolyMeshX
 		mesh.AddMeshFaceInternal( context, face, origin, angles );
 	}
 
-	public static void AddSplitMeshFace( this PolygonMesh mesh, DecompilerContext context, int sFaceIndex, Vector3 origin, Angles angles )
+	public static void AddSplitMeshFace( this PolygonMesh mesh, ImportContext context, int sFaceIndex, Vector3 origin, Angles angles )
 	{
 		var geo = context.Geometry;
 

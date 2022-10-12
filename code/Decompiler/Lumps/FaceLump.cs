@@ -2,7 +2,7 @@
 
 public class FaceLump : BaseLump
 {
-	public FaceLump( DecompilerContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
+	public FaceLump( ImportContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( BinaryReader reader )
 	{
@@ -46,7 +46,7 @@ public struct Face
 	/// </summary>
 	/// <param name="context">The Context to take the texInfo etc. from.</param>
 	/// <returns>The name of the texture taken from context.TexDataStringData.</returns>
-	public string? GetFaceMaterial( DecompilerContext context )
+	public string? GetFaceMaterial( ImportContext context )
 	{
 		// get texture/material for face
 		var texData = context.TexInfo?[TexInfo].TexData;
