@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace BspImport.Decompiler;
+﻿namespace BspImport.Decompiler;
 
 [MapDecompiler( "Default" )]
 public partial class MapDecompiler

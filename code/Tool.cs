@@ -17,56 +17,15 @@ public static class Tool
 
 		var data = File.ReadAllBytes( file );
 
-		Context = new DecompilerContext( data );
+		var context = new DecompilerContext( data );
 
-		// decompile in parallel, also prepares worldspawn geometry
-		Context.DecompileTask = new Task( () => Decompile() );
-		Context.DecompileTask.Start();
-	}
+		var decompiler = new MapDecompiler( context );
+		decompiler.Decompile();
 
-	private static void Decompile()
-	{
-		// run in parallel
-		ThreadSafe.AssertIsNotMainThread();
-
-		if ( Context is null )
-			return;
-
-		lock ( Context.Lock )
-		{
-			var decompiler = new MapDecompiler( Context );
-			decompiler.Decompile();
-		}
-	}
-
-	public static DecompilerContext? Context { get; set; }
-
-	[Event.Frame] // main thread
-	public static void CheckDecompile()
-	{
-		// main thread
-		ThreadSafe.AssertIsMainThread();
-
-		// check Context state
-		if ( Context is null || Context.DecompileTask is null )
-			return;
-
-		if ( !Context.DecompileTask.IsCompleted )
-			return;
-
-		Task.WaitAll( Context.DecompileTask );
-
-		// reset decompile task
-		Context.DecompileTask = null;
-
-		Log.Info( $"Decompiled Context found, Caching..." );
-
-		// cache materials, block main thread
-		var builder = new MapBuilder( Context );
+		var builder = new MapBuilder( context );
 		builder.CacheMaterials();
 		builder.CachePolygonMeshes();
 		builder.Build();
-
 	}
 
 	private static string? GetFileFromDialog( string title = "Open File", string filter = "*.*" )
