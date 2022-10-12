@@ -48,46 +48,15 @@ public struct TexInfo
 	// taken from ata4/bspsrc @ github
 	public Vector2 GetUvs( Vector3 origin, Angles angles, int width, int height )
 	{
-		var uaxis = new Vector3( TextureVecs[0] );
-		var vaxis = new Vector3( TextureVecs[1] );
+		var tv0 = new Vector3( TextureVecs[0] );
+		var tv1 = new Vector3( TextureVecs[1] );
 
-		float utw = 1.0f / uaxis.Length;
-		float vtw = 1.0f / vaxis.Length;
+		var u = tv0.x * origin.x + tv0.y * origin.y + tv0.z * origin.z + TextureVecs[0].w;
+		var v = tv1.x * origin.x + tv1.y * origin.y + tv1.z * origin.z + TextureVecs[1].w;
 
-		uaxis *= utw;
-		vaxis *= vtw;
+		u /= width;
+		v /= height;
 
-		float ushift = TextureVecs[0].w;
-		float vshift = TextureVecs[1].w;
-
-		// translate to origin
-		if ( !origin.AlmostEqual( Vector3.Zero ) )
-		{
-			ushift -= origin.Dot( uaxis ) / utw;
-			vshift -= origin.Dot( vaxis ) / vtw;
-		}
-
-		// rotate texture
-		if ( !angles.AlmostEqual( Angles.Zero ) )
-		{
-			var rotation = angles.ToRotation();
-
-			uaxis *= rotation;
-			vaxis *= rotation;
-
-			// calculate shift uv space due to the rotation
-			var shift = Vector3.Zero;
-			shift -= origin;
-			shift *= rotation;
-			shift += origin;
-
-			ushift -= shift.Dot( uaxis ) / utw;
-			vshift -= shift.Dot( vaxis ) / vtw;
-		}
-
-		ushift /= width;
-		vshift /= height;
-
-		return new Vector2( ushift, vshift );
+		return new Vector2( u, v );
 	}
 }
