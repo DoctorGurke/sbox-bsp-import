@@ -79,6 +79,13 @@ public static class PolyMeshX
 		if ( material is not null )
 			context.CachedMaterials.TryGetValue( material, out cachedMaterial );
 
+		// fallback to active material on error material
+		// TODO: setting
+		//if ( cachedMaterial is not null && cachedMaterial.Name == $"materials/error.vmat" )
+		//{
+		//	cachedMaterial = null;
+		//}
+
 		// null material falls back to reflectivity 30, so we can just pass it
 		var meshFace = new MeshFace( indices, cachedMaterial );
 
