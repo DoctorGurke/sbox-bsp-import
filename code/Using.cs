@@ -1,9 +1,13 @@
-﻿global using BspImport.Extensions;
+﻿global using BspImport.Decompiler;
+global using BspImport.Decompiler.Lumps;
+global using BspImport.Extensions;
 global using Sandbox;
-global using SandboxEditor;
 global using System;
 global using System.Collections.Generic;
 global using System.IO;
 global using System.Linq;
 global using System.Text;
+global using System.Threading.Tasks;
 global using Tools;
+global using Tools.MapDoc;
+global using Tools.MapEditor;

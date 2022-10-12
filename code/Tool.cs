@@ -32,8 +32,11 @@ public static class Tool
 		if ( Context is null )
 			return;
 
-		var decompiler = new MapDecompiler( Context );
-		decompiler.Decompile();
+		lock ( Context.Lock )
+		{
+			var decompiler = new MapDecompiler( Context );
+			decompiler.Decompile();
+		}
 	}
 
 	public static DecompilerContext? Context { get; set; }
@@ -51,6 +54,8 @@ public static class Tool
 		if ( !Context.DecompileTask.IsCompleted )
 			return;
 
+		Task.WaitAll( Context.DecompileTask );
+
 		// reset decompile task
 		Context.DecompileTask = null;
 
@@ -59,34 +64,9 @@ public static class Tool
 		// cache materials, block main thread
 		var builder = new MapBuilder( Context );
 		builder.CacheMaterials();
-
-		// cache meshes in parallel
-		Context.CacheTask = new Task( () => builder.CachePolygonMeshes() );
-		Context.CacheTask.Start();
-	}
-
-	[Event.Frame]
-	public static void CheckCached()
-	{
-		// main thread
-		ThreadSafe.AssertIsMainThread();
-
-		// check Context state
-		if ( Context is null || Context.CacheTask is null )
-			return;
-
-		if ( !Context.CacheTask.IsCompleted )
-			return;
-
-		// reset cache task
-		Context.CacheTask = null;
-
-		Log.Info( $"Cached Context found, Building..." );
-
-		var builder = new MapBuilder( Context );
+		builder.CachePolygonMeshes();
 		builder.Build();
 
-		Log.Info( $"Done building." );
 	}
 
 	private static string? GetFileFromDialog( string title = "Open File", string filter = "*.*" )

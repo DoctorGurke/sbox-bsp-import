@@ -1,6 +1,4 @@
-﻿using BspImport.Extensions;
-
-namespace BspImport.Decompiler.Lumps;
+﻿namespace BspImport.Decompiler.Lumps;
 
 public class OriginalFaceLump : BaseLump
 {
@@ -20,6 +18,6 @@ public class OriginalFaceLump : BaseLump
 
 		Log.Info( $"ORIGINAL FACES: {oFaces.Count()}" );
 
-		Context.MapGeometry.OriginalFaces = oFaces;
+		Context.Geometry.OriginalFaces = oFaces;
 	}
 }

@@ -17,7 +17,7 @@ public class EdgeLump : BaseLump
 
 		Log.Info( $"SURFACE EDGES: {edges.Length}" );
 
-		Context.MapGeometry.EdgeIndices = edges;
+		Context.Geometry.EdgeIndices = edges;
 	}
 }
 

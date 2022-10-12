@@ -1,8 +1,4 @@
-﻿using BspImport.Decompiler.Lumps;
-using System.Threading.Tasks;
-using Tools.MapDoc;
-
-namespace BspImport.Decompiler;
+﻿namespace BspImport.Decompiler;
 
 public class DecompilerContext
 {
@@ -11,19 +7,20 @@ public class DecompilerContext
 		Data = data;
 
 		Lumps = new BaseLump[64];
-		MapGeometry = new();
+		Geometry = new();
 		CachedMaterials = new();
 	}
 
+	public object Lock = new object();
+
 	public Task? DecompileTask { get; set; }
-	public Task? CacheTask { get; set; }
 
 	public byte[] Data { get; private set; }
 	public BaseLump[] Lumps;
 	public LumpEntity[]? Entities { get; set; }
 	public MapModel[]? Models { get; set; }
 	public GameLump[]? GameLumps { get; set; }
-	public MapGeometry MapGeometry { get; private set; }
+	public MapGeometry Geometry { get; private set; }
 	public TexInfo[]? TexInfo { get; set; }
 	public TexData[]? TexData { get; set; }
 	public int[]? TexDataStringTable { get; set; }

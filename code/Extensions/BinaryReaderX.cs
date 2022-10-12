@@ -23,7 +23,9 @@ public static class BinaryReaderX
 		reader.Skip<short>(); // short surfaceFogVolumeID
 		reader.Skip( 4 ); // byte styles[4]
 		reader.Skip<int>(); // int lightofs
-		reader.Skip<float>(); // float area
+
+		var area = reader.ReadSingle();
+
 		reader.Skip<int>( 2 ); // int LightmapTextureMinsInLuxels[2]
 		reader.Skip<int>( 2 ); // int LightmapTextureSizeInLuxels[2]
 
@@ -34,7 +36,7 @@ public static class BinaryReaderX
 		reader.Skip<ushort>(); // ushort firstPrimID
 		reader.Skip<uint>(); // uint smoothingGroups
 
-		return new Face( firstEdge, numEdges, texInfo, dispInfo, oFace );
+		return new Face( firstEdge, numEdges, texInfo, dispInfo, area, oFace );
 	}
 
 	public static BinaryReader Split( this BinaryReader current, int length ) => new BinaryReader( new MemoryStream( current.ReadBytes( length ) ) );
