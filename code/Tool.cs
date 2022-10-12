@@ -1,8 +1,4 @@
-﻿using BspImport.Builder;
-using BspImport.Decompiler;
-using System.Threading.Tasks;
-
-namespace BspImport;
+﻿namespace BspImport;
 
 public static class Tool
 {
@@ -18,14 +14,7 @@ public static class Tool
 		var data = File.ReadAllBytes( file );
 
 		var context = new ImportContext( data );
-
-		var decompiler = new MapDecompiler( context );
-		decompiler.Decompile();
-
-		var builder = new MapBuilder( context );
-		builder.CacheMaterials();
-		builder.CachePolygonMeshes();
-		builder.Build();
+		context.Build();
 	}
 
 	private static string? GetFileFromDialog( string title = "Open File", string filter = "*.*" )

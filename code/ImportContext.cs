@@ -1,4 +1,6 @@
-﻿namespace BspImport;
+﻿using BspImport.Builder;
+
+namespace BspImport;
 
 public class ImportContext
 {
@@ -9,11 +11,21 @@ public class ImportContext
 		Lumps = new BaseLump[64];
 		Geometry = new();
 		CachedMaterials = new();
+
+		var decompiler = new MapDecompiler( this );
+		decompiler.Decompile();
 	}
 
-	public object Lock = new object();
-
-	public Task? DecompileTask { get; set; }
+	/// <summary>
+	/// Construct the decompiled context in the active map.
+	/// </summary>
+	public void Build()
+	{
+		var builder = new MapBuilder( this );
+		builder.CacheMaterials();
+		builder.CachePolygonMeshes();
+		builder.Build();
+	}
 
 	public byte[] Data { get; private set; }
 	public BaseLump[] Lumps;

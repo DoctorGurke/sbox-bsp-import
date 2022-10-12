@@ -4,9 +4,6 @@ public partial class MapBuilder
 {
 	public void CachePolygonMeshes()
 	{
-		// caching is always done in parallel
-		//ThreadSafe.AssertIsNotMainThread();
-
 		Log.Info( $"Caching PolygonMeshes..." );
 
 		var modelCount = Context.Models?.Length ?? 0;

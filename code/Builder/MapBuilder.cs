@@ -15,9 +15,6 @@ public partial class MapBuilder
 	/// <remarks>Necessary to be able to generate PolygonMeshes in parallel, since Materials can only be loaded on the main thread.</remarks>
 	public void CacheMaterials()
 	{
-		// materials can only be loaded on the main thread
-		ThreadSafe.AssertIsMainThread( $"MapBuilder.CacheMaterials()" );
-
 		Log.Info( $"Caching Materials..." );
 
 		// cache all texData strings as materials
@@ -44,9 +41,6 @@ public partial class MapBuilder
 	/// </summary>
 	public void Build()
 	{
-		// MapEntity and MapMesh can only be created on the main thread
-		ThreadSafe.AssertIsMainThread( $"MapBuilder.Build()" );
-
 		BuildEntities();
 
 		BuildGeometry();
@@ -57,8 +51,6 @@ public partial class MapBuilder
 	/// </summary>
 	protected virtual void BuildEntities()
 	{
-		ThreadSafe.AssertIsMainThread( $"MapBuilder.Build()" );
-
 		if ( Context.Entities is null )
 			return;
 
@@ -111,8 +103,6 @@ public partial class MapBuilder
 	/// </summary>
 	protected virtual void BuildGeometry()
 	{
-		ThreadSafe.AssertIsMainThread( $"MapBuilder.Build()" );
-
 		var polyMesh = Context.CachedPolygonMeshes?[0];
 
 		if ( polyMesh is null )
