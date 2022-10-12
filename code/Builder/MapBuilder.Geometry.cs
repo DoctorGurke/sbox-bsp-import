@@ -118,7 +118,7 @@ public partial class MapBuilder
 		// build all split faces
 		foreach ( var faceIndex in faces )
 		{
-			polyMesh.AddSplitMeshFace( Context, faceIndex, origin, angles );
+			polyMesh.AddSplitMeshFace( Context, faceIndex, origin );
 		}
 
 		//// construct and add faces to poly mesh
@@ -129,11 +129,11 @@ public partial class MapBuilder
 
 		//	foreach ( var faceIndex in faceEntry.Value )
 		//	{
-		//		polyMesh.AddSplitMeshFace( Context, faceIndex, origin, angles );
+		//		polyMesh.AddSplitMeshFace( Context, faceIndex, origin );
 		//	}
 
 		//	//see: PolygonMeshX
-		//	//polyMesh.AddOriginalMeshFace( Context, oFaceIndex, origin, angles );
+		//	//polyMesh.AddOriginalMeshFace( Context, oFaceIndex, origin );
 		//}
 
 		// no valid faces in mesh

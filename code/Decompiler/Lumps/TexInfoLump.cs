@@ -46,7 +46,7 @@ public struct TexInfo
 	}
 
 	// taken from ata4/bspsrc @ github
-	public Vector2 GetUvs( Vector3 origin, Angles angles, int width, int height )
+	public Vector2 GetUvs( Vector3 origin, int width, int height )
 	{
 		var tv0 = new Vector3( TextureVecs[0] );
 		var tv1 = new Vector3( TextureVecs[1] );

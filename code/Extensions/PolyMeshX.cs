@@ -2,7 +2,7 @@
 
 public static class PolyMeshX
 {
-	private static void AddMeshFaceInternal( this PolygonMesh mesh, ImportContext context, Face face, Vector3 origin, Angles angles )
+	private static void AddMeshFaceInternal( this PolygonMesh mesh, ImportContext context, Face face, Vector3 origin )
 	{
 		var geo = context.Geometry;
 
@@ -63,7 +63,7 @@ public static class PolyMeshX
 					height = t.Height;
 				}
 
-				var texCoords = ti.GetUvs( vert + origin, angles, width, height );
+				var texCoords = ti.GetUvs( vert, width, height );
 				meshVert.TexCoord = texCoords;
 			}
 
@@ -90,7 +90,7 @@ public static class PolyMeshX
 		mesh.Faces.Add( meshFace );
 	}
 
-	public static void AddOriginalMeshFace( this PolygonMesh mesh, ImportContext context, int oFaceIndex, Vector3 origin, Angles angles )
+	public static void AddOriginalMeshFace( this PolygonMesh mesh, ImportContext context, int oFaceIndex, Vector3 origin )
 	{
 		var geo = context.Geometry;
 
@@ -100,10 +100,10 @@ public static class PolyMeshX
 		}
 
 		var face = geo.OriginalFaces[oFaceIndex];
-		mesh.AddMeshFaceInternal( context, face, origin, angles );
+		mesh.AddMeshFaceInternal( context, face, origin );
 	}
 
-	public static void AddSplitMeshFace( this PolygonMesh mesh, ImportContext context, int sFaceIndex, Vector3 origin, Angles angles )
+	public static void AddSplitMeshFace( this PolygonMesh mesh, ImportContext context, int sFaceIndex, Vector3 origin )
 	{
 		var geo = context.Geometry;
 
@@ -113,6 +113,6 @@ public static class PolyMeshX
 		}
 
 		var face = geo.Faces[sFaceIndex];
-		mesh.AddMeshFaceInternal( context, face, origin, angles );
+		mesh.AddMeshFaceInternal( context, face, origin );
 	}
 }
