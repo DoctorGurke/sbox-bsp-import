@@ -6,7 +6,7 @@ public static class PolyMeshX
 	{
 		var geo = context.Geometry;
 
-		if ( context.Models is null || geo.VertexPositions is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+		if ( context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
 		{
 			return;
 		}
@@ -35,11 +35,11 @@ public static class PolyMeshX
 			// edge sign affects winding order, indexing back to front or vice versa on the edge vertices
 			if ( edge >= 0 )
 			{
-				verts.Add( geo.VertexPositions[geo.EdgeIndices[edge].Indices[0]] );
+				verts.Add( geo.Vertices[geo.EdgeIndices[edge].Indices[0]] );
 			}
 			else
 			{
-				verts.Add( geo.VertexPositions[geo.EdgeIndices[-edge].Indices[1]] );
+				verts.Add( geo.Vertices[geo.EdgeIndices[-edge].Indices[1]] );
 			}
 		}
 
@@ -94,7 +94,7 @@ public static class PolyMeshX
 	{
 		var geo = context.Geometry;
 
-		if ( context.Models is null || geo.VertexPositions is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+		if ( context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
 		{
 			return;
 		}
@@ -107,7 +107,7 @@ public static class PolyMeshX
 	{
 		var geo = context.Geometry;
 
-		if ( context.Models is null || geo.VertexPositions is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+		if ( context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
 		{
 			return;
 		}

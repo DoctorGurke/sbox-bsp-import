@@ -60,7 +60,7 @@ public partial class MapBuilder
 
 		var geo = Context.Geometry;
 
-		if ( Context.Models is null || geo.VertexPositions is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+		if ( Context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
 		{
 			throw new Exception( "No valid map geometry to construct!" );
 		}

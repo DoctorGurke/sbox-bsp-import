@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace BspImport.Decompiler;
+﻿namespace BspImport.Decompiler;
 
 public class StructReader<T> where T : struct
 {
@@ -8,7 +6,7 @@ public class StructReader<T> where T : struct
 
 	public StructReader()
 	{
-		byteBuf = new byte[Marshal.SizeOf( typeof( T ) )];
+		byteBuf = new byte[Marshal.SizeOf<T>()];
 	}
 
 	public IEnumerable<T> ReadMultiple( IEnumerable<byte> bytes, int num = 0 )
@@ -16,7 +14,7 @@ public class StructReader<T> where T : struct
 		for ( int i = 0; i < num; i++ )
 		{
 			yield return Read( bytes );
-			bytes = bytes.Skip( Marshal.SizeOf( typeof( T ) ) );
+			bytes = bytes.Skip( Marshal.SizeOf<T>() );
 		}
 	}
 
@@ -31,8 +29,8 @@ public class StructReader<T> where T : struct
 
 		while ( bytes.Count() >= byteBuf.Length )
 		{
-			Array.Copy( bytes.ToArray(), byteBuf, Marshal.SizeOf( typeof( T ) ) );
-			bytes = bytes.Skip( Marshal.SizeOf( typeof( T ) ) ).ToArray();
+			Array.Copy( bytes.ToArray(), byteBuf, Marshal.SizeOf<T>() );
+			bytes = bytes.Skip( Marshal.SizeOf<T>() ).ToArray();
 
 			object? result;
 			GCHandle handle = GCHandle.Alloc( byteBuf, GCHandleType.Pinned );
@@ -56,7 +54,7 @@ public class StructReader<T> where T : struct
 
 	public T Read( IEnumerable<byte> bytes )
 	{
-		Array.Copy( bytes.ToArray(), byteBuf, Marshal.SizeOf( typeof( T ) ) );
+		Array.Copy( bytes.ToArray(), byteBuf, Marshal.SizeOf<T>() );
 		if ( bytes.Count() == 0 ) throw new InvalidOperationException( "<EOF>" );
 
 		object? result;

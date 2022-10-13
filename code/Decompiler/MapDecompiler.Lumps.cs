@@ -6,50 +6,55 @@ public partial class MapDecompiler
 	{
 		switch ( (LumpType)index )
 		{
-			case LumpType.EntityLump:
+			case LumpType.Entity:
 				return new EntityLump( Context, data );
-			case LumpType.TexDataLump:
+			case LumpType.TexData:
 				return new TexDataLump( Context, data );
-			case LumpType.VertexLump:
+			case LumpType.Vertex:
 				return new VertexLump( Context, data );
-			case LumpType.TexInfoLump:
+			case LumpType.TexInfo:
 				return new TexInfoLump( Context, data );
-			case LumpType.FaceLump:
+			case LumpType.Face:
 				return new FaceLump( Context, data );
-			case LumpType.EdgeLump:
+			case LumpType.Edge:
 				return new EdgeLump( Context, data );
-			case LumpType.SurfaceEdgeLump:
+			case LumpType.SurfaceEdge:
 				return new SurfaceEdgeLump( Context, data );
-			case LumpType.ModelLump:
+			case LumpType.Model:
 				return new ModelLump( Context, data );
-			case LumpType.OriginalFaceLump:
+			case LumpType.DisplacementInfo:
+				return new DisplacementInfoLump( Context, data );
+			case LumpType.OriginalFace:
 				return new OriginalFaceLump( Context, data );
-			case LumpType.GameLump:
+			case LumpType.DisplacementVertices:
+				return new DisplacementVertexLump( Context, data );
+			case LumpType.Game:
 				return new GameLumpHeader( Context, data );
-			case LumpType.TexDataStringDataLump:
+			case LumpType.TexDataStringData:
 				return new TexDataStringDataLump( Context, data );
-			case LumpType.TexDataStringTableLump:
+			case LumpType.TexDataStringTable:
 				return new TexDataStringTableLump( Context, data );
 			default:
-				break;
+				throw new ArgumentException( $"Tried parsing Lump with unknown type! ({index})" );
 		}
-		return null;
 	}
+}
 
-	public enum LumpType
-	{
-		EntityLump = 0,
-		TexDataLump = 2,
-		VertexLump = 3,
-		TexInfoLump = 6,
-		FaceLump = 7,
-		EdgeLump = 12,
-		SurfaceEdgeLump = 13,
-		ModelLump = 14,
-		OriginalFaceLump = 27,
-		GameLump = 35,
-		TexDataStringDataLump = 43,
-		TexDataStringTableLump = 44,
-	}
+public enum LumpType
+{
+	Entity = 0,
+	TexData = 2,
+	Vertex = 3,
+	TexInfo = 6,
+	Face = 7,
+	Edge = 12,
+	SurfaceEdge = 13,
+	Model = 14,
+	DisplacementInfo = 26,
+	OriginalFace = 27,
+	DisplacementVertices = 33,
+	Game = 35,
+	TexDataStringData = 43,
+	TexDataStringTable = 44,
 }
 

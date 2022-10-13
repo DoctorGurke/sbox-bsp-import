@@ -1,8 +1,4 @@
-﻿using BspImport.Extensions;
-using System.Net.Http.Headers;
-using System.Runtime.InteropServices;
-
-namespace BspImport.Decompiler.Lumps;
+﻿namespace BspImport.Decompiler.Lumps;
 
 public class StaticPropLump : BaseLump
 {
@@ -19,7 +15,7 @@ public class StaticPropLump : BaseLump
 
 		for ( int i = 0; i < DictEntryCount; i++ )
 		{
-			var size = Marshal.SizeOf( typeof( StaticPropNameEntry ) );
+			var size = Marshal.SizeOf<StaticPropNameEntry>();
 			var sReader = new StructReader<StaticPropNameEntry>();
 			var name = sReader.Read( reader.ReadBytes( size ) );
 

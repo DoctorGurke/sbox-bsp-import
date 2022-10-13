@@ -20,6 +20,6 @@ public class VertexLump : BaseLump
 
 		Log.Info( $"VERTICES: {vertices.Length}" );
 
-		Context.Geometry.VertexPositions = vertices;
+		Context.Geometry.Vertices = vertices;
 	}
 }
