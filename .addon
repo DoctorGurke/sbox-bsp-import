@@ -3,13 +3,13 @@
   "Type": "tool",
   "Org": "doctor",
   "Ident": "bsp-import",
+  "Tags": null,
   "Schema": 1,
   "HasAssets": true,
   "AssetsPath": "",
   "ResourcePaths": null,
   "HasCode": true,
   "CodePath": "code",
-  "RootNamespace": null,
   "Metadata": {
     "Compiler": {
       "RootNamespace": "BspImport",

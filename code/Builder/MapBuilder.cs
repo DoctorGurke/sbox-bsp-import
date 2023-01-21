@@ -46,13 +46,19 @@ public partial class MapBuilder
 
 				if ( polyMesh is null )
 				{
-
 					continue;
 				}
 
+				// create entity
+				var brushEntity = new MapEntity( Hammer.ActiveMap );
+				brushEntity.ClassName = ent.ClassName;
+				brushEntity.Position = ent.Position;
+				brushEntity.Angles = ent.Angles;
+
+				// create and attach mesh, (tie mesh to entity)
 				var mapMesh = new MapMesh( Hammer.ActiveMap );
 				mapMesh.ConstructFromPolygons( polyMesh );
-				mapMesh.Name = ent.ClassName;
+				mapMesh.Parent = brushEntity;
 				mapMesh.Position = ent.Position;
 				mapMesh.Angles = ent.Angles;
 
