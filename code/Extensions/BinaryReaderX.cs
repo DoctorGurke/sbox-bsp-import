@@ -39,6 +39,12 @@ public static class BinaryReaderX
 		return new Face( firstEdge, numEdges, texInfo, dispInfo, area, oFace );
 	}
 
+	/// <summary>
+	/// Split of a whole section of a BinaryReader to treat isolated from original reader. Useful for reading an array of complex data types with useless trailing info.
+	/// </summary>
+	/// <param name="current">Original binary reader.</param>
+	/// <param name="length">Number of bytes to split off.</param>
+	/// <returns>Split off section of the original reader as a new binary reader instance.</returns>
 	public static BinaryReader Split( this BinaryReader current, int length ) => new BinaryReader( new MemoryStream( current.ReadBytes( length ) ) );
 
 	public static Vector4 ReadVector4( this BinaryReader reader )
