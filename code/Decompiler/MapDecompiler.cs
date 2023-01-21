@@ -43,6 +43,7 @@ public partial class MapDecompiler
 			if ( lump is null )
 				continue;
 
+			// store in context after we're done with all lumps
 			Context.Lumps[i] = lump;
 		}
 
