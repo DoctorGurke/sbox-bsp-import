@@ -4,6 +4,7 @@ public static class PolyMeshX
 {
 	private static void AddMeshFaceInternal( this PolygonMesh mesh, ImportContext context, Face face, Vector3 origin )
 	{
+		//Log.Info( $"adding face to {mesh} : {mesh.Faces.Count}" );
 		var geo = context.Geometry;
 
 		if ( context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
@@ -77,14 +78,6 @@ public static class PolyMeshX
 		// get material
 		var material = Material.Load( $"materials/{materialName}.vmat" );
 
-		// fallback to active material on error material
-		// TODO: setting
-		//if ( cachedMaterial is not null && cachedMaterial.Name == $"materials/error.vmat" )
-		//{
-		//	cachedMaterial = null;
-		//}
-
-		// null material falls back to reflectivity 30, so we can just pass it
 		var meshFace = new MeshFace( indices, material );
 
 		mesh.Faces.Add( meshFace );
