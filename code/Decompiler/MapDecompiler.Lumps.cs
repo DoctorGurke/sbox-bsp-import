@@ -12,20 +12,22 @@ public partial class MapDecompiler
 				return new TexDataLump( Context, data );
 			case LumpType.Vertex:
 				return new VertexLump( Context, data );
-			case LumpType.Leaf:
-				return new LeafLump( Context, data );
+			case LumpType.Node:
+				return new NodeLump( Context, data );
 			case LumpType.TexInfo:
 				return new TexInfoLump( Context, data );
 			case LumpType.Face:
 				return new FaceLump( Context, data );
-			case LumpType.Node:
-				return new NodeLump( Context, data );
+			case LumpType.Leaf:
+				return new LeafLump( Context, data );
 			case LumpType.Edge:
 				return new EdgeLump( Context, data );
 			case LumpType.SurfaceEdge:
 				return new SurfaceEdgeLump( Context, data );
 			case LumpType.Model:
 				return new ModelLump( Context, data );
+			case LumpType.LeafFace:
+				return new LeafFaceLump( Context, data );
 			case LumpType.DisplacementInfo:
 				return new DisplacementInfoLump( Context, data );
 			case LumpType.OriginalFace:
@@ -56,6 +58,7 @@ public enum LumpType
 	Edge = 12,
 	SurfaceEdge = 13,
 	Model = 14,
+	LeafFace = 16,
 	DisplacementInfo = 26,
 	OriginalFace = 27,
 	DisplacementVertices = 33,

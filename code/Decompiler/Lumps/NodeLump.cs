@@ -25,8 +25,7 @@ public class NodeLump : BaseLump
 			var firstFaceIndex = nodeReader.ReadUInt16();
 			var faceCount = nodeReader.ReadUInt16();
 
-			Log.Info( $"parsed node: {firstChildIndex} {secondChildIndex} {firstFaceIndex} {faceCount}" );
-			var node = new MapNode( firstChildIndex, secondChildIndex, firstFaceIndex, faceCount );
+			var node = new MapNode( new int[] { firstChildIndex, secondChildIndex }, firstFaceIndex, faceCount );
 			nodes[i] = node;
 		}
 
@@ -37,15 +36,13 @@ public class NodeLump : BaseLump
 
 public struct MapNode
 {
-	public int FirstChildIndex;
-	public int SecondChildIndex;
+	public int[] Children;
 	public ushort FirstFaceIndex;
 	public ushort FaceCount;
 
-	public MapNode( int firstChildIndex, int secondChildIndex, ushort firstFaceIndex, ushort faceCount )
+	public MapNode( int[] childIndices, ushort firstFaceIndex, ushort faceCount )
 	{
-		FirstChildIndex = firstChildIndex;
-		SecondChildIndex = secondChildIndex;
+		Children = childIndices;
 		FirstFaceIndex = firstFaceIndex;
 		FaceCount = faceCount;
 	}

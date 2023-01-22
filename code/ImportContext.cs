@@ -33,7 +33,11 @@ public class ImportContext
 
 	public byte[] Data { get; private set; }
 	public BaseLump[] Lumps;
+
+	// bsp tree structure
 	public Decompiler.Lumps.MapNode[] Nodes;
+	public MapLeaf[] Leafs;
+
 	public LumpEntity[]? Entities { get; set; }
 	public MapModel[]? Models { get; set; }
 	public GameLump[]? GameLumps { get; set; }

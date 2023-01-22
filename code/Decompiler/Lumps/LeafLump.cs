@@ -6,6 +6,42 @@ public class LeafLump : BaseLump
 
 	protected override void Parse( BinaryReader reader )
 	{
-		//throw new NotImplementedException();
+		var leafSize = 32; // 32 bytes per leaf
+		var leafCount = reader.GetLength() / leafSize;
+
+		Log.Info( $"Parsing {leafCount} leafs... from: {reader.GetLength()}" );
+
+		var leafs = new MapLeaf[leafCount];
+
+		for ( int i = 0; i < leafCount; i++ )
+		{
+			var leafReader = reader.Split( leafSize );
+
+			leafReader.Skip<int>(); // contents
+			leafReader.Skip<short>(); // cluster
+			leafReader.Skip<short>(); // area:9 flags:7
+			leafReader.Skip<short>( 3 ); // mins
+			leafReader.Skip<short>( 3 ); // maxs
+			var firstLeafFace = (int)leafReader.ReadUInt16();
+			var leafFaceCount = (int)leafReader.ReadUInt16();
+
+			var leaf = new MapLeaf( firstLeafFace, leafFaceCount );
+			leafs[i] = leaf;
+		}
+
+		Log.Info( $"LEAFS: {leafCount}" );
+		Context.Leafs = leafs;
+	}
+}
+
+public struct MapLeaf
+{
+	public int FirstFaceIndex;
+	public int FaceCount;
+
+	public MapLeaf( int firstFaceIndex, int faceCount )
+	{
+		FirstFaceIndex = firstFaceIndex;
+		FaceCount = faceCount;
 	}
 }

@@ -1,4 +1,6 @@
-﻿namespace BspImport.Builder;
+﻿using System.Security.Principal;
+
+namespace BspImport.Builder;
 
 public partial class MapBuilder
 {
@@ -50,12 +52,41 @@ public partial class MapBuilder
 		Log.Info( $"Done Building PolygonMeshes." );
 	}
 
-	private PolygonMesh? ConstructModel( int modelIndex, Vector3 origin, Angles angles )
+	private PolygonMesh? ConstructWorldspawn()
 	{
-		// if model is already cached, throw
+		var geo = Context.Geometry;
+
+		if ( geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+		{
+			throw new Exception( "No valid map geometry to construct!" );
+		}
+
+		var faces = TreeParse.ParseTreeFaces( Context );
+
+		if ( faces.Count == 0 )
+		{
+			Log.Error( $"Failed constructing worldspawn geometry! No faces in tree!" );
+			return null;
+		}
+
+		var polyMesh = new PolygonMesh();
+
+		// clump all tree meshlets into worlspawn mesh
+		polyMesh.MergeVerticies = true;
+		foreach ( var face in faces )
+		{
+			polyMesh.AddSplitMeshFace( Context, face, Vector3.Zero );
+		}
+
+		return polyMesh;
+	}
+
+	private PolygonMesh? ConstructModel( int modelIndex, Vector3 origin, Angles angles ) // int modelIndex, Vector3 origin, Angles angles
+	{
+		// return already cached mesh
 		if ( Context.CachedPolygonMeshes?[modelIndex] is not null )
 		{
-			throw new Exception( $"Trying to reconstruct already cached model with index: {modelIndex}!" );
+			return Context.CachedPolygonMeshes[modelIndex];
 		}
 
 		var geo = Context.Geometry;
@@ -72,6 +103,18 @@ public partial class MapBuilder
 
 		var model = Context.Models[modelIndex];
 
+		return ConstructPolygonMesh( model.FirstFace, model.FaceCount, origin, angles );
+	}
+
+	private PolygonMesh? ConstructPolygonMesh( int firstFaceIndex, int faceCount, Vector3 origin, Angles angles )
+	{
+		var geo = Context.Geometry;
+
+		if ( Context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+		{
+			throw new Exception( "No valid map geometry to construct!" );
+		}
+
 		var polyMesh = new PolygonMesh();
 
 		// collect all original face indices and their split faces
@@ -79,15 +122,33 @@ public partial class MapBuilder
 
 		var faces = new HashSet<int>();
 
-		for ( int i = 0; i < model.FaceCount; i++ )
+		for ( int i = 0; i < faceCount; i++ )
 		{
-			var faceIndex = model.FirstFace + i;
+			var faceIndex = firstFaceIndex + i;
 
 			var face = geo.Faces[faceIndex];
 
 			// skip faces with invalid area
 			if ( face.Area <= 0 || face.Area.AlmostEqual( 0 ) )
 				continue;
+
+			var displacementInfoIndex = face.DisplacementInfo;
+
+			// handle displacement faces
+			if ( displacementInfoIndex >= 0 )
+			{
+				if ( geo.DisplacementInfos is null || geo.DisplacementVertices is null )
+				{
+					Log.Error( $"Displacement face found but no Displacement data present in context! Skipping." );
+					continue;
+				}
+
+				var dispInfo = geo.DisplacementInfos[displacementInfoIndex];
+				ConstructDisplacement( dispInfo );
+
+				// skip displacement base face
+				continue;
+			}
 
 			faces.Add( faceIndex );
 
@@ -139,10 +200,79 @@ public partial class MapBuilder
 		// no valid faces in mesh
 		if ( !polyMesh.Faces.Any() )
 		{
-			Log.Error( $"ConstructModel failed, Model [{modelIndex}] has no valid faces!" );
+			Log.Error( $"ConstructPolygonMesh failed, [{firstFaceIndex}, {faceCount}] has no valid faces!" );
 			return null;
 		}
 
 		return polyMesh;
+	}
+
+	private void ConstructDisplacement( DisplacementInfo info )
+	{
+		var geo = Context.Geometry;
+
+		if ( geo.DisplacementInfos is null || geo.DisplacementVertices is null )
+		{
+			Log.Error( $"Displacement face found but no Displacement data present in context! Skipping." );
+			return;
+		}
+
+		var power = info.Power;
+
+		var firstVert = info.FirstVertex;
+		var vertCount = GetDisplacementVertCount( power );
+		var indexCount = vertCount * 2 * 3;
+		var triCount = GetDisplacementTriCount( power );
+
+		Log.Info( $"Displacement face with {vertCount} vertices. width: {GetDisplacementWidth( power )} height:{GetDisplacementHeight( power )} " );
+
+		var verts = new Vector3[vertCount];
+		var tris = new DispTri[triCount];
+		var rIndices = new ushort[indexCount];
+
+		for ( int j = 0; j < vertCount; j++ )
+		{
+			var dVert = geo.DisplacementVertices[firstVert + j];
+			var vert = dVert.Position * dVert.Distance;
+
+			verts[j] = vert;
+		}
+
+		for ( int iTri = 0, iRender = 0; iTri < triCount; ++iTri, iRender += 3 )
+		{
+			//tris[iTri].Indices[0] = rIndices[iRender];
+			//tris[iTri].Indices[1] = rIndices[iRender + 1];
+			//tris[iTri].Indices[2] = rIndices[iRender + 2];
+		}
+	}
+
+	private struct DispTri
+	{
+		public int[] Indices;
+
+		public DispTri( int indices = 3 )
+		{
+			Indices = new int[indices];
+		}
+	}
+
+	private int GetDisplacementVertCount( int power )
+	{
+		return ((1 << power) + 1) * ((1 << power) + 1);
+	}
+
+	private int GetDisplacementWidth( int power )
+	{
+		return (1 << power) + 1;
+	}
+
+	private int GetDisplacementHeight( int power )
+	{
+		return (1 << power) + 1;
+	}
+
+	private int GetDisplacementTriCount( int power )
+	{
+		return (GetDisplacementHeight( power ) - 1) * (GetDisplacementWidth( power ) - 1) * 2;
 	}
 }

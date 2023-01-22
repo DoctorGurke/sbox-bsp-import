@@ -84,16 +84,9 @@ public partial class MapBuilder
 	/// </summary>
 	protected virtual void BuildGeometry()
 	{
-		var polyMesh = Context.CachedPolygonMeshes?[0];
-
-		if ( polyMesh is null )
-		{
-			Log.Error( $"Tried building WorldSpawn geometry, but Context has no Cached Worldspawn PolygonMesh!" );
-			return;
-		}
-
 		var mapMesh = new MapMesh( Hammer.ActiveMap );
-		mapMesh.ConstructFromPolygons( polyMesh );
+		var worldspawnMesh = ConstructWorldspawn();
+		mapMesh.ConstructFromPolygons( worldspawnMesh );
 		mapMesh.Name = $"worldspawn";
 	}
 }

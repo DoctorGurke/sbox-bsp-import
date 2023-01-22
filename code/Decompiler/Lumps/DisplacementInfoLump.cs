@@ -17,10 +17,10 @@ public class DisplacementInfoLump : BaseLump
 
 			var startPosition = rInfo.ReadVector3();
 			var firstVertex = rInfo.ReadInt32();
-			var vertexCount = rInfo.ReadInt32();
+			rInfo.Skip<int>(); // int DispTriStart
 			var power = rInfo.ReadInt32();
 
-			var info = new DisplacementInfo( startPosition, firstVertex, vertexCount, power );
+			var info = new DisplacementInfo( startPosition, firstVertex, power );
 			infos[i] = info;
 		}
 
@@ -34,14 +34,12 @@ public struct DisplacementInfo
 {
 	public Vector3 StartPosition;
 	public int FirstVertex;
-	public int VertexCount;
 	public int Power;
 
-	public DisplacementInfo( Vector3 startPosition, int firstVertex, int vertexCount, int power )
+	public DisplacementInfo( Vector3 startPosition, int firstVertex, int power )
 	{
 		StartPosition = startPosition;
 		FirstVertex = firstVertex;
-		VertexCount = vertexCount;
 		Power = power;
 	}
 }
