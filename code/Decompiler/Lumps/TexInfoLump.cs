@@ -26,7 +26,7 @@ public class TexInfoLump : BaseLump
 			texInfos[i] = texInfo;
 		}
 
-		Log.Info( $"TEXINFO: {texInfos.Length}" );
+		//Log.Info( $"TEXINFO: {texInfos.Length}" );
 
 		Context.TexInfo = texInfos;
 	}

@@ -9,7 +9,7 @@ public class NodeLump : BaseLump
 		var nodeSize = 32;// 32 bytes per node
 		var nodeCount = reader.GetLength() / nodeSize;
 
-		Log.Info( $"Parsing {nodeCount} nodes..." );
+		//Log.Info( $"Parsing {nodeCount} nodes..." );
 
 		var nodes = new MapNode[nodeCount];
 
@@ -29,7 +29,7 @@ public class NodeLump : BaseLump
 			nodes[i] = node;
 		}
 
-		Log.Info( $"NODES: {nodes.Length}" );
+		//Log.Info( $"NODES: {nodes.Length}" );
 		Context.Nodes = nodes;
 	}
 }

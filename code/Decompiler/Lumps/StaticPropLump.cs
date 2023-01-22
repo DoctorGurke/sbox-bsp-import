@@ -57,7 +57,7 @@ public class StaticPropLump : BaseLump
 			Context.Entities = Context.Entities?.Append( prop ).ToArray();
 		}
 
-		Log.Info( $"STATIC PROPS: {entries}" );
+		//Log.Info( $"STATIC PROPS: {entries}" );
 	}
 
 	// helper for getting the dict entries

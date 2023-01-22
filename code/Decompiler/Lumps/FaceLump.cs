@@ -16,7 +16,7 @@ public class FaceLump : BaseLump
 			faces[i] = reader.ReadFace();
 		}
 
-		Log.Info( $"FACES: {faces.Count()}" );
+		//Log.Info( $"FACES: {faces.Count()}" );
 
 		Context.Geometry.Faces = faces;
 	}

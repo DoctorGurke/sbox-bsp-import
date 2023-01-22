@@ -17,7 +17,7 @@ public class SurfaceEdgeLump : BaseLump
 			surfEdges[i] = reader.ReadInt32();
 		}
 
-		Log.Info( $"SURFACE EDGES: {surfEdges.Length}" );
+		//Log.Info( $"SURFACE EDGES: {surfEdges.Length}" );
 
 		Context.Geometry.SurfaceEdges = surfEdges;
 	}

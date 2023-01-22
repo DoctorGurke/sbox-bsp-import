@@ -23,7 +23,7 @@ public class ModelLump : BaseLump
 			models[i] = model;
 		}
 
-		Log.Info( $"MODELS: {models.Length}" );
+		//Log.Info( $"MODELS: {models.Length}" );
 
 		Context.Models = models;
 	}
