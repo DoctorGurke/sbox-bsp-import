@@ -15,7 +15,7 @@ public class LeafFaceLump : BaseLump
 			faces[i] = reader.ReadUInt16();
 		}
 
-		//Log.Info( $"LEAF FACES: {faces.Length}" );
+		Log.Info( $"LEAF FACES: {faces.Length}" );
 		Context.Geometry.LeafFaceIndices = faces;
 	}
 }

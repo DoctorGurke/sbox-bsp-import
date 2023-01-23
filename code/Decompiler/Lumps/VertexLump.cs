@@ -18,7 +18,7 @@ public class VertexLump : BaseLump
 			vertices[i] = reader.ReadVector3();
 		}
 
-		//Log.Info( $"VERTICES: {vertices.Length}" );
+		Log.Info( $"VERTICES: {vertices.Length}" );
 
 		Context.Geometry.Vertices = vertices;
 	}

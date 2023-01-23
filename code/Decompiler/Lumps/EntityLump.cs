@@ -9,7 +9,7 @@ public class EntityLump : BaseLump
 		var pairs = Encoding.ASCII.GetString( Data );
 		var ents = FromKeyValues( pairs );
 
-		//Log.Info( $"ENTITIES: {ents.Count()}" );
+		Log.Info( $"ENTITIES: {ents.Count()}" );
 
 		Context.Entities = ents.ToArray();
 	}

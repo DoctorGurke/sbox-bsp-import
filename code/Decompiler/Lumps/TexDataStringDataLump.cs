@@ -11,7 +11,7 @@ public class TexDataStringDataLump : BaseLump
 
 		var texData = new TexDataStringData( text );
 
-		//Log.Info( $"TEXDATASTRINGDATA: {texData.Count}" );
+		Log.Info( $"TEXDATASTRINGDATA: {texData.Count}" );
 
 		Context.TexDataStringData = texData;
 	}
