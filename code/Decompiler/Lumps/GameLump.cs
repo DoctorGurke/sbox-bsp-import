@@ -19,12 +19,18 @@
 
 			// offset is based on full file start, aka raw initial data
 			var gameLumpData = Context.Data.Take( new Range( offset, offset + length ) ).ToArray();
-
-			switch ( (GameLumpType)Id )
+			try
 			{
-				case GameLumpType.StaticPropLump:
-					_ = new StaticPropLump( Context, gameLumpData );
-					break;
+				switch ( (GameLumpType)Id )
+				{
+					case GameLumpType.StaticPropLump:
+						_ = new StaticPropLump( Context, gameLumpData );
+						break;
+				}
+			}
+			catch
+			{
+				Log.Error( $"Failed decompiling static prop game lump!" );
 			}
 		}
 
