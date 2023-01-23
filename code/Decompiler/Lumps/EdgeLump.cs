@@ -15,7 +15,7 @@ public class EdgeLump : BaseLump
 			edges[i] = new EdgeIndices( reader.ReadUInt16(), reader.ReadUInt16() );
 		}
 
-		Log.Info( $"SURFACE EDGES: {edges.Length}" );
+		Log.Info( $"EDGES: {edges.Length}" );
 
 		Context.Geometry.EdgeIndices = edges;
 	}
