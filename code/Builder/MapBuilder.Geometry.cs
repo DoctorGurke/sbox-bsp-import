@@ -58,7 +58,8 @@ public partial class MapBuilder
 
 		if ( geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
 		{
-			throw new Exception( "No valid map geometry to construct!" );
+			Log.Error( $"Failed constructing worldspawn geometry! No valid geometry in Context!" );
+			return null;
 		}
 
 		var faces = TreeParse.ParseTreeFaces( Context );

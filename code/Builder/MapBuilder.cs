@@ -86,6 +86,10 @@ public partial class MapBuilder
 	{
 		var mapMesh = new MapMesh( Hammer.ActiveMap );
 		var worldspawnMesh = ConstructWorldspawn();
+
+		if ( worldspawnMesh is null )
+			return;
+
 		mapMesh.ConstructFromPolygons( worldspawnMesh );
 		mapMesh.Name = $"worldspawn";
 	}
