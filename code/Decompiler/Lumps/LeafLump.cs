@@ -9,8 +9,6 @@ public class LeafLump : BaseLump
 		var leafSize = 32; // 32 bytes per leaf
 		var leafCount = reader.GetLength() / leafSize;
 
-		Log.Info( $"Parsing {leafCount} leafs... from: {reader.GetLength()}" );
-
 		var leafs = new MapLeaf[leafCount];
 
 		for ( int i = 0; i < leafCount; i++ )
