@@ -38,7 +38,15 @@ public partial class MapDecompiler
 			byte[] lumpData = new byte[length];
 			Array.Copy( Context.Data, offset, lumpData, 0, length );
 
-			var lump = ParseLump( i, lumpData, version );
+			BaseLump? lump = null;
+			try
+			{
+				ParseLump( i, lumpData, version );
+			}
+			catch ( Exception ex )
+			{
+				Log.Error( $"Failed decompiling lump: {i} {ex}" );
+			}
 
 			if ( lump is null )
 				continue;

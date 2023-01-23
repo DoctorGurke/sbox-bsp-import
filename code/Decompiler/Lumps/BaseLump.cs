@@ -26,7 +26,9 @@ public abstract class BaseLump
 		var lzmaId = reader.ReadUInt32();
 
 		if ( lzmaId == LZMA_ID )
-			Log.Warning( $"Lump {this.GetType()} is compressed!" );
+		{
+			throw new Exception( $"Lump {this.GetType()} is compressed!" );
+		}
 	}
 
 	protected abstract void Parse( BinaryReader reader );
