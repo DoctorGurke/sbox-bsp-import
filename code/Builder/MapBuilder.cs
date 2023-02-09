@@ -3,10 +3,12 @@
 public partial class MapBuilder
 {
 	protected ImportContext Context { get; set; }
+	protected MapDocument Map { get; set; }
 
-	public MapBuilder( ImportContext context )
+	public MapBuilder( ImportContext context, MapDocument map )
 	{
 		Context = context;
+		Map = map;
 	}
 
 	/// <summary>
@@ -50,13 +52,13 @@ public partial class MapBuilder
 				}
 
 				// create entity
-				var brushEntity = new MapEntity( Hammer.ActiveMap );
+				var brushEntity = new MapEntity( Map );
 				brushEntity.ClassName = ent.ClassName;
 				brushEntity.Position = ent.Position;
 				brushEntity.Angles = ent.Angles;
 
 				// create and attach mesh, (tie mesh to entity)
-				var mapMesh = new MapMesh( Hammer.ActiveMap );
+				var mapMesh = new MapMesh( Map );
 				mapMesh.ConstructFromPolygons( polyMesh );
 				mapMesh.Parent = brushEntity;
 				mapMesh.Position = ent.Position;
@@ -66,7 +68,7 @@ public partial class MapBuilder
 			}
 
 			// regular entity
-			var mapent = new MapEntity( Hammer.ActiveMap );
+			var mapent = new MapEntity( Map );
 			mapent.ClassName = ent.ClassName;
 			mapent.Position = ent.Position;
 			mapent.Angles = ent.Angles;
@@ -84,7 +86,7 @@ public partial class MapBuilder
 	/// </summary>
 	protected virtual void BuildGeometry()
 	{
-		var mapMesh = new MapMesh( Hammer.ActiveMap );
+		var mapMesh = new MapMesh( Map );
 		var worldspawnMesh = ConstructWorldspawn();
 
 		if ( worldspawnMesh is null )
