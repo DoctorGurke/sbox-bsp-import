@@ -64,6 +64,7 @@ public static class PolyMeshX
 					height = t.Height;
 				}
 
+				// construct uvs
 				var texCoords = ti.GetUvs( vert, width, height );
 				meshVert.TexCoord = texCoords;
 			}
@@ -73,6 +74,7 @@ public static class PolyMeshX
 			indices.Add( index );
 		}
 
+		// inverse winding
 		indices.Reverse();
 
 		// get material

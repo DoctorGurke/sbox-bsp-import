@@ -82,7 +82,15 @@ public partial class MapBuilder
 		return polyMesh;
 	}
 
-	private PolygonMesh? ConstructModel( int modelIndex, Vector3 origin, Angles angles ) // int modelIndex, Vector3 origin, Angles angles
+	/// <summary>
+	/// Construct a PolygonMesh from a bsp model index.
+	/// </summary>
+	/// <param name="modelIndex"></param>
+	/// <param name="origin"></param>
+	/// <param name="angles"></param>
+	/// <returns></returns>
+	/// <exception cref="Exception"></exception>
+	private PolygonMesh? ConstructModel( int modelIndex, Vector3 origin, Angles angles )
 	{
 		// return already cached mesh
 		if ( Context.CachedPolygonMeshes?[modelIndex] is not null )
@@ -107,10 +115,21 @@ public partial class MapBuilder
 		return ConstructPolygonMesh( model.FirstFace, model.FaceCount, origin, angles );
 	}
 
+	/// <summary>
+	/// Construct a PolygonMesh from a firstFace index and face count.
+	/// </summary>
+	/// <param name="firstFaceIndex"></param>
+	/// <param name="faceCount"></param>
+	/// <param name="origin"></param>
+	/// <param name="angles"></param>
+	/// <returns></returns>
+	/// <exception cref="Exception"></exception>
 	private PolygonMesh? ConstructPolygonMesh( int firstFaceIndex, int faceCount, Vector3 origin, Angles angles )
 	{
 		if ( faceCount <= 0 )
 			return null;
+
+		Log.Info( $"construct poly mesh: [{firstFaceIndex}, {faceCount}]" );
 
 		var geo = Context.Geometry;
 
@@ -120,6 +139,49 @@ public partial class MapBuilder
 		}
 
 		var polyMesh = new PolygonMesh();
+
+		var faces = GetFaceIndices( firstFaceIndex, faceCount );
+		Log.Info( $"gathered {faces.Length} faces" );
+
+		// only displacements, probably
+		if ( faces.Count() <= 0 )
+			return null;
+
+		// build all split faces
+		foreach ( var faceIndex in faces )
+		{
+			polyMesh.AddSplitMeshFace( Context, faceIndex, origin );
+		}
+
+		Log.Info( $"face count: {faces.Length}" );
+		Log.Info( $"poly mesh faces: {polyMesh.Faces.Count()}" );
+		Log.Info( $"------------" );
+
+		// no valid faces in mesh
+		if ( !polyMesh.Faces.Any() )
+		{
+			Log.Error( $"ConstructPolygonMesh failed, [{firstFaceIndex}, {faceCount}] has no valid faces!" );
+			return null;
+		}
+
+		return polyMesh;
+	}
+
+	/// <summary>
+	/// Gather all unique face indices from a firstFace index and a face count. Skips displacement faces.
+	/// </summary>
+	/// <param name="firstFaceIndex"></param>
+	/// <param name="faceCount"></param>
+	/// <returns></returns>
+	/// <exception cref="Exception"></exception>
+	private int[] GetFaceIndices( int firstFaceIndex, int faceCount )
+	{
+		var geo = Context.Geometry;
+
+		if ( Context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+		{
+			throw new Exception( "No valid map geometry to construct!" );
+		}
 
 		var faces = new HashSet<int>();
 
@@ -131,43 +193,22 @@ public partial class MapBuilder
 
 			// skip faces with invalid area
 			if ( face.Area <= 0 || face.Area.AlmostEqual( 0 ) )
+			{
+				Log.Info( $"skipping face with invalid area: {faceIndex}" );
 				continue;
+			}
 
+			// skip displacement faces, displacement info != 0 means it's a displacement
 			var displacementInfoIndex = face.DisplacementInfo;
-
-			// handle displacement faces
 			if ( displacementInfoIndex >= 0 )
 			{
+				Log.Info( $"skipping displacement face: {faceIndex}" );
 				continue;
-
-				//if ( geo.DisplacementInfos is null || geo.DisplacementVertices is null )
-				//{
-				//	Log.Error( $"Displacement face found but no Displacement data present in context! Skipping." );
-				//	continue;
-				//}
-
-				//var dispInfo = geo.DisplacementInfos[displacementInfoIndex];
-				//ConstructDisplacement( dispInfo );
-
-				// skip displacement base face
 			}
 
 			faces.Add( faceIndex );
 		}
 
-		// build all split faces
-		foreach ( var faceIndex in faces )
-		{
-			polyMesh.AddSplitMeshFace( Context, faceIndex, origin );
-		}
-
-		// no valid faces in mesh
-		if ( !polyMesh.Faces.Any() )
-		{
-			Log.Error( $"ConstructPolygonMesh failed, [{firstFaceIndex}, {faceCount}] has no valid faces!" );
-			return null;
-		}
-
-		return polyMesh;
+		return faces.ToArray();
 	}
 }
