@@ -109,6 +109,9 @@ public partial class MapBuilder
 
 	private PolygonMesh? ConstructPolygonMesh( int firstFaceIndex, int faceCount, Vector3 origin, Angles angles )
 	{
+		if ( faceCount <= 0 )
+			return null;
+
 		var geo = Context.Geometry;
 
 		if ( Context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
@@ -117,9 +120,6 @@ public partial class MapBuilder
 		}
 
 		var polyMesh = new PolygonMesh();
-
-		// collect all original face indices and their split faces
-		var faceCollection = new Dictionary<int, List<int>>();
 
 		var faces = new HashSet<int>();
 
@@ -138,43 +138,21 @@ public partial class MapBuilder
 			// handle displacement faces
 			if ( displacementInfoIndex >= 0 )
 			{
-				if ( geo.DisplacementInfos is null || geo.DisplacementVertices is null )
-				{
-					Log.Error( $"Displacement face found but no Displacement data present in context! Skipping." );
-					continue;
-				}
+				continue;
 
-				var dispInfo = geo.DisplacementInfos[displacementInfoIndex];
-				ConstructDisplacement( dispInfo );
+				//if ( geo.DisplacementInfos is null || geo.DisplacementVertices is null )
+				//{
+				//	Log.Error( $"Displacement face found but no Displacement data present in context! Skipping." );
+				//	continue;
+				//}
+
+				//var dispInfo = geo.DisplacementInfos[displacementInfoIndex];
+				//ConstructDisplacement( dispInfo );
 
 				// skip displacement base face
-				continue;
 			}
 
 			faces.Add( faceIndex );
-
-			//var oFaceIndex = face.OriginalFaceIndex;
-
-			//// no texture info, skip face (SKIP, CLIP, INVISIBLE, etc)
-			//if ( oFaceIndex < 0 || oFaceIndex >= Context.Geometry.OriginalFaces?.Length || face.TexInfo < 0 || face.TexInfo >= Context.TexInfo?.Length )
-			//	continue;
-
-			//// sync texinfo, original faces have screwed up texinfo, just take it from the split face
-			//geo.OriginalFaces[oFaceIndex].TexInfo = face.TexInfo;
-
-			//// associate split face to original face index
-			//if ( faceCollection.TryGetValue( oFaceIndex, out var faces ) )
-			//{
-			//	faces.Add( faceIndex );
-			//}
-			//else
-			//{
-			//	// new split face collection
-			//	var fCol = new List<int>();
-			//	fCol.Add( faceIndex );
-
-			//	faceCollection.Add( oFaceIndex, fCol );
-			//}
 		}
 
 		// build all split faces
@@ -182,21 +160,6 @@ public partial class MapBuilder
 		{
 			polyMesh.AddSplitMeshFace( Context, faceIndex, origin );
 		}
-
-		//// construct and add faces to poly mesh
-		//foreach ( var faceEntry in faceCollection )
-		//{
-		//	// key is oFaceIndex
-		//	var oFaceIndex = faceEntry.Key;
-
-		//	foreach ( var faceIndex in faceEntry.Value )
-		//	{
-		//		polyMesh.AddSplitMeshFace( Context, faceIndex, origin );
-		//	}
-
-		//	//see: PolygonMeshX
-		//	//polyMesh.AddOriginalMeshFace( Context, oFaceIndex, origin );
-		//}
 
 		// no valid faces in mesh
 		if ( !polyMesh.Faces.Any() )
@@ -206,74 +169,5 @@ public partial class MapBuilder
 		}
 
 		return polyMesh;
-	}
-
-	private void ConstructDisplacement( DisplacementInfo info )
-	{
-		var geo = Context.Geometry;
-
-		if ( geo.DisplacementInfos is null || geo.DisplacementVertices is null )
-		{
-			Log.Error( $"Displacement face found but no Displacement data present in context! Skipping." );
-			return;
-		}
-
-		var power = info.Power;
-
-		var firstVert = info.FirstVertex;
-		var vertCount = GetDisplacementVertCount( power );
-		var indexCount = vertCount * 2 * 3;
-		var triCount = GetDisplacementTriCount( power );
-
-		Log.Info( $"Displacement face with {vertCount} vertices. width: {GetDisplacementWidth( power )} height:{GetDisplacementHeight( power )} " );
-
-		var verts = new Vector3[vertCount];
-		var tris = new DispTri[triCount];
-		var rIndices = new ushort[indexCount];
-
-		for ( int j = 0; j < vertCount; j++ )
-		{
-			var dVert = geo.DisplacementVertices[firstVert + j];
-			var vert = dVert.Position * dVert.Distance;
-
-			verts[j] = vert;
-		}
-
-		for ( int iTri = 0, iRender = 0; iTri < triCount; ++iTri, iRender += 3 )
-		{
-			//tris[iTri].Indices[0] = rIndices[iRender];
-			//tris[iTri].Indices[1] = rIndices[iRender + 1];
-			//tris[iTri].Indices[2] = rIndices[iRender + 2];
-		}
-	}
-
-	private struct DispTri
-	{
-		public int[] Indices;
-
-		public DispTri( int indices = 3 )
-		{
-			Indices = new int[indices];
-		}
-	}
-
-	private int GetDisplacementVertCount( int power )
-	{
-		return ((1 << power) + 1) * ((1 << power) + 1);
-	}
-
-	private int GetDisplacementWidth( int power )
-	{
-		return (1 << power) + 1;
-	}
-
-	private int GetDisplacementHeight( int power )
-	{
-		return (1 << power) + 1;
-	}
-
-	private int GetDisplacementTriCount( int power )
-	{
-		return (GetDisplacementHeight( power ) - 1) * (GetDisplacementWidth( power ) - 1) * 2;
 	}
 }
