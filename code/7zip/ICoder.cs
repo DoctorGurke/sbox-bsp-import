@@ -1,3 +1,4 @@
+#nullable disable
 // ICoder.h
 
 using System;
@@ -9,7 +10,7 @@ namespace SevenZip
 	/// </summary>
 	class DataErrorException : ApplicationException
 	{
-		public DataErrorException(): base("Data Error") { }
+		public DataErrorException() : base( "Data Error" ) { }
 	}
 
 	/// <summary>
@@ -17,7 +18,7 @@ namespace SevenZip
 	/// </summary>
 	class InvalidParamException : ApplicationException
 	{
-		public InvalidParamException(): base("Invalid Parameter") { }
+		public InvalidParamException() : base( "Invalid Parameter" ) { }
 	}
 
 	public interface ICodeProgress
@@ -31,7 +32,7 @@ namespace SevenZip
 		/// <param name="outSize">
 		/// output size. -1 if unknown.
 		/// </param>
-		void SetProgress(Int64 inSize, Int64 outSize);
+		void SetProgress( Int64 inSize, Int64 outSize );
 	};
 
 	public interface ICoder
@@ -57,8 +58,8 @@ namespace SevenZip
 		/// <exception cref="SevenZip.DataErrorException">
 		/// if input stream is not valid
 		/// </exception>
-		void Code(System.IO.Stream inStream, System.IO.Stream outStream,
-			Int64 inSize, Int64 outSize, ICodeProgress progress);
+		void Code( System.IO.Stream inStream, System.IO.Stream outStream,
+			Int64 inSize, Int64 outSize, ICodeProgress progress );
 	};
 
 	/*
@@ -142,16 +143,16 @@ namespace SevenZip
 
 	public interface ISetCoderProperties
 	{
-		void SetCoderProperties(CoderPropID[] propIDs, object[] properties);
+		void SetCoderProperties( CoderPropID[] propIDs, object[] properties );
 	};
 
 	public interface IWriteCoderProperties
 	{
-		void WriteCoderProperties(System.IO.Stream outStream);
+		void WriteCoderProperties( System.IO.Stream outStream );
 	}
 
 	public interface ISetDecoderProperties
 	{
-		void SetDecoderProperties(byte[] properties);
+		void SetDecoderProperties( byte[] properties );
 	}
 }

@@ -1,3 +1,4 @@
+#nullable disable
 // LzmaDecoder.cs
 
 using System;
@@ -166,7 +167,6 @@ namespace SevenZip.Compression.LZMA
 
 		void SetDictionarySize( uint dictionarySize )
 		{
-			Log.Info( $"set dict size: {dictionarySize}" );
 			if ( m_DictionarySize != dictionarySize )
 			{
 				m_DictionarySize = dictionarySize;

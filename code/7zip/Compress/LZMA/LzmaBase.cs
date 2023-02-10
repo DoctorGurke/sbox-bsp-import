@@ -1,3 +1,4 @@
+#nullable disable
 // LzmaBase.cs
 
 namespace SevenZip.Compression.LZMA
@@ -18,8 +19,8 @@ namespace SevenZip.Compression.LZMA
 			public void Init() { Index = 0; }
 			public void UpdateChar()
 			{
-				if (Index < 4) Index = 0;
-				else if (Index < 10) Index -= 3;
+				if ( Index < 4 ) Index = 0;
+				else if ( Index < 10 ) Index -= 3;
 				else Index -= 6;
 			}
 			public void UpdateMatch() { Index = (uint)(Index < 7 ? 7 : 10); }
@@ -38,10 +39,10 @@ namespace SevenZip.Compression.LZMA
 
 		public const uint kMatchMinLen = 2;
 
-		public static uint GetLenToPosState(uint len)
+		public static uint GetLenToPosState( uint len )
 		{
 			len -= kMatchMinLen;
-			if (len < kNumLenToPosStates)
+			if ( len < kNumLenToPosStates )
 				return len;
 			return (uint)(kNumLenToPosStates - 1);
 		}
