@@ -23,11 +23,11 @@ public class ImportContext
 	}
 
 	/// <summary>
-	/// Construct the decompiled context in the active map.
+	/// Construct the decompiled context into a map.
 	/// </summary>
-	public void Build()
+	public void Build( MapDocument map )
 	{
-		var builder = new MapBuilder( this );
+		var builder = new MapBuilder( this, map );
 		builder.Build();
 	}
 
@@ -35,8 +35,8 @@ public class ImportContext
 	public BaseLump[] Lumps;
 
 	// bsp tree structure
-	public Decompiler.Lumps.MapNode[] Nodes;
-	public MapLeaf[] Leafs;
+	public Decompiler.Lumps.MapNode[]? Nodes;
+	public MapLeaf[]? Leafs;
 
 	public LumpEntity[]? Entities { get; set; }
 	public MapModel[]? Models { get; set; }

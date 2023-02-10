@@ -11,6 +11,9 @@ public static class TreeParse
 
 	private static void ParseNodeFacesRecursively( ImportContext context, int index, ref HashSet<int> faceIndices, int depth = 0 )
 	{
+		if ( context.Nodes is null )
+			return;
+
 		var node = context.Nodes[index];
 
 		//var padding = string.Concat( Enumerable.Repeat( "\t", depth ) );
@@ -48,6 +51,8 @@ public static class TreeParse
 	private static void AddLeafFaces( ImportContext context, int index, ref HashSet<int> faceIndices, int depth )
 	{
 		//var padding = string.Concat( Enumerable.Repeat( "\t", depth ) );
+		if ( context.Leafs is null )
+			return;
 
 		if ( index >= context.Leafs.Length )
 			return;

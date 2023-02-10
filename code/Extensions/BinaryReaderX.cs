@@ -6,6 +6,11 @@ namespace BspImport.Extensions;
 
 public static class BinaryReaderX
 {
+	/// <summary>
+	/// Get length left in reader.
+	/// </summary>
+	/// <param name="reader"></param>
+	/// <returns></returns>
 	public static int GetLength( this BinaryReader reader ) => (int)(reader.BaseStream.Length - reader.BaseStream.Position);
 
 	public static Face ReadFace( this BinaryReader reader )

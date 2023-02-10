@@ -1,6 +1,6 @@
 ﻿namespace BspImport.Decompiler.Lumps;
 
-public abstract class BaseLump
+public abstract partial class BaseLump
 {
 	protected ImportContext Context { get; set; }
 	public int Version { get; private set; }
@@ -8,27 +8,17 @@ public abstract class BaseLump
 
 	public BaseLump( ImportContext context, byte[] data, int version = 0 )
 	{
+		if ( IsCompressed( data ) )
+		{
+			data = Decompress( data );
+		}
+
 		Context = context;
 		Data = data;
 		Version = version;
 
-		CheckDecompress( data );
-
 		var bReader = new BinaryReader( new MemoryStream( Data ) );
 		Parse( bReader );
-	}
-
-	private const uint LZMA_ID = (('A' << 24) | ('M' << 16) | ('Z' << 8) | ('L'));
-
-	private void CheckDecompress( byte[] data )
-	{
-		var reader = new BinaryReader( new MemoryStream( data ) );
-		var lzmaId = reader.ReadUInt32();
-
-		if ( lzmaId == LZMA_ID )
-		{
-			throw new Exception( $"Lump {this.GetType()} is compressed!" );
-		}
 	}
 
 	protected abstract void Parse( BinaryReader reader );
