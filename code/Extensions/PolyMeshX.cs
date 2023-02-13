@@ -1,8 +1,11 @@
-﻿namespace BspImport.Extensions;
+﻿using BspImport.Decompiler.Lumps;
+using Editor.MapDoc;
+
+namespace BspImport.Extensions;
 
 public static class PolyMeshX
 {
-	private static void AddMeshFaceInternal( this PolygonMesh mesh, ImportContext context, Face face, Vector3 origin )
+	private static void AddMeshFaceInternal( this PolygonMesh mesh, ImportContext context, Face face )
 	{
 		//Log.Info( $"adding face to {mesh} : {mesh.Faces.Count}" );
 		var geo = context.Geometry;
@@ -51,26 +54,9 @@ public static class PolyMeshX
 			var meshVert = new MeshVertex();
 			meshVert.Position = vert;
 
-			var width = 1024;
-			var height = 1024;
+			meshVert.TexCoord = GetTexCoords( context, texInfo, vert );
 
-			// get texture width/height from texdata via texinfo
-			if ( context.TexInfo?[texInfo] is TexInfo ti )
-			{
-				var texData = context.TexData?[ti.TexData];
-				if ( texData is TexData t )
-				{
-					width = t.Width;
-					height = t.Height;
-				}
-
-				// construct uvs
-				var texCoords = ti.GetUvs( vert, width, height );
-				meshVert.TexCoord = texCoords;
-			}
-
-			mesh.Vertices.Add( meshVert );
-			var index = mesh.Vertices.Count() - 1;
+			var index = mesh.AddVertex( meshVert );
 			indices.Add( index );
 		}
 
@@ -85,7 +71,27 @@ public static class PolyMeshX
 		mesh.Faces.Add( meshFace );
 	}
 
-	public static void AddOriginalMeshFace( this PolygonMesh mesh, ImportContext context, int oFaceIndex, Vector3 origin )
+	private static Vector2 GetTexCoords( ImportContext context, int texInfoIndex, Vector3 position, int width = 1024, int height = 1024 )
+	{
+		// get texture width/height from texdata via texinfo, if available
+		if ( context.TexInfo is not null )
+		{
+			var ti = context.TexInfo[texInfoIndex];
+
+			if ( context.TexData is not null )
+			{
+				var texData = context.TexData[ti.TexData];
+				width = texData.Width;
+				height = texData.Height;
+			}
+
+			return ti.GetUvs( position, width, height );
+		}
+
+		return default;
+	}
+
+	public static void AddOriginalMeshFace( this PolygonMesh mesh, ImportContext context, int oFaceIndex )
 	{
 		var geo = context.Geometry;
 
@@ -95,10 +101,10 @@ public static class PolyMeshX
 		}
 
 		var face = geo.OriginalFaces[oFaceIndex];
-		mesh.AddMeshFaceInternal( context, face, origin );
+		mesh.AddMeshFaceInternal( context, face );
 	}
 
-	public static void AddSplitMeshFace( this PolygonMesh mesh, ImportContext context, int sFaceIndex, Vector3 origin )
+	public static void AddSplitMeshFace( this PolygonMesh mesh, ImportContext context, int sFaceIndex )
 	{
 		var geo = context.Geometry;
 
@@ -108,6 +114,6 @@ public static class PolyMeshX
 		}
 
 		var face = geo.Faces[sFaceIndex];
-		mesh.AddMeshFaceInternal( context, face, origin );
+		mesh.AddMeshFaceInternal( context, face );
 	}
 }

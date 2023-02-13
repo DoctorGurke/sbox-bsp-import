@@ -20,26 +20,7 @@ public partial class MapBuilder
 
 		for ( int i = 0; i < modelCount; i++ )
 		{
-			var origin = Vector3.Zero;
-			var angles = Angles.Zero;
-
-			// index 0 = worldspawn
-			if ( i != 0 )
-			{
-				// get any entity with this model, needed to build uvs for brush entity meshes properly
-				var entity = Context.Entities?.Where( x => x.Data.Where( x => x.Key == "model" ).FirstOrDefault().Value == $"*{i}" ).FirstOrDefault();
-
-				// no entity found, don't bother
-				if ( entity is null )
-				{
-					continue;
-				}
-
-				origin = entity.Position;
-				angles = entity.Angles;
-			}
-
-			var polyMesh = ConstructModel( i, origin, angles );
+			var polyMesh = ConstructModel( i );
 
 			if ( polyMesh is null )
 				continue;
@@ -76,7 +57,7 @@ public partial class MapBuilder
 		polyMesh.MergeVerticies = true;
 		foreach ( var face in faces )
 		{
-			polyMesh.AddSplitMeshFace( Context, face, Vector3.Zero );
+			polyMesh.AddSplitMeshFace( Context, face );
 		}
 
 		return polyMesh;
@@ -90,7 +71,7 @@ public partial class MapBuilder
 	/// <param name="angles"></param>
 	/// <returns></returns>
 	/// <exception cref="Exception"></exception>
-	private PolygonMesh? ConstructModel( int modelIndex, Vector3 origin, Angles angles )
+	private PolygonMesh? ConstructModel( int modelIndex )
 	{
 		// return already cached mesh
 		if ( Context.CachedPolygonMeshes?[modelIndex] is not null )
@@ -112,7 +93,7 @@ public partial class MapBuilder
 
 		var model = Context.Models[modelIndex];
 
-		return ConstructPolygonMesh( model.FirstFace, model.FaceCount, origin, angles );
+		return ConstructPolygonMesh( model.FirstFace, model.FaceCount );
 	}
 
 	/// <summary>
@@ -124,7 +105,7 @@ public partial class MapBuilder
 	/// <param name="angles"></param>
 	/// <returns></returns>
 	/// <exception cref="Exception"></exception>
-	private PolygonMesh? ConstructPolygonMesh( int firstFaceIndex, int faceCount, Vector3 origin, Angles angles )
+	private PolygonMesh? ConstructPolygonMesh( int firstFaceIndex, int faceCount )
 	{
 		if ( faceCount <= 0 )
 			return null;
@@ -150,11 +131,12 @@ public partial class MapBuilder
 		// build all split faces
 		foreach ( var faceIndex in faces )
 		{
-			polyMesh.AddSplitMeshFace( Context, faceIndex, origin );
+			polyMesh.AddSplitMeshFace( Context, faceIndex );
 		}
 
 		Log.Info( $"face count: {faces.Length}" );
 		Log.Info( $"poly mesh faces: {polyMesh.Faces.Count()}" );
+		Log.Info( $"poly mesh vertices: {polyMesh.Vertices.Count()}" );
 		Log.Info( $"------------" );
 
 		// no valid faces in mesh
