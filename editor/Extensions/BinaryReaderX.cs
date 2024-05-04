@@ -1,8 +1,4 @@
-﻿using BspImport.Decompiler;
-using BspImport.Decompiler.Lumps;
-using System.Runtime.InteropServices;
-
-namespace BspImport.Extensions;
+﻿namespace BspImport.Extensions;
 
 public static class BinaryReaderX
 {
@@ -51,6 +47,13 @@ public static class BinaryReaderX
 	/// <param name="length">Number of bytes to split off.</param>
 	/// <returns>Split off section of the original reader as a new binary reader instance.</returns>
 	public static BinaryReader Split( this BinaryReader current, int length ) => new BinaryReader( new MemoryStream( current.ReadBytes( length ) ) );
+
+	public static Vector3 ReadVector3( this BinaryReader reader )
+	{
+		var size = Marshal.SizeOf( typeof( Vector3 ) );
+		var sReader = new StructReader<Vector3>();
+		return sReader.Read( reader.ReadBytes( size ) );
+	}
 
 	public static Vector4 ReadVector4( this BinaryReader reader )
 	{

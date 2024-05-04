@@ -1,6 +1,4 @@
-﻿using System.Security.Principal;
-
-namespace BspImport.Builder;
+﻿namespace BspImport.Builder;
 
 public partial class MapBuilder
 {
@@ -33,14 +31,14 @@ public partial class MapBuilder
 		Log.Info( $"Done Building PolygonMeshes." );
 	}
 
-	private PolygonMesh? ConstructWorldspawn()
+	private IEnumerable<PolygonMesh?> ConstructWorldspawn()
 	{
 		var geo = Context.Geometry;
 
 		if ( geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
 		{
 			Log.Error( $"Failed constructing worldspawn geometry! No valid geometry in Context!" );
-			return null;
+			yield return null;
 		}
 
 		var faces = TreeParse.ParseTreeFaces( Context );
@@ -48,27 +46,37 @@ public partial class MapBuilder
 		if ( faces.Count == 0 )
 		{
 			Log.Error( $"Failed constructing worldspawn geometry! No faces in tree!" );
-			return null;
+			yield return null;
 		}
 
-		var polyMesh = new PolygonMesh();
+
+		// chunk tree faces into batches for MeshComponent
+		foreach ( var chunk in faces.Chunk( 100 ) )
+		{
+			var polyMesh = new PolygonMesh();
+
+			foreach ( var face in chunk )
+			{
+				polyMesh.AddSplitMeshFace( Context, face );
+			}
+
+			yield return polyMesh;
+		}
 
 		// clump all tree meshlets into worlspawn mesh
-		polyMesh.MergeVerticies = true;
-		foreach ( var face in faces )
-		{
-			polyMesh.AddSplitMeshFace( Context, face );
-		}
+		//polyMesh.MergeVerticies = true;
+		//foreach ( var face in faces )
+		//{
+		//	polyMesh.AddSplitMeshFace( Context, face );
+		//}
 
-		return polyMesh;
+		//yield return polyMesh;
 	}
 
 	/// <summary>
 	/// Construct a PolygonMesh from a bsp model index.
 	/// </summary>
 	/// <param name="modelIndex"></param>
-	/// <param name="origin"></param>
-	/// <param name="angles"></param>
 	/// <returns></returns>
 	/// <exception cref="Exception"></exception>
 	private PolygonMesh? ConstructModel( int modelIndex )
@@ -101,8 +109,6 @@ public partial class MapBuilder
 	/// </summary>
 	/// <param name="firstFaceIndex"></param>
 	/// <param name="faceCount"></param>
-	/// <param name="origin"></param>
-	/// <param name="angles"></param>
 	/// <returns></returns>
 	/// <exception cref="Exception"></exception>
 	private PolygonMesh? ConstructPolygonMesh( int firstFaceIndex, int faceCount )
@@ -134,17 +140,17 @@ public partial class MapBuilder
 			polyMesh.AddSplitMeshFace( Context, faceIndex );
 		}
 
-		Log.Info( $"face count: {faces.Length}" );
-		Log.Info( $"poly mesh faces: {polyMesh.Faces.Count()}" );
-		Log.Info( $"poly mesh vertices: {polyMesh.Vertices.Count()}" );
-		Log.Info( $"------------" );
+		//Log.Info( $"face count: {faces.Length}" );
+		//Log.Info( $"poly mesh faces: {polyMesh.Faces.Count()}" );
+		//Log.Info( $"poly mesh vertices: {polyMesh.Vertices.Count()}" );
+		//Log.Info( $"------------" );
 
-		// no valid faces in mesh
-		if ( !polyMesh.Faces.Any() )
-		{
-			Log.Error( $"ConstructPolygonMesh failed, [{firstFaceIndex}, {faceCount}] has no valid faces!" );
-			return null;
-		}
+		//// no valid faces in mesh
+		//if ( !polyMesh.Faces.Any() )
+		//{
+		//	Log.Error( $"ConstructPolygonMesh failed, [{firstFaceIndex}, {faceCount}] has no valid faces!" );
+		//	return null;
+		//}
 
 		return polyMesh;
 	}

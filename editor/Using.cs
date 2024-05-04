@@ -8,7 +8,3 @@ global using System.IO;
 global using System.Linq;
 global using System.Runtime.InteropServices;
 global using System.Text;
-global using System.Threading.Tasks;
-global using Editor;
-global using Editor.MapDoc;
-global using Editor.MapEditor;

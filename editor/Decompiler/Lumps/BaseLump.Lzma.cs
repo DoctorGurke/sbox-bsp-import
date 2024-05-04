@@ -50,10 +50,12 @@ public partial class BaseLump
 
 		// decompress and put into byte array
 		var outStream = new MemoryStream();
-		decoder.Code( reader.BaseStream, outStream, compressedSize, uncompressedSize, null );
-		var outData = outStream.ReadByteArrayFromStream( 0, (uint)outStream.Length );
 
-		return outData;
+		decoder.Code( reader.BaseStream, outStream, compressedSize, uncompressedSize, null );
+
+		//var outData = outStream.ReadByteArrayFromStream( 0, (uint)outStream.Length );
+
+		return outStream.ToArray();
 	}
 
 	// this sucks

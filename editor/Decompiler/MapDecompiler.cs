@@ -49,7 +49,7 @@ public partial class MapDecompiler
 			}
 			catch ( Exception ex )
 			{
-				Log.Error( $"Failed decompiling lump: {i} {ex}" );
+				Log.Error( $"Failed decompiling lump: {(LumpType)i} {ex}" );
 			}
 
 			if ( lump is null )

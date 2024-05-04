@@ -1,7 +1,4 @@
-﻿using BspImport.Decompiler.Lumps;
-using Editor.MapDoc;
-
-namespace BspImport.Extensions;
+﻿namespace BspImport.Extensions;
 
 public static class PolyMeshX
 {
@@ -48,27 +45,34 @@ public static class PolyMeshX
 		}
 
 		// construct mesh vertex from vert pos and calculated uv
-		var indices = new List<int>();
-		foreach ( var vert in verts )
-		{
-			var meshVert = new MeshVertex();
-			meshVert.Position = vert;
+		var hVertices = mesh.AddVertices( verts.ToArray() );
+		var faceIndex = mesh.AddFace( hVertices.Reverse().ToArray() );
+		// TODO: uvs
+		//var material = Material.Load( $"materials/{materialName}.vmat" );
+		//mesh.SetFaceMaterial( faceIndex, material );
 
-			meshVert.TexCoord = GetTexCoords( context, texInfo, vert );
 
-			var index = mesh.AddVertex( meshVert );
-			indices.Add( index );
-		}
 
-		// inverse winding
-		indices.Reverse();
+		//foreach ( var vert in verts )
+		//{
+		//	var meshVert = new MeshVertex();
+		//	meshVert.Position = vert;
 
-		// get material
-		var material = Material.Load( $"materials/{materialName}.vmat" );
+		//	meshVert.TexCoord = GetTexCoords( context, texInfo, vert );
 
-		var meshFace = new MeshFace( indices, material );
+		//	var index = mesh.AddVertex( meshVert );
+		//	indices.Add( index );
+		//}
 
-		mesh.Faces.Add( meshFace );
+		//// inverse winding
+		//indices.Reverse();
+
+		//// get material
+		//var material = Material.Load( $"materials/{materialName}.vmat" );
+
+		//var meshFace = new MeshFace( indices, material );
+
+		//mesh.Faces.Add( meshFace );
 	}
 
 	private static Vector2 GetTexCoords( ImportContext context, int texInfoIndex, Vector3 position, int width = 1024, int height = 1024 )
@@ -91,18 +95,18 @@ public static class PolyMeshX
 		return default;
 	}
 
-	public static void AddOriginalMeshFace( this PolygonMesh mesh, ImportContext context, int oFaceIndex )
-	{
-		var geo = context.Geometry;
+	//public static void AddOriginalMeshFace( this PolygonMesh mesh, ImportContext context, int oFaceIndex )
+	//{
+	//	var geo = context.Geometry;
 
-		if ( context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
-		{
-			return;
-		}
+	//	if ( context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+	//	{
+	//		return;
+	//	}
 
-		var face = geo.OriginalFaces[oFaceIndex];
-		mesh.AddMeshFaceInternal( context, face );
-	}
+	//	var face = geo.OriginalFaces[oFaceIndex];
+	//	mesh.AddMeshFaceInternal( context, face );
+	//}
 
 	public static void AddSplitMeshFace( this PolygonMesh mesh, ImportContext context, int sFaceIndex )
 	{

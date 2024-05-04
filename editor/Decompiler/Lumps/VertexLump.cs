@@ -1,7 +1,4 @@
-﻿using BspImport.Extensions;
-using System.Runtime.InteropServices;
-
-namespace BspImport.Decompiler.Lumps;
+﻿namespace BspImport.Decompiler.Lumps;
 
 public class VertexLump : BaseLump
 {

@@ -23,11 +23,11 @@ public class ImportContext
 	}
 
 	/// <summary>
-	/// Construct the decompiled context into a map.
+	/// Construct the decompiled context into the scene.
 	/// </summary>
-	public void Build( MapDocument map )
+	public void Build()
 	{
-		var builder = new MapBuilder( this, map );
+		var builder = new MapBuilder( this );
 		builder.Build();
 	}
 

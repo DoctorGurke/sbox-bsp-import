@@ -1,11 +1,13 @@
-﻿namespace BspImport;
+﻿using Editor;
 
-public static class Tool
+namespace BspImport;
+
+public static class Main
 {
 	/// <summary>
 	/// Main entry point for the tool. Prompt user to import a bsp file.
 	/// </summary>
-	[Menu( "Hammer", "Bsp Import/Import Map...", "map" )]
+	[Menu( "Editor", "Bsp Import/Import Map...", "map" )]
 	public static void OpenLoadMenu()
 	{
 		// get bsp file path
@@ -19,7 +21,7 @@ public static class Tool
 		var data = File.ReadAllBytes( file );
 		var context = new ImportContext( data );
 		context.Decompile();
-		context.Build( Hammer.ActiveMap );
+		context.Build();
 
 		//Log.Info( $"Thanks for using sbox-bsp-import by DoctorGurke to import outdated bsp maps from tf2 and gmod, anything else probably won't work right now." );
 		//Log.Info( $"Issue reports: https://github.com/DoctorGurke/sbox-bsp-import/issues" );
@@ -29,6 +31,8 @@ public static class Tool
 	//public static void OpenDonate()
 	//{
 	//	Utility.OpenFolder( "https://paypal.me/DoctorGurke" );
+	//	Log.Info( $"{Clipboard.Paste()}" );
+	//	Utility.
 	//}
 
 	/// <summary>
@@ -50,7 +54,7 @@ public static class Tool
 			return file.SelectedFile;
 		}
 
-		// dialog was closed or failed, no file was selected.
+		//// dialog was closed or failed, no file was selected.
 		return null;
 	}
 }

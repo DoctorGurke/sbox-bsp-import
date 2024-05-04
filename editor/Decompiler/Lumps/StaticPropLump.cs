@@ -43,17 +43,21 @@ public class StaticPropLump : BaseLump
 			var sprp = reader.Split( propLength );
 
 			var origin = sprp.ReadVector3();
-			var angles = sprp.ReadAngles();
+			var angles = sprp.ReadVector3();
 
 			var propType = sprp.ReadUInt16();
 
 			var prop = new LumpEntity();
 			prop.SetClassName( "prop_static" );
 			prop.SetPosition( origin );
-			prop.SetAngles( angles );
-			prop.SetModel( Names[propType] );
+			prop.SetAngles( new Angles( angles ) );
+			if ( Names.TryGetValue( propType, out var model ) )
+			{
+				prop.SetModel( Names[propType] );
+			}
 
-			// bit dirty but we only throw props into the entity lump once
+
+			// bit dirty but we only throw props into the entity lump here
 			Context.Entities = Context.Entities?.Append( prop ).ToArray();
 		}
 

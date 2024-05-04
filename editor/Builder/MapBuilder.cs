@@ -1,14 +1,14 @@
-﻿namespace BspImport.Builder;
+﻿using Editor;
+
+namespace BspImport.Builder;
 
 public partial class MapBuilder
 {
 	protected ImportContext Context { get; set; }
-	protected MapDocument Map { get; set; }
 
-	public MapBuilder( ImportContext context, MapDocument map )
+	public MapBuilder( ImportContext context )
 	{
 		Context = context;
-		Map = map;
 	}
 
 	/// <summary>
@@ -31,13 +31,27 @@ public partial class MapBuilder
 	/// </summary>
 	protected virtual void BuildGeometry()
 	{
-		var mapMesh = new MapMesh( Map );
-		var worldspawnMesh = ConstructWorldspawn();
+		//var mapMesh = new MapMesh( Map );
+		var worldspawnMeshes = ConstructWorldspawn();
 
-		if ( worldspawnMesh is null )
-			return;
+		Log.Info( $"MeshComponents: {worldspawnMeshes.Count()}" );
 
-		mapMesh.ConstructFromPolygons( worldspawnMesh );
-		mapMesh.Name = $"worldspawn";
+		using var scope = SceneEditorSession.Scope();
+		var worldspawn = new GameObject( true, "worldspawn" );
+
+		foreach ( var mesh in worldspawnMeshes )
+		{
+			var meshComponent = worldspawn.Components.Create<MeshComponent>();
+			meshComponent.Mesh = mesh;
+		}
+
+
+		//	if ( worldspawnMesh is null )
+		//		return;
+
+		//mapMesh.ConstructFromPolygons( worldspawnMesh );
+		//	mapMesh.Name = $"worldspawn";
+
+
 	}
 }

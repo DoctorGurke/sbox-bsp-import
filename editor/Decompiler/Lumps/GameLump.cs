@@ -28,9 +28,9 @@
 						break;
 				}
 			}
-			catch
+			catch ( Exception ex )
 			{
-				Log.Error( $"Failed decompiling static prop game lump!" );
+				Log.Error( $"Failed decompiling static prop game lump! {ex}" );
 			}
 		}
 
