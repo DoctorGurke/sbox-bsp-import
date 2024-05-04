@@ -116,7 +116,7 @@ public partial class MapBuilder
 		if ( faceCount <= 0 )
 			return null;
 
-		Log.Info( $"construct poly mesh: [{firstFaceIndex}, {faceCount}]" );
+		//Log.Info( $"construct poly mesh: [{firstFaceIndex}, {faceCount}]" );
 
 		var geo = Context.Geometry;
 
@@ -128,7 +128,7 @@ public partial class MapBuilder
 		var polyMesh = new PolygonMesh();
 
 		var faces = GetFaceIndices( firstFaceIndex, faceCount );
-		Log.Info( $"gathered {faces.Length} faces" );
+		//Log.Info( $"gathered {faces.Length} faces" );
 
 		// only displacements, probably
 		if ( faces.Count() <= 0 )
@@ -182,7 +182,7 @@ public partial class MapBuilder
 			// skip faces with invalid area
 			if ( face.Area <= 0 || face.Area.AlmostEqual( 0 ) )
 			{
-				Log.Info( $"skipping face with invalid area: {faceIndex}" );
+				//Log.Info( $"skipping face with invalid area: {faceIndex}" );
 				continue;
 			}
 
@@ -190,7 +190,7 @@ public partial class MapBuilder
 			var displacementInfoIndex = face.DisplacementInfo;
 			if ( displacementInfoIndex >= 0 )
 			{
-				Log.Info( $"skipping displacement face: {faceIndex}" );
+				//Log.Info( $"skipping displacement face: {faceIndex}" );
 				continue;
 			}
 

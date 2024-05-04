@@ -7,7 +7,7 @@ public partial class MapBuilder
 	/// <summary>
 	/// Build entities parsed from entity lump and static props
 	/// </summary>
-	protected virtual void BuildEntities()
+	protected virtual void BuildEntities( GameObject parent )
 	{
 		if ( Context.Entities is null )
 			return;
@@ -27,6 +27,7 @@ public partial class MapBuilder
 				using var scope = SceneEditorSession.Scope();
 				//TODO: parent to worldspawn game object
 				var prop = new GameObject( true, ent.ClassName );
+				prop.SetParent( parent );
 				prop.Transform.Position = ent.Position;
 				prop.Transform.Rotation = ent.Angles.ToRotation();
 
@@ -47,7 +48,7 @@ public partial class MapBuilder
 				else
 				{
 					var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
-					propComponent.Model = model.IsError ? Model.Error : model;
+					propComponent.Model = (model is null || model.IsError) ? Model.Error : model;
 				}
 
 				// prop_static
@@ -61,10 +62,10 @@ public partial class MapBuilder
 			//mapent.Angles = ent.Angles;
 			//mapent.Name = ent.GetValue( "targetname" ) ?? "";
 
-			foreach ( var kvp in ent.Data )
-			{
-				//mapent.SetKeyValue( kvp.Key, kvp.Value );
-			}
+			//foreach ( var kvp in ent.Data )
+			//{
+			//	//mapent.SetKeyValue( kvp.Key, kvp.Value );
+			//}
 		}
 	}
 }
