@@ -7,7 +7,7 @@ public static class Main
 	/// <summary>
 	/// Main entry point for the tool. Prompt user to import a bsp file.
 	/// </summary>
-	[Menu( "Editor", "Bsp Import/Import Map...", "map" )]
+	[Menu( "Editor", "BSP Import/Import Map...", "map" )]
 	public static void OpenLoadMenu()
 	{
 		// get bsp file path
