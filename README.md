@@ -1,5 +1,6 @@
 # sbox-bsp-import
  Editor Tool for decompiling bsp into scene MeshComponent.
+ The tool itself is supposed to be used to port an environment into scene. It expects you to have referenced content (models, materials, etc) ported ahead of time. Paths should remain the same.
 
  ### How to Use:
  Use the Bsp Import Menu in the Editor with an open scene, select your bsp file from disk, wait.
