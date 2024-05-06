@@ -11,7 +11,7 @@
 
 ## Planned and Needed features:
  - Displacements; currently displacement faces are skipped entirely
- - Materials and uvs; Materials are possible but vertex uvs arent supported by the current PolygonMesh API
+ - Materials and uvs; Materials are possible but vertex uvs arent supported by the current PolygonMesh API. Currently skips toolsskybox.
  - More Entites; basic environment entities alongside probes and lights should probably be translated
 
 ## Issues and bugs

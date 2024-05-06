@@ -1,0 +1,34 @@
+code/obj/*
+code/Properties/*
+
+*.csproj
+
+# files from bsp map compiles we don't need
+*.log
+*.vmx
+*.prt
+
+*/Code/obj/*
+
+# Auto-generated code editor files
+.vs/*
+.vscode/*
+*.csproj
+*/obj/*
+Properties/*
+code/obj/*
+code/Properties/*
+*.sln
+
+# Editor Projects
+*/code/Editor/obj/*
+*/code/Editor/Properties/*
+*/code/Editor/*.sln
+*/code/Editor/.vs/*
+*/code/Editor/.vscode/*
+
+# Auto-generated asset related files
+*.generated.*
+*.*_c
+*.los
+*.vpk

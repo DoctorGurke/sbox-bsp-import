@@ -1,4 +1,6 @@
-﻿namespace BspImport.Extensions;
+﻿using BspImport;
+
+namespace Sandbox.Builder;
 
 public static class PolyMeshX
 {
@@ -25,6 +27,9 @@ public static class PolyMeshX
 		{
 			materialName = face.GetFaceMaterial( context );
 		}
+
+		if ( materialName!.Contains( "toolsskybox" ) )
+			return;
 
 		var verts = new List<Vector3>();
 

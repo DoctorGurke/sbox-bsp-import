@@ -1,4 +1,6 @@
-﻿namespace BspImport.Builder;
+﻿using Sandbox.Builder;
+
+namespace BspImport.Builder;
 
 public partial class MapBuilder
 {
