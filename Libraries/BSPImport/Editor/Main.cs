@@ -1,6 +1,4 @@
-﻿using Editor;
-
-namespace BspImport;
+﻿namespace BspImport;
 
 public static class Main
 {

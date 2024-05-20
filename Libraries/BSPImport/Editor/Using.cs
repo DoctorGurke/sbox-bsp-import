@@ -1,6 +1,7 @@
 ﻿global using BspImport.Decompiler;
 global using BspImport.Decompiler.Lumps;
 global using BspImport.Extensions;
+global using Editor;
 global using Sandbox;
 global using System;
 global using System.Collections.Generic;

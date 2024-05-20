@@ -3,6 +3,7 @@
   "GameObjects": [
     {
       "__guid": "bfc59c12-1ed2-4f91-8956-a95a315eac3c",
+      "Flags": 0,
       "Name": "Sun",
       "Position": "0,0,456.6863",
       "Rotation": "-0.0729315,0.4822396,0.1305433,0.8631827",
@@ -24,6 +25,7 @@
     },
     {
       "__guid": "00344a8c-fa5e-45ae-b12a-10bb781a1dc3",
+      "Flags": 0,
       "Name": "2D Skybox",
       "Position": "0,0,410.8936",
       "Tags": "skybox",
@@ -60,6 +62,7 @@
     },
     {
       "__guid": "3ee1c9f4-07be-4e0b-8b23-67bee2d8ec8a",
+      "Flags": 0,
       "Name": "Camera",
       "Position": "-267.452,-379.653,297.7903",
       "Rotation": "-0.1448582,0.2860239,0.4279631,0.8450171",
@@ -127,6 +130,28 @@
           "Scale": 0.2
         }
       ]
+    },
+    {
+      "__guid": "f0158d67-20fa-4637-857e-b51f6225f943",
+      "Flags": 0,
+      "Name": "Point Light",
+      "Position": "41.79132,1449.259,56.19301",
+      "Tags": "light_point,light",
+      "Enabled": true,
+      "NetworkMode": 2,
+      "NetworkInterpolation": true,
+      "Components": [
+        {
+          "__type": "Sandbox.PointLight",
+          "__guid": "a1c68637-72f6-4bcb-bd0d-e313917c3192",
+          "Attenuation": 1,
+          "FogMode": "Enabled",
+          "FogStrength": 1,
+          "LightColor": "0.91373,0.98039,1,1",
+          "Radius": 400,
+          "Shadows": true
+        }
+      ]
     }
   ],
   "SceneProperties": {
@@ -152,8 +177,8 @@
   },
   "Title": "minimal",
   "Description": "",
-  "LastSaved": "2024-05-06T01:51:42.8619595\u002B02:00",
+  "LastSaved": "2024-05-20T18:09:47.6270763\u002B02:00",
   "ResourceVersion": 1,
-  "__version": 1,
-  "__references": []
+  "__references": [],
+  "__version": 1
 }

@@ -32,52 +32,39 @@ public static class PolyMeshX
 			return;
 
 		var verts = new List<Vector3>();
+		var uvs = new List<Vector2>();
 
 		// get verts from surf edges -> edges -> vertices
 		for ( int i = 0; i < face.EdgeCount; i++ )
 		{
 			var edge = geo.SurfaceEdges[face.FirstEdge + i];
+			Vector3 _vert;
 
 			// edge sign affects winding order, indexing back to front or vice versa on the edge vertices
 			if ( edge >= 0 )
 			{
-				verts.Add( geo.Vertices[geo.EdgeIndices[edge].Indices[0]] );
+				_vert = geo.Vertices[geo.EdgeIndices[edge].Indices[0]];
 			}
 			else
 			{
-				verts.Add( geo.Vertices[geo.EdgeIndices[-edge].Indices[1]] );
+				_vert = geo.Vertices[geo.EdgeIndices[-edge].Indices[1]];
 			}
+
+			verts.Add( _vert );
+			uvs.Add( GetTexCoords( context, texInfo, _vert ) );
 		}
+
+		verts.Reverse();
+		uvs.Reverse();
 
 		// construct mesh vertex from vert pos and calculated uv
 		var hVertices = mesh.AddVertices( verts.ToArray() );
-		var faceIndex = mesh.AddFace( hVertices.Reverse().ToArray() );
+		var hFace = mesh.AddFace( hVertices );
+
 		// TODO: uvs
-		//var material = Material.Load( $"materials/{materialName}.vmat" );
-		//mesh.SetFaceMaterial( faceIndex, material );
-
-
-
-		//foreach ( var vert in verts )
-		//{
-		//	var meshVert = new MeshVertex();
-		//	meshVert.Position = vert;
-
-		//	meshVert.TexCoord = GetTexCoords( context, texInfo, vert );
-
-		//	var index = mesh.AddVertex( meshVert );
-		//	indices.Add( index );
-		//}
-
-		//// inverse winding
-		//indices.Reverse();
-
-		//// get material
-		//var material = Material.Load( $"materials/{materialName}.vmat" );
-
-		//var meshFace = new MeshFace( indices, material );
-
-		//mesh.Faces.Add( meshFace );
+		var material = Material.Load( $"materials/{materialName}.vmat" );
+		mesh.SetFaceMaterial( hFace, material );
+		mesh.SetFaceTextureCoords( hFace, uvs.ToArray() );
 	}
 
 	private static Vector2 GetTexCoords( ImportContext context, int texInfoIndex, Vector3 position, int width = 1024, int height = 1024 )

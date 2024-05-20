@@ -16,11 +16,11 @@ public partial class MapBuilder
 	/// </summary>
 	public void Build()
 	{
-		// prepares the polygon meshes
-		BuildPolygonMeshes();
+		// prepares bsp model meshes (brush entities)
+		BuildModelMeshes();
 
 		// build map worldspawn geometry (model 0)
-		var worldspawn = BuildGeometry();
+		var worldspawn = BuildWorldGeometry();
 
 		// builds entities, including prop static and brush entities
 		BuildEntities( worldspawn );
@@ -30,7 +30,7 @@ public partial class MapBuilder
 	/// <summary>
 	/// Builds the map world geometry of the current context, using the previously cached PolygonMesh.
 	/// </summary>
-	protected virtual GameObject BuildGeometry()
+	protected virtual GameObject BuildWorldGeometry()
 	{
 		//var mapMesh = new MapMesh( Map );
 		var worldspawnMeshes = ConstructWorldspawn();
@@ -45,7 +45,6 @@ public partial class MapBuilder
 			var meshComponent = worldspawn.Components.Create<MeshComponent>();
 			meshComponent.Mesh = mesh;
 		}
-
 
 		//	if ( worldspawnMesh is null )
 		//		return;

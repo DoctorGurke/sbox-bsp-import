@@ -4,7 +4,7 @@ namespace BspImport.Builder;
 
 public partial class MapBuilder
 {
-	public void BuildPolygonMeshes()
+	public void BuildModelMeshes()
 	{
 		Log.Info( $"Building PolygonMeshes..." );
 
@@ -64,15 +64,6 @@ public partial class MapBuilder
 
 			yield return polyMesh;
 		}
-
-		// clump all tree meshlets into worlspawn mesh
-		//polyMesh.MergeVerticies = true;
-		//foreach ( var face in faces )
-		//{
-		//	polyMesh.AddSplitMeshFace( Context, face );
-		//}
-
-		//yield return polyMesh;
 	}
 
 	/// <summary>
