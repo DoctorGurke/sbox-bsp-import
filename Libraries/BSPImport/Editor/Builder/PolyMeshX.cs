@@ -61,7 +61,6 @@ public static class PolyMeshX
 		var hVertices = mesh.AddVertices( verts.ToArray() );
 		var hFace = mesh.AddFace( hVertices );
 
-		// TODO: uvs
 		var material = Material.Load( $"materials/{materialName}.vmat" );
 		mesh.SetFaceMaterial( hFace, material );
 		mesh.SetFaceTextureCoords( hFace, uvs.ToArray() );
