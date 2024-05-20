@@ -23,13 +23,13 @@ public class DisplacementVertexLump : BaseLump
 
 public struct DisplacementVertex
 {
-	public Vector3 Position;
+	public Vector3 Displacement;
 	public float Distance;
 	public float Alpha;
 
-	public DisplacementVertex( Vector3 position, float distance, float alpha )
+	public DisplacementVertex( Vector3 displacement, float distance, float alpha )
 	{
-		Position = position;
+		Displacement = displacement;
 		Distance = distance;
 		Alpha = alpha;
 	}
