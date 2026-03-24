@@ -28,8 +28,8 @@ public partial class MapBuilder
 				//TODO: parent to worldspawn game object
 				var prop = new GameObject( true, ent.ClassName );
 				prop.SetParent( parent );
-				prop.Transform.Position = ent.Position;
-				prop.Transform.Rotation = ent.Angles.ToRotation();
+				prop.WorldPosition = ent.Position;
+				prop.WorldRotation = ent.Angles.ToRotation();
 
 				var propComponent = prop.Components.Create<Prop>();
 
