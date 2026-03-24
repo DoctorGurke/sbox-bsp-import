@@ -17,7 +17,7 @@ public class DisplacementVertexLump : BaseLump
 
 		Log.Info( $"DISPLACEMENT VERTICES: {verts.Length}" );
 
-		Context.Geometry.DisplacementVertices = verts;
+		Context.Geometry.SetDisplacementVertices( verts );
 	}
 }
 

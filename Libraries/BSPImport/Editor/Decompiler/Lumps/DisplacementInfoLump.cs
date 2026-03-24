@@ -26,7 +26,7 @@ public class DisplacementInfoLump : BaseLump
 
 		Log.Info( $"DISPLACEMENT INFOS: {infos.Length}" );
 
-		Context.Geometry.DisplacementInfos = infos;
+		Context.Geometry.SetDisplacementInfos( infos );
 	}
 }
 

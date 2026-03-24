@@ -50,4 +50,16 @@ public class ImportContext
 	public PolygonMesh? WorldSpawn { get; set; }
 	public PolygonMesh[]? CachedPolygonMeshes { get; set; }
 	public Dictionary<string, Material> CachedMaterials { get; set; }
+
+	/// <summary>
+	/// Checks that the context has a complete geometry set available for building meshes.
+	/// Returns the Geometry instance for convenience.
+	/// </summary>
+	public bool HasCompleteGeometry(out MapGeometry geo)
+	{
+		geo = Geometry;
+		return Models is not null
+			 && geo is not null
+			 && geo.IsValid();
+	}
 }

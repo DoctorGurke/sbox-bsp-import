@@ -18,7 +18,7 @@ public class FaceLump : BaseLump
 
 		Log.Info( $"FACES: {faces.Count()}" );
 
-		Context.Geometry.Faces = faces;
+		Context.Geometry.SetFaces( faces );
 	}
 }
 

@@ -37,12 +37,13 @@ public partial class MapBuilder
 	{
 		var geo = Context.Geometry;
 
-		if ( geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+		if ( !Context.HasCompleteGeometry( out geo ) )
 		{
 			Log.Error( $"Failed constructing worldspawn geometry! No valid geometry in Context!" );
 			yield return null;
 		}
 
+		// construct world mesh faces from bsp tree
 		var faces = TreeParse.ParseTreeFaces( Context );
 
 		if ( faces.Count == 0 )
@@ -53,7 +54,7 @@ public partial class MapBuilder
 
 
 		// chunk tree faces into batches for MeshComponent
-		foreach ( var chunk in faces.Chunk( 100 ) )
+		foreach ( var chunk in faces.Chunk( 512 ) )
 		{
 			var polyMesh = new PolygonMesh();
 
@@ -82,7 +83,12 @@ public partial class MapBuilder
 
 		var geo = Context.Geometry;
 
-		if ( Context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+		if( !Context.HasCompleteGeometry( out geo ) )
+		{
+			throw new Exception( "No valid map geometry to construct!" );
+		}
+
+		if ( Context.Models is null )
 		{
 			throw new Exception( "No valid map geometry to construct!" );
 		}
@@ -112,8 +118,7 @@ public partial class MapBuilder
 		//Log.Info( $"construct poly mesh: [{firstFaceIndex}, {faceCount}]" );
 
 		var geo = Context.Geometry;
-
-		if ( Context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+		if ( !geo.IsValid() )
 		{
 			throw new Exception( "No valid map geometry to construct!" );
 		}
@@ -123,7 +128,7 @@ public partial class MapBuilder
 		var faces = GetFaceIndices( firstFaceIndex, faceCount );
 		//Log.Info( $"gathered {faces.Length} faces" );
 
-		// only displacements, probably
+		// invalid world mesh
 		if ( faces.Count() <= 0 )
 			return null;
 
@@ -158,8 +163,7 @@ public partial class MapBuilder
 	private int[] GetFaceIndices( int firstFaceIndex, int faceCount )
 	{
 		var geo = Context.Geometry;
-
-		if ( Context.Models is null || geo.Vertices is null || geo.SurfaceEdges is null || geo.EdgeIndices is null || geo.Faces is null || geo.OriginalFaces is null )
+		if ( !geo.IsValid() )
 		{
 			throw new Exception( "No valid map geometry to construct!" );
 		}
@@ -170,7 +174,7 @@ public partial class MapBuilder
 		{
 			var faceIndex = firstFaceIndex + i;
 
-			var face = geo.Faces[faceIndex];
+			geo.TryGetFace( faceIndex, out var face );
 
 			// skip faces with invalid area
 			if ( face.Area <= 0 || face.Area.AlmostEqual( 0 ) )
@@ -183,7 +187,7 @@ public partial class MapBuilder
 			var displacementInfoIndex = face.DisplacementInfo;
 			if ( displacementInfoIndex >= 0 )
 			{
-				//Log.Info( $"skipping displacement face: {faceIndex}" );
+				Log.Info( $"skipping displacement face: {faceIndex}" );
 				continue;
 			}
 

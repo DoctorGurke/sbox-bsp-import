@@ -18,6 +18,6 @@ public class OriginalFaceLump : BaseLump
 
 		Log.Info( $"ORIGINAL FACES: {oFaces.Count()}" );
 
-		Context.Geometry.OriginalFaces = oFaces;
+        Context.Geometry.SetOriginalFaces( oFaces );
 	}
 }

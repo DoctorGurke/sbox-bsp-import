@@ -2,6 +2,11 @@
 
 public static class TreeParse
 {
+	/// <summary>
+	/// Get all unique Face indices from the BSP tree. Results represent render meshes, not brushes. Never brushes.
+	/// </summary>
+	/// <param name="context"></param>
+	/// <returns></returns>
 	public static HashSet<int> ParseTreeFaces( ImportContext context )
 	{
 		var faces = new HashSet<int>();
@@ -64,9 +69,8 @@ public static class TreeParse
 		for ( int i = 0; i < leaf.FaceCount; i++ )
 		{
 			var faceIndex = leaf.FirstFaceIndex + i;
-			var face = context.Geometry.LeafFaceIndices?[faceIndex];
 
-			if ( face is null ) continue;
+			context.Geometry.TryGetLeafFaceIndex( faceIndex, out var face );
 
 			//Log.Info( $"{padding} '- {faceIndex} -> {face}" );
 			faceIndices.Add( (int)face );

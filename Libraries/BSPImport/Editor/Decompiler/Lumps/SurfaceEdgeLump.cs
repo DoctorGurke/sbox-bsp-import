@@ -19,6 +19,6 @@ public class SurfaceEdgeLump : BaseLump
 
 		Log.Info( $"SURFACE EDGES: {surfEdges.Length}" );
 
-		Context.Geometry.SurfaceEdges = surfEdges;
+		Context.Geometry.SetSurfaceEdges( surfEdges );
 	}
 }
