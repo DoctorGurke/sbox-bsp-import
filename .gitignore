@@ -17,6 +17,7 @@ Properties/*
 code/obj/*
 code/Properties/*
 *.sln
+*.slnx
 
 # Editor Projects
 code/Editor/obj/*
@@ -30,3 +31,5 @@ code/Editor/.vscode/*
 *.*_c
 *.los
 *.vpk
+
+.sbox/
