@@ -1,8 +1,4 @@
-﻿using BspImport.Extensions;
-using Sandbox;
-using System.Runtime.InteropServices;
-
-namespace BspImport.Decompiler.Lumps;
+﻿namespace BspImport.Decompiler.Lumps;
 
 public class TexInfoLump : BaseLump
 {
@@ -26,7 +22,7 @@ public class TexInfoLump : BaseLump
 			texInfos[i] = texInfo;
 		}
 
-		Log.Info( $"TEXINFO: {texInfos.Length}" );
+		//Log.Info( $"TEXINFO: {texInfos.Length}" );
 
 		Context.TexInfo = texInfos;
 	}

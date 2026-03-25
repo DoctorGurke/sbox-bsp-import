@@ -74,8 +74,11 @@ public static class PolyMeshX
 		var hVertices = mesh.AddVertices( verts.ToArray() );
 		var hFace = mesh.AddFace( hVertices );
 
-		var material = Material.Load( $"materials/{materialName}.vmat" );
-		mesh.SetFaceMaterial( hFace, material );
+		if ( context.Settings.LoadMaterials )
+		{
+			var material = Material.Load( $"materials/{materialName}.vmat" );
+			mesh.SetFaceMaterial( hFace, material );
+		}
 
 		if ( isToolsMaterial )
 			mesh.TextureAlignToGrid( Transform.Zero );
@@ -162,6 +165,7 @@ public static class PolyMeshX
 		if ( !geo.TryGetDisplacementInfo( face.DisplacementInfo, out var dInfo ) )
 		{
 			// fallback to normal face handling
+			Log.Info( "1" );
 			mesh.AddMeshFaceInternal( context, face );
 			return;
 		}
@@ -169,6 +173,7 @@ public static class PolyMeshX
 		// original face index should point to a base quad
 		if ( face.OriginalFaceIndex < 0 || !geo.TryGetOriginalFace( face.OriginalFaceIndex, out var oFace ) )
 		{
+			Log.Info( "2" );
 			mesh.AddMeshFaceInternal( context, face );
 			return;
 		}
@@ -180,6 +185,7 @@ public static class PolyMeshX
 			int surfEdgeIdx = oFace.FirstEdge + i;
 			if ( !geo.TryGetSurfaceEdge( surfEdgeIdx, out var edge ) )
 			{
+				Log.Info( "3" );
 				mesh.AddMeshFaceInternal( context, face );
 				return;
 			}
@@ -187,6 +193,7 @@ public static class PolyMeshX
 			int edgeIndex = edge >= 0 ? edge : -edge;
 			if ( !geo.TryGetEdgeIndices( edgeIndex, out var edgeIndices ) )
 			{
+				Log.Info( "4" );
 				mesh.AddMeshFaceInternal( context, face );
 				return;
 			}
@@ -194,6 +201,7 @@ public static class PolyMeshX
 			var indices = edgeIndices.Indices;
 			if ( indices is null || indices.Length < 2 )
 			{
+				Log.Info( "5" );
 				mesh.AddMeshFaceInternal( context, face );
 				return;
 			}
@@ -201,6 +209,7 @@ public static class PolyMeshX
 			int vertIdx = edge >= 0 ? indices[0] : indices[1];
 			if ( !geo.TryGetVertex( vertIdx, out var vertex ) )
 			{
+				Log.Info( "6" );
 				mesh.AddMeshFaceInternal( context, face );
 				return;
 			}
@@ -211,6 +220,7 @@ public static class PolyMeshX
 		// we expect a quad base; if not, fallback
 		if ( corners.Count != 4 )
 		{
+			Log.Info( "7" );
 			mesh.AddMeshFaceInternal( context, face );
 			return;
 		}
@@ -265,12 +275,14 @@ public static class PolyMeshX
 
 				// two tris: (a, b, c) and (b, d, c) — ordering chosen to match face winding
 				var t1 = mesh.AddFace( new[] { hVerts[a], hVerts[b], hVerts[c] } );
+				mesh.SetEdgeSmoothing( t1.Edge, PolygonMesh.EdgeSmoothMode.Soft );
 				mesh.SetFaceTextureCoords( t1, new[] { uvs[a], uvs[b], uvs[c] } );
-				if ( dispMaterial is not null ) mesh.SetFaceMaterial( t1, dispMaterial );
+				if ( dispMaterial is not null && context.Settings.LoadMaterials ) mesh.SetFaceMaterial( t1, dispMaterial );
 
 				var t2 = mesh.AddFace( new[] { hVerts[b], hVerts[d], hVerts[c] } );
+				mesh.SetEdgeSmoothing( t2.Edge, PolygonMesh.EdgeSmoothMode.Soft );
 				mesh.SetFaceTextureCoords( t2, new[] { uvs[b], uvs[d], uvs[c] } );
-				if ( dispMaterial is not null ) mesh.SetFaceMaterial( t2, dispMaterial );
+				if ( dispMaterial is not null && context.Settings.LoadMaterials ) mesh.SetFaceMaterial( t2, dispMaterial );
 			}
 		}
 	}

@@ -27,7 +27,7 @@ public class LeafLump : BaseLump
 			leafs[i] = leaf;
 		}
 
-		Log.Info( $"LEAFS: {leafCount}" );
+		//Log.Info( $"LEAFS: {leafCount}" );
 		Context.Leafs = leafs;
 	}
 }

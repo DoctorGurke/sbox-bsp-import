@@ -1,6 +1,4 @@
-﻿using BspImport.Extensions;
-
-namespace BspImport.Decompiler.Lumps;
+﻿namespace BspImport.Decompiler.Lumps;
 
 public class TexDataLump : BaseLump
 {
@@ -24,7 +22,7 @@ public class TexDataLump : BaseLump
 			texDatas[i] = texData;
 		}
 
-		Log.Info( $"TEXDATA: {texDatas.Length}" );
+		//Log.Info( $"TEXDATA: {texDatas.Length}" );
 
 		Context.TexData = texDatas;
 	}

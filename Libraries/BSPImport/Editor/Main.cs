@@ -3,8 +3,6 @@
 
 public class BspImportComponent : Component, Component.ExecuteInEditor
 {
-	[FilePath, Property]
-	public string Path { get; set; } = string.Empty;
 
 	[Property]
 	public ImportSettings Settings { get; set; } = new ImportSettings();
@@ -18,10 +16,9 @@ public class BspImportComponent : Component, Component.ExecuteInEditor
 			child.Destroy();
 		}
 
-		Log.Info( $"Test load {Path}" );
-		var data = Editor.FileSystem.Content.ReadAllBytes( Path );
-		//var data = File.ReadAllBytes( Path );
-		var context = new ImportContext( Path, data.ToArray(), Settings );
+		var data = Editor.FileSystem.Content.ReadAllBytes( Settings.FilePath );
+		var name = Path.GetFileName( Settings.FilePath );
+		var context = new ImportContext( name, data.ToArray(), Settings );
 		context.Decompile();
 		context.Build( GameObject );
 	}
@@ -35,14 +32,6 @@ public static class Main
 	[Menu( "Editor", "BSP Import/Import Map...", "map" )]
 	public static void OpenLoadMenu()
 	{
-		// get bsp file path
-		var file = GetFileFromDialog( "Open a bsp file.", "*.bsp" );
-		Log.Info( $"### Loading bsp: {file}" );
-
-		if ( file is null )
-			return;
-
-
 		var window = new Window( null );
 		window.WindowTitle = "BSP Import Settings";
 
@@ -55,17 +44,32 @@ public static class Main
 
 		var settings = new ImportSettings();
 
-		var ps = new ControlSheet();
+		var cookieString = "bsp-import.last-imported-bsp";
+		var lastPath = Game.Cookies.Get( cookieString, "" );
 
+		if ( !string.IsNullOrEmpty( lastPath ) )
+		{
+			Log.Info( $"loaded lastpath: {lastPath}" );
+			settings.FilePath = lastPath;
+		}
+
+		var ps = new ControlSheet();
+		ps.AddProperty( settings, x => x );
+		ps.AddProperty( settings, x => x.FilePath );
 		ps.AddProperty( settings, x => x.ChunkSize );
-		//ps.AddProperty(  );
+		ps.AddProperty( settings, x => x.LoadMaterials );
+		ps.AddProperty( settings, x => x.ImportStaticProps );
+		ps.AddProperty( settings, x => x.ImportBrushEntities );
+		ps.AddProperty( settings, x => x.ImportToolMaterials );
+		ps.AddProperty( settings, x => x.ImportDisplacements );
 
 		canvas.Layout.Add( ps );
 
 		var btn = new Button( "Import", canvas );
 		btn.MouseClick += () =>
 		{
-			DecompileAndImport( file, settings );
+			Game.Cookies.Set( cookieString, settings.FilePath );
+			DecompileAndImport( settings );
 			window.Close();
 		};
 		canvas.Layout.Add( btn );
@@ -73,47 +77,22 @@ public static class Main
 		window.FixedWidth = 500;
 		window.Show();
 		window.Center();
-
 	}
 
 	/// <summary>
 	/// Read bsp byte data, decompile into ImportContext, parse and Build the map geometry and entities into the s&box scene.
 	/// </summary>
 	/// <param name="file"></param>
-	private static void DecompileAndImport( string file, ImportSettings settings )
+	private static void DecompileAndImport( ImportSettings settings )
 	{
-		var data = File.ReadAllBytes( file );
-		var name = Path.GetFileName( file );
-		var context = new ImportContext( name, data, settings );
+		var data = Editor.FileSystem.Content.ReadAllBytes( settings.FilePath );
+		var name = Path.GetFileName( settings.FilePath );
+		var context = new ImportContext( name, data.ToArray(), settings );
 		context.Decompile();
 		context.Build();
 
-
-		Log.Info( "Imported Source 1 BSP File using bsp-import by DoctorGurke" );
 		var repoURL = "https://github.com/DoctorGurke/sbox-bsp-import";
 		Log.Info( $"Report bugs or contribute @{repoURL}" );
-	}
-
-	/// <summary>
-	/// Gets a file path from a file explorer dialog.
-	/// </summary>
-	/// <param name="title">Title of the dialog window.</param>
-	/// <param name="filter">File filter for dialog display.</param>
-	/// <returns>File path of a singular user-selected file. Null if dialog was closed or failed.</returns>
-	private static string? GetFileFromDialog( string title = "Open File", string filter = "*.*" )
-	{
-		var file = new FileDialog( null );
-		file.Title = title;
-		file.SetNameFilter( filter );
-		file.SetFindFile();
-
-		// user has selected file
-		if ( file.Execute() )
-		{
-			return file.SelectedFile;
-		}
-
-		// dialog was closed or failed, no file was selected.
-		return null;
+		Log.Info( "Imported Source 1 BSP File using bsp-import by DoctorGurke" );
 	}
 }

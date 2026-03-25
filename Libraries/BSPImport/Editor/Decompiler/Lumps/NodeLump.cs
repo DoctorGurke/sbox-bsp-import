@@ -27,7 +27,7 @@ public class NodeLump : BaseLump
 			nodes[i] = node;
 		}
 
-		Log.Info( $"NODES: {nodes.Length}" );
+		//Log.Info( $"NODES: {nodes.Length}" );
 		Context.Nodes = nodes;
 	}
 }

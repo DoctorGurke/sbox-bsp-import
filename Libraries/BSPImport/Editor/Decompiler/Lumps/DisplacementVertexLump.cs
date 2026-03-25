@@ -15,8 +15,6 @@ public class DisplacementVertexLump : BaseLump
 			verts[i] = new DisplacementVertex( reader.ReadVector3(), reader.ReadSingle(), reader.ReadSingle() );
 		}
 
-		Log.Info( $"DISPLACEMENT VERTICES: {verts.Length}" );
-
 		Context.Geometry.SetDisplacementVertices( verts );
 	}
 }

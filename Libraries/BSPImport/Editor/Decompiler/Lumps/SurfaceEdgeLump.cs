@@ -1,6 +1,4 @@
-﻿using BspImport.Extensions;
-
-namespace BspImport.Decompiler.Lumps;
+﻿namespace BspImport.Decompiler.Lumps;
 
 public class SurfaceEdgeLump : BaseLump
 {
@@ -17,7 +15,7 @@ public class SurfaceEdgeLump : BaseLump
 			surfEdges[i] = reader.ReadInt32();
 		}
 
-		Log.Info( $"SURFACE EDGES: {surfEdges.Length}" );
+		//Log.Info( $"SURFACE EDGES: {surfEdges.Length}" );
 
 		Context.Geometry.SetSurfaceEdges( surfEdges );
 	}

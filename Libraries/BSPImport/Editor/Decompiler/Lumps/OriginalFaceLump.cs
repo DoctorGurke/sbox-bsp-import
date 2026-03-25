@@ -16,8 +16,8 @@ public class OriginalFaceLump : BaseLump
 			oFaces[i] = reader.ReadFace();
 		}
 
-		Log.Info( $"ORIGINAL FACES: {oFaces.Count()}" );
+		//Log.Info( $"ORIGINAL FACES: {oFaces.Count()}" );
 
-        Context.Geometry.SetOriginalFaces( oFaces );
+		Context.Geometry.SetOriginalFaces( oFaces );
 	}
 }

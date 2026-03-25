@@ -52,8 +52,6 @@ public partial class MapBuilder
 			yield return null;
 		}
 
-		Log.Info( $"Unique Faces: {faces.Count}" );
-
 		// chunk tree faces into batches for MeshComponent
 		foreach ( var chunk in faces.Chunk( Context.Settings.ChunkSize ) )
 		{

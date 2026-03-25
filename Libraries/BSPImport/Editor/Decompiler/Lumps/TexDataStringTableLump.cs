@@ -1,6 +1,4 @@
-﻿using BspImport.Extensions;
-
-namespace BspImport.Decompiler.Lumps;
+﻿namespace BspImport.Decompiler.Lumps;
 
 public class TexDataStringTableLump : BaseLump
 {
@@ -17,7 +15,7 @@ public class TexDataStringTableLump : BaseLump
 			indices[i] = reader.ReadInt32();
 		}
 
-		Log.Info( $"TEXDATASTRINGTABLE: {indices.Count()}" );
+		//Log.Info( $"TEXDATASTRINGTABLE: {indices.Count()}" );
 
 		Context.TexDataStringTable = indices;
 	}
