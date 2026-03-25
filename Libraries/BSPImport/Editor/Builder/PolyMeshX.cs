@@ -165,7 +165,6 @@ public static class PolyMeshX
 		if ( !geo.TryGetDisplacementInfo( face.DisplacementInfo, out var dInfo ) )
 		{
 			// fallback to normal face handling
-			Log.Info( "1" );
 			mesh.AddMeshFaceInternal( context, face );
 			return;
 		}
@@ -173,7 +172,6 @@ public static class PolyMeshX
 		// original face index should point to a base quad
 		if ( face.OriginalFaceIndex < 0 || !geo.TryGetOriginalFace( face.OriginalFaceIndex, out var oFace ) )
 		{
-			Log.Info( "2" );
 			mesh.AddMeshFaceInternal( context, face );
 			return;
 		}
@@ -185,7 +183,6 @@ public static class PolyMeshX
 			int surfEdgeIdx = oFace.FirstEdge + i;
 			if ( !geo.TryGetSurfaceEdge( surfEdgeIdx, out var edge ) )
 			{
-				Log.Info( "3" );
 				mesh.AddMeshFaceInternal( context, face );
 				return;
 			}
@@ -193,7 +190,6 @@ public static class PolyMeshX
 			int edgeIndex = edge >= 0 ? edge : -edge;
 			if ( !geo.TryGetEdgeIndices( edgeIndex, out var edgeIndices ) )
 			{
-				Log.Info( "4" );
 				mesh.AddMeshFaceInternal( context, face );
 				return;
 			}
@@ -201,7 +197,6 @@ public static class PolyMeshX
 			var indices = edgeIndices.Indices;
 			if ( indices is null || indices.Length < 2 )
 			{
-				Log.Info( "5" );
 				mesh.AddMeshFaceInternal( context, face );
 				return;
 			}
@@ -209,7 +204,6 @@ public static class PolyMeshX
 			int vertIdx = edge >= 0 ? indices[0] : indices[1];
 			if ( !geo.TryGetVertex( vertIdx, out var vertex ) )
 			{
-				Log.Info( "6" );
 				mesh.AddMeshFaceInternal( context, face );
 				return;
 			}
@@ -220,7 +214,6 @@ public static class PolyMeshX
 		// we expect a quad base; if not, fallback
 		if ( corners.Count != 4 )
 		{
-			Log.Info( "7" );
 			mesh.AddMeshFaceInternal( context, face );
 			return;
 		}
@@ -247,7 +240,13 @@ public static class PolyMeshX
 				var top = Vector3.Lerp( corners[3], corners[2], s );
 				var basePos = Vector3.Lerp( bottom, top, t );
 
-				int dvIndex = dInfo.FirstVertex + y * side + x;
+				// Displacement vertices are stored in X-major order within the grid.
+				// Use x * side + y here instead of y * side + x to match the BSP layout
+				// and prevent a -90 degree rotation of the generated mesh.
+				// Flip the Y index when reading displacement vertices to correct
+				// mirroring around the Y axis while preserving X-major ordering.
+				int flippedY = (side - 1) - y;
+				int dvIndex = dInfo.FirstVertex + x * side + flippedY;
 				if ( !geo.TryGetDisplacementVertex( dvIndex, out var dVert ) )
 				{
 					mesh.AddMeshFaceInternal( context, face );
