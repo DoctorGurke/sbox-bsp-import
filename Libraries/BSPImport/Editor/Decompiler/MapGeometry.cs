@@ -1,37 +1,36 @@
-﻿using System;
-using System.Linq;
-
-namespace BspImport.Decompiler;
+﻿namespace BspImport.Decompiler;
 
 public class MapGeometry
 {
-    private Vector3[] Vertices = Array.Empty<Vector3>();
+	private Vector3[] Vertices = Array.Empty<Vector3>();
 	private EdgeIndices[] EdgeIndices = Array.Empty<EdgeIndices>();
 	private int[] SurfaceEdges = Array.Empty<int>();
-    private ushort[] LeafFaceIndices = Array.Empty<ushort>();
+	private ushort[] LeafFaceIndices = Array.Empty<ushort>();
 	private Face[] Faces = Array.Empty<Face>();
 	private Face[] OriginalFaces = Array.Empty<Face>();
 	private DisplacementVertex[] DisplacementVertices = Array.Empty<DisplacementVertex>();
 	private DisplacementInfo[] DisplacementInfos = Array.Empty<DisplacementInfo>();
 
-    public int VertexCount => Vertices.Length;
+	public int VertexCount => Vertices.Length;
 	public int EdgeIndicesCount => EdgeIndices.Length;
 	public int SurfaceEdgesCount => SurfaceEdges.Length;
 	public int LeafFaceIndicesCount => LeafFaceIndices.Length;
 	public int FacesCount => Faces.Length;
 	public int OriginalFaceCount => OriginalFaces.Length;
+	public int DisplacementVertexCount => DisplacementVertices.Length;
+	public int DisplacementInfoCount => DisplacementInfos.Length;
 
 	public bool IsValid()
 	{
-		return VertexCount> 0
+		return VertexCount > 0
 			&& EdgeIndicesCount > 0
 			&& SurfaceEdgesCount > 0
 			&& LeafFaceIndicesCount > 0
-			&& FacesCount > 0 
+			&& FacesCount > 0
 			&& OriginalFaceCount > 0;
 	}
 
-    public bool TryGetVertex( int index, out Vector3 vertex )
+	public bool TryGetVertex( int index, out Vector3 vertex )
 	{
 		if ( index >= 0 && index < Vertices.Length )
 		{
@@ -43,7 +42,7 @@ public class MapGeometry
 		return false;
 	}
 
-    public bool TryGetEdgeIndices( int index, out EdgeIndices edgeIndices )
+	public bool TryGetEdgeIndices( int index, out EdgeIndices edgeIndices )
 	{
 		if ( index >= 0 && index < EdgeIndices.Length )
 		{
@@ -55,7 +54,7 @@ public class MapGeometry
 		return false;
 	}
 
-    public bool TryGetSurfaceEdge( int index, out int surfEdge )
+	public bool TryGetSurfaceEdge( int index, out int surfEdge )
 	{
 		if ( index >= 0 && index < SurfaceEdges.Length )
 		{
@@ -67,7 +66,7 @@ public class MapGeometry
 		return false;
 	}
 
-    public bool TryGetFace( int index, out Face face )
+	public bool TryGetFace( int index, out Face face )
 	{
 		if ( index >= 0 && index < Faces.Length )
 		{
@@ -115,7 +114,7 @@ public class MapGeometry
 		return false;
 	}
 
-	public bool TryGetDisplacementInfo( int index, out DisplacementInfo info )
+	public bool TryGetDisplacementInfo( short index, out DisplacementInfo info )
 	{
 		if ( index >= 0 && index < DisplacementInfos.Length )
 		{

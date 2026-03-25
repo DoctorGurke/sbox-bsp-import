@@ -2,35 +2,38 @@
 
 public static class TreeParse
 {
+	public class TreeParseResult
+	{
+		public List<ushort> FaceIndices = new();
+	}
+
 	/// <summary>
 	/// Get all unique Face indices from the BSP tree. Results represent render meshes, not brushes. Never brushes.
 	/// </summary>
 	/// <param name="context"></param>
 	/// <returns></returns>
-	public static HashSet<int> ParseTreeFaces( ImportContext context )
+	public static List<ushort> ParseTreeFaces( ImportContext context )
 	{
-		var faces = new HashSet<int>();
+		var faces = new HashSet<ushort>();
 		ParseNodeFacesRecursively( context, 0, ref faces );
-		return faces;
+
+		return faces.ToList();
 	}
 
-	private static void ParseNodeFacesRecursively( ImportContext context, int index, ref HashSet<int> faceIndices, int depth = 0 )
+	private static void ParseNodeFacesRecursively( ImportContext context, int index, ref HashSet<ushort> faceIndices )
 	{
 		if ( context.Nodes is null )
 			return;
 
 		var node = context.Nodes[index];
 
-		//var padding = string.Concat( Enumerable.Repeat( "\t", depth ) );
-		//Log.Info( $"{padding}@ adding faces for node {index}" );
-		//Log.Info( $"{padding}\t* {node.Children[0]}" );
-		//Log.Info( $"{padding}\t* {node.Children[1]}" );
-
 		// contribute to faces collection
-		for ( int i = 0; i < node.FaceCount; i++ )
+		for ( ushort i = 0; i < node.FaceCount; i++ )
 		{
-			var face = node.FirstFaceIndex + i;
-			faceIndices.Add( face );
+			ushort faceIndex = node.FirstFaceIndex;
+			faceIndex += i;
+
+			TryAddFace( context, faceIndex, ref faceIndices );
 		}
 
 		// gather faces from children
@@ -44,18 +47,17 @@ public static class TreeParse
 			// <0 = leaf, not node
 			if ( child < 0 )
 			{
-				AddLeafFaces( context, -1 - child, ref faceIndices, depth + 1 );
+				AddLeafFaces( context, -1 - child, ref faceIndices );
 				continue;
 			}
 
 			// parse child node recursively
-			ParseNodeFacesRecursively( context, child, ref faceIndices, depth + 1 );
+			ParseNodeFacesRecursively( context, child, ref faceIndices );
 		}
 	}
 
-	private static void AddLeafFaces( ImportContext context, int index, ref HashSet<int> faceIndices, int depth )
+	private static void AddLeafFaces( ImportContext context, int index, ref HashSet<ushort> faceIndices )
 	{
-		//var padding = string.Concat( Enumerable.Repeat( "\t", depth ) );
 		if ( context.Leafs is null )
 			return;
 
@@ -63,17 +65,22 @@ public static class TreeParse
 			return;
 
 		var leaf = context.Leafs[index];
-		//Log.Info( $"{padding}- adding faces for leaf {index} {leaf.FirstFaceIndex} {leaf.FaceCount}" );
 
 		// contribute to faces collection
-		for ( int i = 0; i < leaf.FaceCount; i++ )
+		for ( ushort i = 0; i < leaf.FaceCount; i++ )
 		{
-			var faceIndex = leaf.FirstFaceIndex + i;
+			ushort leafFaceIndex = leaf.FirstFaceIndex;
+			leafFaceIndex += i;
 
-			context.Geometry.TryGetLeafFaceIndex( faceIndex, out var face );
+			context.Geometry.TryGetLeafFaceIndex( leafFaceIndex, out var faceIndex );
 
-			//Log.Info( $"{padding} '- {faceIndex} -> {face}" );
-			faceIndices.Add( (int)face );
+			TryAddFace( context, faceIndex, ref faceIndices );
 		}
+	}
+
+	private static void TryAddFace( ImportContext context, ushort faceIndex, ref HashSet<ushort> faceIndices )
+	{
+		context.Geometry.TryGetFace( faceIndex, out var face );
+		faceIndices.Add( faceIndex );
 	}
 }

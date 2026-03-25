@@ -52,51 +52,42 @@ public partial class MapBuilder
 			yield return null;
 		}
 
+		Log.Info( $"Unique Faces: {faces.Count}" );
 
 		// chunk tree faces into batches for MeshComponent
 		foreach ( var chunk in faces.Chunk( Context.Settings.ChunkSize ) )
 		{
 			var polyMesh = new PolygonMesh();
-			var dispMesh = new PolygonMesh();
 
 			foreach ( var face in chunk )
 			{
 				if ( !geo.TryGetFace( face, out var f ) )
 					continue;
 
-				if ( f.DisplacementInfo >= 0 )
-				{
-					// Displacement meshes sometimes do not persist into a separate PolygonMesh instance
-					// when attached later. Add displacements into the primary polyMesh so they are
-					// visible in the generated MeshComponent.
-					var before = polyMesh.FaceHandles.Count();
-					polyMesh.AddSplitMeshFace( Context, face );
-					var after = polyMesh.FaceHandles.Count();
-					if ( after > before )
-						Log.Info( $"polyMesh (disp) increased: +{after - before} faces for faceIndex={face} (total={after})" );
-					else
-						Log.Info( $"polyMesh (disp) unchanged for faceIndex={face} (total={after})" );
-				}
-				else
-				{
-					var before = polyMesh.FaceHandles.Count();
-					polyMesh.AddSplitMeshFace( Context, face );
-					var after = polyMesh.FaceHandles.Count();
-					if ( after > before )
-						Log.Info( $"polyMesh increased: +{after - before} faces for faceIndex={face} (total={after})" );
-					else
-						Log.Info( $"polyMesh unchanged for faceIndex={face} (total={after})" );
-				}
+				polyMesh.AddSplitMeshFace( Context, face );
 			}
 
-			// mark dirty so engine will build runtime mesh and log counts for debugging
 			if ( polyMesh is not null )
 			{
 				Log.Info( $"polyMesh: faces={polyMesh.FaceHandles.Count()}, verts={polyMesh.VertexHandles.Count()}" );
 				if ( polyMesh.FaceHandles.Any() )
 					yield return polyMesh;
 			}
+		}
 
+		HashSet<ushort> DisplacementIndices = new();
+
+		for ( short i = 0; i < Context.Geometry.DisplacementInfoCount; i++ )
+		{
+			Context.Geometry.TryGetDisplacementInfo( i, out var dispInfo );
+
+			DisplacementIndices.Add( dispInfo.MapFace );
+		}
+
+		// create one mesh per displacement
+		foreach ( ushort dispIndex in DisplacementIndices )
+		{
+			var dispMesh = ConstructDisplacement( dispIndex );
 			if ( dispMesh is not null )
 			{
 				Log.Info( $"dispMesh: faces={dispMesh.FaceHandles.Count()}, verts={dispMesh.VertexHandles.Count()}" );
@@ -104,6 +95,15 @@ public partial class MapBuilder
 					yield return dispMesh;
 			}
 		}
+	}
+
+	private PolygonMesh ConstructDisplacement( ushort faceIndex )
+	{
+		var mesh = new PolygonMesh();
+
+		mesh.AddDisplacementMesh( Context, faceIndex );
+
+		return mesh;
 	}
 
 	/// <summary>
@@ -129,7 +129,7 @@ public partial class MapBuilder
 
 		if ( Context.Models is null )
 		{
-			throw new Exception( "No valid map geometry to construct!" );
+			throw new Exception( "No valid models to construct!" );
 		}
 
 		if ( modelIndex < 0 || modelIndex >= Context.Models.Length )
@@ -221,12 +221,10 @@ public partial class MapBuilder
 				continue;
 			}
 
-			// skip displacement faces, displacement info != 0 means it's a displacement
-			var displacementInfoIndex = face.DisplacementInfo;
-			if ( displacementInfoIndex >= 0 )
+			// skip displacement faces, is this needed anymore?
+			if ( face.DisplacementInfo >= 0 )
 			{
-				Log.Info( $"found displacement face: {faceIndex}" );
-				//continue;
+				continue;
 			}
 
 			faces.Add( faceIndex );

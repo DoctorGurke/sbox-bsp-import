@@ -20,8 +20,8 @@ public class LeafLump : BaseLump
 			leafReader.Skip<short>(); // area:9 flags:7
 			leafReader.Skip<short>( 3 ); // mins
 			leafReader.Skip<short>( 3 ); // maxs
-			var firstLeafFace = (int)leafReader.ReadUInt16();
-			var leafFaceCount = (int)leafReader.ReadUInt16();
+			var firstLeafFace = leafReader.ReadUInt16();
+			var leafFaceCount = leafReader.ReadUInt16();
 
 			var leaf = new MapLeaf( firstLeafFace, leafFaceCount );
 			leafs[i] = leaf;
@@ -34,10 +34,10 @@ public class LeafLump : BaseLump
 
 public struct MapLeaf
 {
-	public int FirstFaceIndex;
-	public int FaceCount;
+	public ushort FirstFaceIndex;
+	public ushort FaceCount;
 
-	public MapLeaf( int firstFaceIndex, int faceCount )
+	public MapLeaf( ushort firstFaceIndex, ushort faceCount )
 	{
 		FirstFaceIndex = firstFaceIndex;
 		FaceCount = faceCount;

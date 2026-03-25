@@ -63,8 +63,7 @@ public class ImportContext
 	public bool HasCompleteGeometry( out MapGeometry geo )
 	{
 		geo = Geometry;
-		return Models is not null
-			 && geo is not null
+		return geo is not null
 			 && geo.IsValid();
 	}
 }
