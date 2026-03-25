@@ -12,17 +12,20 @@ public partial class MapBuilder
 	/// <summary>
 	/// Builds the final decompiled context insto the active editor scene. This will spawn world geometry and map entities, including parsed static props and brush entities.
 	/// </summary>
-	public void Build()
+	public void Build( GameObject? parent = null )
 	{
 		using var scope = SceneEditorSession.Scope();
 
-		var root = new GameObject( true, "BSP Map" );
+		var name = Context.Name;
+
+		var root = new GameObject( parent, true, name );
 
 		// prepares bsp model meshes (brush entities)
 		BuildModelMeshes();
 
 		// build map worldspawn geometry (model 0)
 		var worldspawn = BuildWorldGeometry();
+		worldspawn.SetParent( root );
 
 		// builds entities, including prop static and brush entities
 		BuildEntities( worldspawn );

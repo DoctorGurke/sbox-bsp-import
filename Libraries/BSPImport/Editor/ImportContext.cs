@@ -27,10 +27,10 @@ public class ImportContext
 	/// <summary>
 	/// Construct the decompiled context into the scene.
 	/// </summary>
-	public void Build()
+	public void Build( GameObject? parent = null )
 	{
 		var builder = new MapBuilder( this );
-		builder.Build();
+		builder.Build( parent );
 	}
 
 	public string Name { get; private set; }

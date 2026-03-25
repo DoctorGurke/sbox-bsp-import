@@ -1,5 +1,32 @@
 ﻿namespace BspImport;
 
+
+public class BspImportComponent : Component, Component.ExecuteInEditor
+{
+	[FilePath, Property]
+	public string Path { get; set; } = string.Empty;
+
+	[Property]
+	public ImportSettings Settings { get; set; } = new ImportSettings();
+
+	[Button( "Test", "map" )]
+	public void Test()
+	{
+		// cleanup any children to get rid of previous import
+		foreach ( var child in GameObject.Children )
+		{
+			child.Destroy();
+		}
+
+		Log.Info( $"Test load {Path}" );
+		var data = Editor.FileSystem.Content.ReadAllBytes( Path );
+		//var data = File.ReadAllBytes( Path );
+		var context = new ImportContext( Path, data.ToArray(), Settings );
+		context.Decompile();
+		context.Build( GameObject );
+	}
+}
+
 public static class Main
 {
 	/// <summary>
@@ -56,7 +83,8 @@ public static class Main
 	private static void DecompileAndImport( string file, ImportSettings settings )
 	{
 		var data = File.ReadAllBytes( file );
-		var context = new ImportContext( file, data, settings );
+		var name = Path.GetFileName( file );
+		var context = new ImportContext( name, data, settings );
 		context.Decompile();
 		context.Build();
 
