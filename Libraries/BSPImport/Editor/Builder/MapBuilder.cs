@@ -1,6 +1,4 @@
-﻿using Editor;
-
-namespace BspImport.Builder;
+﻿namespace BspImport.Builder;
 
 public partial class MapBuilder
 {
@@ -12,10 +10,14 @@ public partial class MapBuilder
 	}
 
 	/// <summary>
-	/// Builds the final decompiled context inside of hammer. This will spawn world geometry and map entities, including parsed static props and brush entities.
+	/// Builds the final decompiled context insto the active editor scene. This will spawn world geometry and map entities, including parsed static props and brush entities.
 	/// </summary>
 	public void Build()
 	{
+		using var scope = SceneEditorSession.Scope();
+
+		var root = new GameObject( true, "BSP Map" );
+
 		// prepares bsp model meshes (brush entities)
 		BuildModelMeshes();
 
@@ -33,11 +35,10 @@ public partial class MapBuilder
 	protected virtual GameObject BuildWorldGeometry()
 	{
 		//var mapMesh = new MapMesh( Map );
-		var worldspawnMeshes = ConstructWorldspawn();
+		var worldspawnMeshes = ConstructWorldspawn().ToList();
 
-		Log.Info( $"MeshComponents: {worldspawnMeshes.Count()}" );
+		Log.Info( $"MeshComponents: {worldspawnMeshes.Count}" );
 
-		using var scope = SceneEditorSession.Scope();
 		var worldspawn = new GameObject( true, "worldspawn" );
 
 		foreach ( var mesh in worldspawnMeshes )

@@ -54,16 +54,55 @@ public partial class MapBuilder
 
 
 		// chunk tree faces into batches for MeshComponent
-		foreach ( var chunk in faces.Chunk( 512 ) )
+		foreach ( var chunk in faces.Chunk( Context.Settings.ChunkSize ) )
 		{
 			var polyMesh = new PolygonMesh();
+			var dispMesh = new PolygonMesh();
 
 			foreach ( var face in chunk )
 			{
-				polyMesh.AddSplitMeshFace( Context, face );
+				if ( !geo.TryGetFace( face, out var f ) )
+					continue;
+
+				if ( f.DisplacementInfo >= 0 )
+				{
+					// Displacement meshes sometimes do not persist into a separate PolygonMesh instance
+					// when attached later. Add displacements into the primary polyMesh so they are
+					// visible in the generated MeshComponent.
+					var before = polyMesh.FaceHandles.Count();
+					polyMesh.AddSplitMeshFace( Context, face );
+					var after = polyMesh.FaceHandles.Count();
+					if ( after > before )
+						Log.Info( $"polyMesh (disp) increased: +{after - before} faces for faceIndex={face} (total={after})" );
+					else
+						Log.Info( $"polyMesh (disp) unchanged for faceIndex={face} (total={after})" );
+				}
+				else
+				{
+					var before = polyMesh.FaceHandles.Count();
+					polyMesh.AddSplitMeshFace( Context, face );
+					var after = polyMesh.FaceHandles.Count();
+					if ( after > before )
+						Log.Info( $"polyMesh increased: +{after - before} faces for faceIndex={face} (total={after})" );
+					else
+						Log.Info( $"polyMesh unchanged for faceIndex={face} (total={after})" );
+				}
 			}
 
-			yield return polyMesh;
+			// mark dirty so engine will build runtime mesh and log counts for debugging
+			if ( polyMesh is not null )
+			{
+				Log.Info( $"polyMesh: faces={polyMesh.FaceHandles.Count()}, verts={polyMesh.VertexHandles.Count()}" );
+				if ( polyMesh.FaceHandles.Any() )
+					yield return polyMesh;
+			}
+
+			if ( dispMesh is not null )
+			{
+				Log.Info( $"dispMesh: faces={dispMesh.FaceHandles.Count()}, verts={dispMesh.VertexHandles.Count()}" );
+				if ( dispMesh.FaceHandles.Any() )
+					yield return dispMesh;
+			}
 		}
 	}
 
@@ -83,7 +122,7 @@ public partial class MapBuilder
 
 		var geo = Context.Geometry;
 
-		if( !Context.HasCompleteGeometry( out geo ) )
+		if ( !Context.HasCompleteGeometry( out geo ) )
 		{
 			throw new Exception( "No valid map geometry to construct!" );
 		}
@@ -126,7 +165,6 @@ public partial class MapBuilder
 		var polyMesh = new PolygonMesh();
 
 		var faces = GetFaceIndices( firstFaceIndex, faceCount );
-		//Log.Info( $"gathered {faces.Length} faces" );
 
 		// invalid world mesh
 		if ( faces.Count() <= 0 )
@@ -187,8 +225,8 @@ public partial class MapBuilder
 			var displacementInfoIndex = face.DisplacementInfo;
 			if ( displacementInfoIndex >= 0 )
 			{
-				Log.Info( $"skipping displacement face: {faceIndex}" );
-				continue;
+				Log.Info( $"found displacement face: {faceIndex}" );
+				//continue;
 			}
 
 			faces.Add( faceIndex );

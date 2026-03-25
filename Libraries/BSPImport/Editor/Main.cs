@@ -15,23 +15,56 @@ public static class Main
 		if ( file is null )
 			return;
 
-		// read bsp byte data, decompile into context, read and build
+
+		var window = new Window( null );
+		window.WindowTitle = "BSP Import Settings";
+
+		window.Canvas = new Widget( window );
+		var canvas = window.Canvas;
+
+		canvas.Layout = Layout.Column();
+		canvas.Layout.Margin = 16;
+		canvas.Layout.Spacing = 4;
+
+		var settings = new ImportSettings();
+
+		var ps = new ControlSheet();
+
+		ps.AddProperty( settings, x => x.ChunkSize );
+		//ps.AddProperty(  );
+
+		canvas.Layout.Add( ps );
+
+		var btn = new Button( "Import", canvas );
+		btn.MouseClick += () =>
+		{
+			DecompileAndImport( file, settings );
+			window.Close();
+		};
+		canvas.Layout.Add( btn );
+
+		window.FixedWidth = 500;
+		window.Show();
+		window.Center();
+
+	}
+
+	/// <summary>
+	/// Read bsp byte data, decompile into ImportContext, parse and Build the map geometry and entities into the s&box scene.
+	/// </summary>
+	/// <param name="file"></param>
+	private static void DecompileAndImport( string file, ImportSettings settings )
+	{
 		var data = File.ReadAllBytes( file );
-		var context = new ImportContext( data );
+		var context = new ImportContext( file, data, settings );
 		context.Decompile();
 		context.Build();
 
-		//Log.Info( $"Thanks for using sbox-bsp-import by DoctorGurke to import outdated bsp maps from tf2 and gmod, anything else probably won't work right now." );
-		//Log.Info( $"Issue reports: https://github.com/DoctorGurke/sbox-bsp-import/issues" );
-	}
 
-	//[Menu( "Hammer", "Bsp Import/Donate", "money" )]
-	//public static void OpenDonate()
-	//{
-	//	Utility.OpenFolder( "https://paypal.me/DoctorGurke" );
-	//	Log.Info( $"{Clipboard.Paste()}" );
-	//	Utility.
-	//}
+		Log.Info( "Imported Source 1 BSP File using bsp-import by DoctorGurke" );
+		var repoURL = "https://github.com/DoctorGurke/sbox-bsp-import";
+		Log.Info( $"Report bugs or contribute @{repoURL}" );
+	}
 
 	/// <summary>
 	/// Gets a file path from a file explorer dialog.
@@ -52,7 +85,7 @@ public static class Main
 			return file.SelectedFile;
 		}
 
-		//// dialog was closed or failed, no file was selected.
+		// dialog was closed or failed, no file was selected.
 		return null;
 	}
 }

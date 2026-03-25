@@ -4,9 +4,11 @@ namespace BspImport;
 
 public class ImportContext
 {
-	public ImportContext( byte[] data )
+	public ImportContext( string name, byte[] data, ImportSettings settings )
 	{
+		Name = name;
 		Data = data;
+		Settings = settings;
 
 		Lumps = new BaseLump[64];
 		Geometry = new();
@@ -31,7 +33,10 @@ public class ImportContext
 		builder.Build();
 	}
 
+	public string Name { get; private set; }
 	public byte[] Data { get; private set; }
+	public ImportSettings Settings { get; private set; }
+
 	public BaseLump[] Lumps;
 
 	// bsp tree structure
@@ -55,7 +60,7 @@ public class ImportContext
 	/// Checks that the context has a complete geometry set available for building meshes.
 	/// Returns the Geometry instance for convenience.
 	/// </summary>
-	public bool HasCompleteGeometry(out MapGeometry geo)
+	public bool HasCompleteGeometry( out MapGeometry geo )
 	{
 		geo = Geometry;
 		return Models is not null
