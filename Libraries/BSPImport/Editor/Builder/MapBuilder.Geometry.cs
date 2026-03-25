@@ -69,30 +69,32 @@ public partial class MapBuilder
 
 			if ( polyMesh is not null )
 			{
-				Log.Info( $"polyMesh: faces={polyMesh.FaceHandles.Count()}, verts={polyMesh.VertexHandles.Count()}" );
 				if ( polyMesh.FaceHandles.Any() )
 					yield return polyMesh;
 			}
 		}
 
-		HashSet<ushort> DisplacementIndices = new();
 
-		for ( short i = 0; i < Context.Geometry.DisplacementInfoCount; i++ )
+		if ( Context.Settings.ImportDisplacements )
 		{
-			Context.Geometry.TryGetDisplacementInfo( i, out var dispInfo );
+			HashSet<ushort> DisplacementIndices = new();
 
-			DisplacementIndices.Add( dispInfo.MapFace );
-		}
-
-		// create one mesh per displacement
-		foreach ( ushort dispIndex in DisplacementIndices )
-		{
-			var dispMesh = ConstructDisplacement( dispIndex );
-			if ( dispMesh is not null )
+			for ( short i = 0; i < Context.Geometry.DisplacementInfoCount; i++ )
 			{
-				Log.Info( $"dispMesh: faces={dispMesh.FaceHandles.Count()}, verts={dispMesh.VertexHandles.Count()}" );
-				if ( dispMesh.FaceHandles.Any() )
-					yield return dispMesh;
+				Context.Geometry.TryGetDisplacementInfo( i, out var dispInfo );
+
+				DisplacementIndices.Add( dispInfo.MapFace );
+			}
+
+			// create one mesh per displacement
+			foreach ( ushort dispIndex in DisplacementIndices )
+			{
+				var dispMesh = ConstructDisplacement( dispIndex );
+				if ( dispMesh is not null )
+				{
+					if ( dispMesh.FaceHandles.Any() )
+						yield return dispMesh;
+				}
 			}
 		}
 	}

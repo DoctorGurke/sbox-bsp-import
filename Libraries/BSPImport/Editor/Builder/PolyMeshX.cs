@@ -35,8 +35,9 @@ public static class PolyMeshX
 		if ( string.IsNullOrEmpty( materialName ) )
 			return;
 
-		// TODO: settings
-		if ( materialName.Contains( "toolsskybox", StringComparison.OrdinalIgnoreCase ) )
+		var isToolsMaterial = materialName.Contains( "tools", StringComparison.OrdinalIgnoreCase );
+
+		if ( !context.Settings.ImportToolMaterials && isToolsMaterial )
 			return;
 
 		var verts = new List<Vector3>();
@@ -73,9 +74,13 @@ public static class PolyMeshX
 		var hVertices = mesh.AddVertices( verts.ToArray() );
 		var hFace = mesh.AddFace( hVertices );
 
-		//var material = Material.Load( $"materials/{materialName}.vmat" );
-		//mesh.SetFaceMaterial( hFace, material );
-		mesh.SetFaceTextureCoords( hFace, uvs.ToArray() );
+		var material = Material.Load( $"materials/{materialName}.vmat" );
+		mesh.SetFaceMaterial( hFace, material );
+
+		if ( isToolsMaterial )
+			mesh.TextureAlignToGrid( Transform.Zero );
+		else
+			mesh.SetFaceTextureCoords( hFace, uvs.ToArray() );
 	}
 
 	private static Vector2 GetTexCoords( ImportContext context, int texInfoIndex, Vector3 position, int width = 1024, int height = 1024 )
@@ -261,14 +266,12 @@ public static class PolyMeshX
 				// two tris: (a, b, c) and (b, d, c) — ordering chosen to match face winding
 				var t1 = mesh.AddFace( new[] { hVerts[a], hVerts[b], hVerts[c] } );
 				mesh.SetFaceTextureCoords( t1, new[] { uvs[a], uvs[b], uvs[c] } );
-				//if ( dispMaterial is not null ) mesh.SetFaceMaterial( t1, dispMaterial );
+				if ( dispMaterial is not null ) mesh.SetFaceMaterial( t1, dispMaterial );
 
 				var t2 = mesh.AddFace( new[] { hVerts[b], hVerts[d], hVerts[c] } );
 				mesh.SetFaceTextureCoords( t2, new[] { uvs[b], uvs[d], uvs[c] } );
-				//if ( dispMaterial is not null ) mesh.SetFaceMaterial( t2, dispMaterial );
+				if ( dispMaterial is not null ) mesh.SetFaceMaterial( t2, dispMaterial );
 			}
 		}
-
-		Log.Info( $"added displacement mesh: faces={mesh.FaceHandles.Count()}, verts={mesh.VertexHandles.Count()}" );
 	}
 }

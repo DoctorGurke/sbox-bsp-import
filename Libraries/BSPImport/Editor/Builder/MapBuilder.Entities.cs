@@ -1,6 +1,4 @@
-﻿using Editor;
-
-namespace BspImport.Builder;
+﻿namespace BspImport.Builder;
 
 public partial class MapBuilder
 {
@@ -21,20 +19,22 @@ public partial class MapBuilder
 			if ( ent.ClassName == "worldspawn" )
 				continue;
 
+			using var scope = SceneEditorSession.Scope();
+
 			// props and brush entities
 			if ( ent.Model is not null )
 			{
-				using var scope = SceneEditorSession.Scope();
-				//TODO: parent to worldspawn game object
-				var prop = new GameObject( true, ent.ClassName );
-				prop.SetParent( parent );
-				prop.WorldPosition = ent.Position;
-				prop.WorldRotation = ent.Angles.ToRotation();
+				var isBrushEntity = ent.Model.StartsWith( '*' );
+				var isStaticProp = ent.ClassName.Contains( "static" );
 
-				var propComponent = prop.Components.Create<Prop>();
-
-				if ( ent.Model.StartsWith( '*' ) )
+				if ( isBrushEntity && Context.Settings.ImportBrushEntities )
 				{
+					var brushEntity = new GameObject( true, ent.ClassName );
+					brushEntity.SetParent( parent );
+					brushEntity.WorldPosition = ent.Position;
+					brushEntity.WorldRotation = ent.Angles.ToRotation();
+
+					var propComponent = brushEntity.Components.Create<Prop>();
 					var modelIndex = int.Parse( ent.Model.TrimStart( '*' ) );
 					var polyMesh = Context.CachedPolygonMeshes?[modelIndex];
 
@@ -45,14 +45,20 @@ public partial class MapBuilder
 
 					propComponent.IsStatic = true;
 				}
-				else
+				else if ( isStaticProp && Context.Settings.ImportStaticProps )
 				{
+					var staticProp = new GameObject( true, ent.ClassName );
+					staticProp.SetParent( parent );
+					staticProp.WorldPosition = ent.Position;
+					staticProp.WorldRotation = ent.Angles.ToRotation();
+
+					var propComponent = staticProp.Components.Create<Prop>();
+
 					var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
 					propComponent.Model = (model is null || model.IsError) ? Model.Error : model;
+					propComponent.IsStatic = true;
 				}
 
-				// prop_static
-				propComponent.IsStatic = ent.ClassName.Contains( "static" );
 			}
 
 			// regular entity
