@@ -75,24 +75,51 @@ public partial class MapBuilder
 
 		if ( Context.Settings.ImportDisplacements )
 		{
-			HashSet<ushort> DisplacementIndices = new();
+			//HashSet<ushort> DisplacementIndices = new();
+
+			//for ( short i = 0; i < Context.Geometry.DisplacementInfoCount; i++ )
+			//{
+			//	Context.Geometry.TryGetDisplacementInfo( i, out var dispInfo );
+
+			//	DisplacementIndices.Add( dispInfo.MapFace );
+			//}
+
+			//// create one mesh per displacement
+			//foreach ( ushort dispIndex in DisplacementIndices )
+			//{
+			//	var dispMesh = ConstructDisplacement( dispIndex );
+			//	if ( dispMesh is not null )
+			//	{
+			//		if ( dispMesh.FaceHandles.Any() )
+			//			yield return dispMesh;
+			//	}
+			//}
+
+			List<DisplacementMesh> displacements = new();
 
 			for ( short i = 0; i < Context.Geometry.DisplacementInfoCount; i++ )
 			{
 				Context.Geometry.TryGetDisplacementInfo( i, out var dispInfo );
 
-				DisplacementIndices.Add( dispInfo.MapFace );
+				DisplacementMesh mesh = new();
+				mesh.Info = dispInfo;
+
+				for ( int v = 0; v < mesh.Info.VertCount; v++ )
+				{
+					Context.Geometry.TryGetDisplacementVertex( dispInfo.FirstVertex + v, out var vertInfo );
+
+					mesh.Vertices.Add( vertInfo );
+				}
+
+				displacements.Add( mesh );
 			}
 
-			// create one mesh per displacement
-			foreach ( ushort dispIndex in DisplacementIndices )
+			// SetupDisplacementNeighbors(displacements);
+
+			foreach ( var mesh in displacements )
 			{
-				var dispMesh = ConstructDisplacement( dispIndex );
-				if ( dispMesh is not null )
-				{
-					if ( dispMesh.FaceHandles.Any() )
-						yield return dispMesh;
-				}
+				//GenerateDisplacementGeometry(mesh);
+				//TesselateDisplacement(mesh);
 			}
 		}
 	}

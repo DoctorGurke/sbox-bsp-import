@@ -20,8 +20,8 @@ public class DisplacementInfoLump : BaseLump
 			var firstTri = rInfo.ReadInt32();
 			var power = rInfo.ReadInt32();
 
-			rInfo.Skip<int>(); // minTess
-			rInfo.Skip<float>(); // smoothingAngle
+			var minTess = rInfo.ReadInt32();
+			var smoothingAngle = rInfo.ReadSingle();
 			rInfo.Skip<int>(); // contents
 
 			var mapFace = rInfo.ReadUInt16();
@@ -29,7 +29,7 @@ public class DisplacementInfoLump : BaseLump
 			rInfo.Skip<int>(); // lightmapAlphaStart
 			rInfo.Skip<int>(); // lightmapSamplePositionStart
 
-			var info = new DisplacementInfo( startPosition, firstVertex, firstTri, power, mapFace );
+			var info = new DisplacementInfo( startPosition, firstVertex, firstTri, power, minTess, smoothingAngle, mapFace );
 			infos[i] = info;
 
 			// read 4 edge neighbors
@@ -108,17 +108,23 @@ public struct DisplacementInfo
 	public int FirstVertex;
 	public int FirstTri;
 	public int Power;
+	public int MinTess;
+	public float SmoothingAngle;
 	public ushort MapFace;
 	public DispNeighbor[] EdgeNeighbors = new DispNeighbor[4];
 	public DispCornerNeighbors[] CornerNeighbors = new DispCornerNeighbors[4];
 	public ulong[] AllowedVerts = new ulong[10];
 
-	public DisplacementInfo( Vector3 startPosition, int firstVertex, int firstTri, int power, ushort mapFace )
+	public DisplacementInfo( Vector3 startPosition, int firstVertex, int firstTri, int power, int minTess, float smoothingAngle, ushort mapFace )
 	{
 		StartPosition = startPosition;
 		FirstVertex = firstVertex;
 		FirstTri = firstTri;
 		Power = power;
+		MinTess = minTess;
+		SmoothingAngle = smoothingAngle;
 		MapFace = mapFace;
 	}
+
+	public int VertCount => ((1 << Power) + 1) * ((1 << Power) + 1);
 }
