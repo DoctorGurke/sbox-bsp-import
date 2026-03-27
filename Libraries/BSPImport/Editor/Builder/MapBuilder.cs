@@ -37,24 +37,37 @@ public partial class MapBuilder
 	/// </summary>
 	protected virtual GameObject BuildWorldGeometry()
 	{
-		//var mapMesh = new MapMesh( Map );
-		var worldspawnMeshes = ConstructWorldspawn().ToList();
-
-		Log.Info( $"MeshComponents: {worldspawnMeshes.Count}" );
-
 		var worldspawn = new GameObject( true, "worldspawn" );
 
-		foreach ( var mesh in worldspawnMeshes )
+		var worldspawnMeshes = ConstructWorldspawn().ToList();
+		var displacementMeshes = ConstructDisplacementMeshes().ToList();
+
+		if ( displacementMeshes.Any() && Context.Settings.ImportDisplacements )
 		{
-			var meshComponent = worldspawn.Components.Create<MeshComponent>();
-			meshComponent.Mesh = mesh;
+			Log.Info( $"Displacement Meshes: {displacementMeshes.Count}" );
+			var displacementParent = new GameObject( worldspawn, true, "displacements" );
+
+			foreach ( var displacement in displacementMeshes )
+			{
+				var dispObject = new GameObject( displacementParent, true, "displacement" );
+				var meshComponent = dispObject.Components.Create<MeshComponent>();
+				meshComponent.Mesh = displacement;
+				CenterMeshOrigin( meshComponent );
+			}
 		}
 
-		//	if ( worldspawnMesh is null )
-		//		return;
-
-		//mapMesh.ConstructFromPolygons( worldspawnMesh );
-		//	mapMesh.Name = $"worldspawn";
+		if ( worldspawnMeshes.Any() )
+		{
+			Log.Info( $"World Meshes: {worldspawnMeshes.Count}" );
+			var meshParent = new GameObject( worldspawn, true, "world_meshes" );
+			foreach ( var mesh in worldspawnMeshes )
+			{
+				var meshObject = new GameObject( meshParent, true, "world_mesh" );
+				var meshComponent = meshObject.Components.Create<MeshComponent>();
+				meshComponent.Mesh = mesh;
+				CenterMeshOrigin( meshComponent );
+			}
+		}
 
 		return worldspawn;
 	}
