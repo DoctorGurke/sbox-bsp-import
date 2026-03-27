@@ -115,6 +115,8 @@ public struct DisplacementInfo
 	public DispCornerNeighbors[] CornerNeighbors = new DispCornerNeighbors[4];
 	public ulong[] AllowedVerts = new ulong[10];
 
+	// helper: convert power level to side length
+
 	public DisplacementInfo( Vector3 startPosition, int firstVertex, int firstTri, int power, int minTess, float smoothingAngle, ushort mapFace )
 	{
 		StartPosition = startPosition;
@@ -126,5 +128,6 @@ public struct DisplacementInfo
 		MapFace = mapFace;
 	}
 
-	public int VertCount => ((1 << Power) + 1) * ((1 << Power) + 1);
+	public int Side => (1 << Power) + 1;
+	public int VertCount => Side * Side;
 }
