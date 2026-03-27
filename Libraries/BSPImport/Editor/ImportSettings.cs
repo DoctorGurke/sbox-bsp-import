@@ -14,13 +14,19 @@ public class ImportSettings
 	public int ChunkSize { get; set; } = 256;
 
 	/// <summary>
-	/// Load and Apply materials to world geometry. This requires loading the material names from the BSP and looking up the corresponding .vmat files. Disabling this will result in untextured world geometry.
+	/// Load and Apply materials to world geometry.
 	/// </summary>
 	[Property]
-	public bool LoadMaterials { get; set; } = true;
+	public bool LoadMaterials { get; set; } = false;
 
 	/// <summary>
-	/// Include Entities (Props, Lights, Brush Entities, etc) as GameObjects.
+	/// Load and spawn Model paths as Props. Includes static props.
+	/// </summary>
+	[Property]
+	public bool LoadModels { get; set; } = false;
+
+	/// <summary>
+	/// Include Entities (Lights, Brush Entities, etc) as GameObjects.
 	/// </summary>
 	[Property]
 	public bool ImportEntities { get; set; } = true;

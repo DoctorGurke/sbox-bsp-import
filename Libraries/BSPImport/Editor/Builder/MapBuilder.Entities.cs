@@ -10,6 +10,8 @@ public partial class MapBuilder
 		if ( Context.Entities is null )
 			return;
 
+		var entityParent = new GameObject( parent, true, "entities" );
+
 		foreach ( var ent in Context.Entities )
 		{
 			if ( ent.ClassName is null )
@@ -19,69 +21,129 @@ public partial class MapBuilder
 			if ( ent.ClassName == "worldspawn" )
 				continue;
 
-			using var scope = SceneEditorSession.Scope();
+			// skip logic entities
+			if ( ent.ClassName.Contains( "logic" ) )
+				continue;
 
 			// props and brush entities
 			if ( ent.Model is not null )
 			{
-				var isStaticProp = ent.ClassName.Contains( "static" );
-
-				if ( ent.Model.StartsWith( '*' ) )
-				{
-					Log.Info( $"brush entitiy: {ent.ClassName}, {ent.Model}" );
-					var brushEntity = new GameObject( true, ent.ClassName );
-					brushEntity.SetParent( parent );
-					brushEntity.WorldPosition = ent.Position;
-					brushEntity.WorldRotation = ent.Angles.ToRotation();
-
-					var propComponent = brushEntity.Components.Create<Prop>();
-					var modelIndex = int.Parse( ent.Model.TrimStart( '*' ) );
-					var polyMesh = Context.CachedPolygonMeshes?[modelIndex];
-
-					if ( polyMesh is null )
-						continue;
-
-					propComponent.Model = polyMesh!.Rebuild();
-
-					propComponent.IsStatic = true;
-				}
-				else if ( isStaticProp )
-				{
-					Log.Info( $"static prop: {ent.ClassName}, {ent.Model}" );
-					var staticProp = new GameObject( true, ent.ClassName );
-					staticProp.SetParent( parent );
-					staticProp.WorldPosition = ent.Position;
-					staticProp.WorldRotation = ent.Angles.ToRotation();
-
-					var propComponent = staticProp.Components.Create<Prop>();
-
-					var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
-					propComponent.Model = (model is null || model.IsError) ? Model.Error : model;
-					propComponent.IsStatic = true;
-				}
-				else if ( !isStaticProp )
-				{
-					Log.Warning( $"model ent: {ent.ClassName} {ent.Model}" );
-				}
+				HandleModelEntity( ent, entityParent );
 			}
 			else
 			{
-				Log.Warning( $"ent: {ent.ClassName} " );
+				var targetname = ent.GetValue( "targetname" ) ?? ent.ClassName;
+
+				switch ( ent.ClassName )
+				{
+					// get rid of some useless entities
+					case "info_node":
+					case "info_node_air":
+					case "env_sun":
+					case "b":
+
+						break;
+					case "info_player_start":
+						{
+							var playerStart = new GameObject( entityParent, true, targetname );
+							playerStart.WorldPosition = ent.Position;
+							playerStart.WorldRotation = ent.Angles.ToRotation();
+							playerStart.Components.Create<SpawnPoint>();
+						}
+						break;
+
+					case "light":
+						{
+							var lightObj = new GameObject( entityParent, true, targetname );
+							lightObj.WorldPosition = ent.Position;
+
+							var light = lightObj.Components.Create<PointLight>();
+
+							// fetch qattenuation and distance
+							light.Attenuation = ent.GetValue( "_quadratic_attn" )?.ToFloat() ?? 1f;
+							var distance = ent.GetValue( "_distance" )?.ToInt();
+							if ( distance is not null && distance != 0 )
+								light.Radius = distance.Value;
+
+							// fetch color
+							var lightString = ent.GetValue( "_light" );
+							var colorVec = lightString is not null ? Vector4.Parse( ent.GetValue( "_light" ) ) : new Vector4( 1.0f );
+							var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
+							light.LightColor = color.WithAlpha( 1.0f );
+
+						}
+						break;
+
+					case "light_environment":
+						{
+							var sunObj = new GameObject( entityParent, true, targetname );
+							sunObj.WorldPosition = ent.Position;
+							sunObj.WorldRotation = ent.Angles.WithPitch( 1 - ent.Angles.pitch ).ToRotation();
+
+							var light = sunObj.Components.Create<DirectionalLight>();
+
+							// fetch color
+							var lightString = ent.GetValue( "_light" );
+							var colorVec = lightString is not null ? Vector4.Parse( ent.GetValue( "_light" ) ) : new Vector4( 1.0f );
+							var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
+							light.LightColor = color.WithAlpha( 1.0f );
+
+							Log.Info( $"---sun---" );
+
+							foreach ( var entry in ent.Data )
+							{
+								Log.Info( $"{entry.Key}: {entry.Value}" );
+							}
+						}
+						break;
+
+					default:
+						Log.Warning( $"unhandled entity: {ent.ClassName} {(targetname != ent.ClassName ? targetname : null)}" );
+						break;
+				}
 			}
+		}
+	}
 
+	private void HandleModelEntity( LumpEntity ent, GameObject parent )
+	{
+		if ( ent.ClassName is null || ent.Model is null )
+			return;
 
+		if ( ent.Model.StartsWith( '*' ) )
+		{
+			var brushEntity = new GameObject( true, ent.ClassName );
+			brushEntity.SetParent( parent );
+			brushEntity.WorldPosition = ent.Position;
+			brushEntity.WorldRotation = ent.Angles.ToRotation();
 
-			// regular entity
-			//var mapent = new MapEntity( Map );
-			//mapent.ClassName = ent.ClassName;
-			//mapent.Position = ent.Position;
-			//mapent.Angles = ent.Angles;
-			//mapent.Name = ent.GetValue( "targetname" ) ?? "";
+			var propComponent = brushEntity.Components.Create<Prop>();
+			var modelIndex = int.Parse( ent.Model.TrimStart( '*' ) );
+			var polyMesh = Context.CachedPolygonMeshes?[modelIndex];
 
-			//foreach ( var kvp in ent.Data )
-			//{
-			//	//mapent.SetKeyValue( kvp.Key, kvp.Value );
-			//}
+			if ( polyMesh is null )
+				return;
+
+			propComponent.Model = polyMesh!.Rebuild();
+
+			propComponent.IsStatic = true;
+		}
+		else
+		{
+			if ( !Context.Settings.LoadModels )
+				return;
+
+			var staticProp = new GameObject( true, ent.ClassName );
+			staticProp.SetParent( parent );
+			staticProp.WorldPosition = ent.Position;
+			staticProp.WorldRotation = ent.Angles.ToRotation();
+
+			var propComponent = staticProp.Components.Create<Prop>();
+
+			var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
+			propComponent.Model = (model is null || model.IsError) ? Model.Error : model;
+
+			propComponent.IsStatic = ent.ClassName.Contains( "static" );
 		}
 	}
 }

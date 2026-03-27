@@ -48,10 +48,10 @@ public static class Main
 		var settings = Game.Cookies.Get( cookieString, newSettings );
 
 		var ps = new ControlSheet();
-		ps.AddProperty( settings, x => x );
 		ps.AddProperty( settings, x => x.FilePath );
 		ps.AddProperty( settings, x => x.ChunkSize );
 		ps.AddProperty( settings, x => x.LoadMaterials );
+		ps.AddProperty( settings, x => x.LoadModels );
 		ps.AddProperty( settings, x => x.ImportEntities );
 		ps.AddProperty( settings, x => x.ImportToolMaterials );
 		ps.AddProperty( settings, x => x.ImportDisplacements );
