@@ -28,7 +28,8 @@ public partial class MapBuilder
 		worldspawn.SetParent( root );
 
 		// builds entities, including prop static and brush entities
-		BuildEntities( worldspawn );
+		if ( Context.Settings.ImportEntities )
+			BuildEntities( worldspawn );
 
 	}
 

@@ -24,11 +24,11 @@ public partial class MapBuilder
 			// props and brush entities
 			if ( ent.Model is not null )
 			{
-				var isBrushEntity = ent.Model.StartsWith( '*' );
 				var isStaticProp = ent.ClassName.Contains( "static" );
 
-				if ( isBrushEntity && Context.Settings.ImportBrushEntities )
+				if ( ent.Model.StartsWith( '*' ) )
 				{
+					Log.Info( $"brush entitiy: {ent.ClassName}, {ent.Model}" );
 					var brushEntity = new GameObject( true, ent.ClassName );
 					brushEntity.SetParent( parent );
 					brushEntity.WorldPosition = ent.Position;
@@ -45,8 +45,9 @@ public partial class MapBuilder
 
 					propComponent.IsStatic = true;
 				}
-				else if ( isStaticProp && Context.Settings.ImportStaticProps )
+				else if ( isStaticProp )
 				{
+					Log.Info( $"static prop: {ent.ClassName}, {ent.Model}" );
 					var staticProp = new GameObject( true, ent.ClassName );
 					staticProp.SetParent( parent );
 					staticProp.WorldPosition = ent.Position;
@@ -58,8 +59,17 @@ public partial class MapBuilder
 					propComponent.Model = (model is null || model.IsError) ? Model.Error : model;
 					propComponent.IsStatic = true;
 				}
-
+				else if ( !isStaticProp )
+				{
+					Log.Warning( $"model ent: {ent.ClassName} {ent.Model}" );
+				}
 			}
+			else
+			{
+				Log.Warning( $"ent: {ent.ClassName} " );
+			}
+
+
 
 			// regular entity
 			//var mapent = new MapEntity( Map );

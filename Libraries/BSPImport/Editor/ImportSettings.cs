@@ -20,21 +20,10 @@ public class ImportSettings
 	public bool LoadMaterials { get; set; } = true;
 
 	/// <summary>
-	/// Include static Prop models as GameObjects.
+	/// Include Entities (Props, Lights, Brush Entities, etc) as GameObjects.
 	/// </summary>
 	[Property]
-	public bool ImportStaticProps { get; set; } = true;
-
-	/// <summary>
-	/// Include Brush Entities as GameObjects
-	/// </summary>
-	[Property]
-	public bool ImportBrushEntities { get; set; } = true;
-
-	/// <summary>
-	/// Include Misc Entities (Lights, Spawns, etc) as GameObjects.
-	/// </summary>
-	//public bool ImportEntities { get; set; } = true;
+	public bool ImportEntities { get; set; } = true;
 
 	/// <summary>
 	/// Include Tool Materials (toolsskybox, trigger, etc) in the world mesh.
