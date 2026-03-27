@@ -25,6 +25,17 @@ public partial class MapBuilder
 			if ( ent.ClassName.Contains( "logic" ) )
 				continue;
 
+			var blacklist = new List<string>()
+			{
+				"info_node",
+				"info_node_air",
+				"env_sun"
+			};
+
+			// skip some useless entities
+			if ( blacklist.Contains( ent.ClassName ) )
+				continue;
+
 			// props and brush entities
 			if ( ent.Model is not null )
 			{
@@ -36,13 +47,6 @@ public partial class MapBuilder
 
 				switch ( ent.ClassName )
 				{
-					// get rid of some useless entities
-					case "info_node":
-					case "info_node_air":
-					case "env_sun":
-					case "b":
-
-						break;
 					case "info_player_start":
 						{
 							var playerStart = new GameObject( entityParent, true, targetname );

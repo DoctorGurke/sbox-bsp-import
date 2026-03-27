@@ -254,7 +254,6 @@ public static class PolyMeshX
 		var uvs = new Vector2[count];
 
 		// Read displacement vertices in storage order (X-major: x*side + y)
-		// Use flipped Y when reading to correct mirroring in many BSPs while preserving X-major ordering.
 		var storedVerts = new DisplacementVertex[count];
 		for ( int sx = 0; sx < side; sx++ )
 		{
