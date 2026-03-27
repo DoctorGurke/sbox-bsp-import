@@ -24,12 +24,14 @@ public partial class MapBuilder
 		BuildModelMeshes();
 
 		// build map worldspawn geometry (model 0)
-		var worldspawn = BuildWorldGeometry();
-		worldspawn.SetParent( root );
-
+		if ( Context.Settings.ImportWorldGeometry )
+		{
+			var worldspawn = BuildWorldGeometry();
+			worldspawn.SetParent( root );
+		}
 		// builds entities, including prop static and brush entities
 		if ( Context.Settings.ImportEntities )
-			BuildEntities( worldspawn );
+			BuildEntities( root );
 
 	}
 
@@ -43,7 +45,7 @@ public partial class MapBuilder
 		var worldspawnMeshes = ConstructWorldspawn().ToList();
 		var displacementMeshes = ConstructDisplacementMeshes().ToList();
 
-		if ( displacementMeshes.Any() && Context.Settings.ImportDisplacements )
+		if ( displacementMeshes.Any() )
 		{
 			Log.Info( $"Displacement Meshes: {displacementMeshes.Count}" );
 			var displacementParent = new GameObject( worldspawn, true, "displacements" );

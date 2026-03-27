@@ -38,8 +38,8 @@ public class ImportSettings
 	public bool ImportToolMaterials { get; set; } = false;
 
 	/// <summary>
-	/// Include Displacement Meshes in the world mesh.
+	/// Include world geometry, including displacements.
 	/// </summary>
 	[Property]
-	public bool ImportDisplacements { get; set; } = true;
+	public bool ImportWorldGeometry { get; set; } = true;
 }

@@ -91,13 +91,6 @@ public partial class MapBuilder
 							var colorVec = lightString is not null ? Vector4.Parse( ent.GetValue( "_light" ) ) : new Vector4( 1.0f );
 							var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
 							light.LightColor = color.WithAlpha( 1.0f );
-
-							Log.Info( $"---sun---" );
-
-							foreach ( var entry in ent.Data )
-							{
-								Log.Info( $"{entry.Key}: {entry.Value}" );
-							}
 						}
 						break;
 

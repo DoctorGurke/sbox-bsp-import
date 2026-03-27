@@ -54,7 +54,7 @@ public static class Main
 		ps.AddProperty( settings, x => x.LoadModels );
 		ps.AddProperty( settings, x => x.ImportEntities );
 		ps.AddProperty( settings, x => x.ImportToolMaterials );
-		ps.AddProperty( settings, x => x.ImportDisplacements );
+		ps.AddProperty( settings, x => x.ImportWorldGeometry );
 
 		canvas.Layout.Add( ps );
 
