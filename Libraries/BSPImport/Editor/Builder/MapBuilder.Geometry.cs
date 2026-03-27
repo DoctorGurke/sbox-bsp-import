@@ -33,6 +33,56 @@ public partial class MapBuilder
 		Log.Info( $"Done Building PolygonMeshes." );
 	}
 
+	static void CenterMeshOrigin( MeshComponent meshComponent )
+	{
+		if ( !meshComponent.IsValid() ) return;
+
+		var mesh = meshComponent.Mesh;
+		if ( mesh is null ) return;
+
+		var children = meshComponent.GameObject.Children
+			.Select( x => (GameObject: x, Transform: x.WorldTransform) )
+			.ToArray();
+
+		var world = meshComponent.WorldTransform;
+		var bounds = mesh.CalculateBounds( world );
+		var center = bounds.Center;
+		var localCenter = world.PointToLocal( center );
+		meshComponent.WorldPosition = center;
+		meshComponent.Mesh.ApplyTransform( new Transform( -localCenter ) );
+		meshComponent.RebuildMesh();
+
+		foreach ( var child in children )
+		{
+			child.GameObject.WorldTransform = child.Transform;
+		}
+	}
+
+	private IEnumerable<PolygonMesh?> ConstructDisplacementMeshes()
+	{
+		HashSet<ushort> DisplacementIndices = new();
+
+		for ( short i = 0; i < Context.Geometry.DisplacementInfoCount; i++ )
+		{
+			Context.Geometry.TryGetDisplacementInfo( i, out var dispInfo );
+
+			DisplacementIndices.Add( dispInfo.MapFace );
+		}
+
+		// create one mesh per displacement
+		foreach ( ushort dispIndex in DisplacementIndices )
+		{
+			var dispMesh = ConstructDisplacement( dispIndex );
+			if ( dispMesh is not null )
+			{
+				if ( dispMesh.FaceHandles.Any() )
+				{
+					yield return dispMesh;
+				}
+			}
+		}
+	}
+
 	private IEnumerable<PolygonMesh?> ConstructWorldspawn()
 	{
 		var geo = Context.Geometry;
@@ -69,57 +119,6 @@ public partial class MapBuilder
 			{
 				if ( polyMesh.FaceHandles.Any() )
 					yield return polyMesh;
-			}
-		}
-
-
-		if ( Context.Settings.ImportDisplacements )
-		{
-			//HashSet<ushort> DisplacementIndices = new();
-
-			//for ( short i = 0; i < Context.Geometry.DisplacementInfoCount; i++ )
-			//{
-			//	Context.Geometry.TryGetDisplacementInfo( i, out var dispInfo );
-
-			//	DisplacementIndices.Add( dispInfo.MapFace );
-			//}
-
-			//// create one mesh per displacement
-			//foreach ( ushort dispIndex in DisplacementIndices )
-			//{
-			//	var dispMesh = ConstructDisplacement( dispIndex );
-			//	if ( dispMesh is not null )
-			//	{
-			//		if ( dispMesh.FaceHandles.Any() )
-			//			yield return dispMesh;
-			//	}
-			//}
-
-			List<DisplacementMesh> displacements = new();
-
-			for ( short i = 0; i < Context.Geometry.DisplacementInfoCount; i++ )
-			{
-				Context.Geometry.TryGetDisplacementInfo( i, out var dispInfo );
-
-				DisplacementMesh mesh = new();
-				mesh.Info = dispInfo;
-
-				for ( int v = 0; v < mesh.Info.VertCount; v++ )
-				{
-					Context.Geometry.TryGetDisplacementVertex( dispInfo.FirstVertex + v, out var vertInfo );
-
-					mesh.Vertices.Add( vertInfo );
-				}
-
-				displacements.Add( mesh );
-			}
-
-			// SetupDisplacementNeighbors(displacements);
-
-			foreach ( var mesh in displacements )
-			{
-				//GenerateDisplacementGeometry(mesh);
-				//TesselateDisplacement(mesh);
 			}
 		}
 	}

@@ -125,6 +125,37 @@ public static class PolyMeshX
 		}
 	}
 
+	private static int FindClosestCorner( Vector3[] corners, Vector3 startPosition )
+	{
+		int minIndex = -1;
+		float minDistance = float.MaxValue;
+
+		for ( int i = 0; i < 4; i++ )
+		{
+			Vector3 segment = startPosition - corners[i];
+			float distanceSq = segment.LengthSquared;
+			if ( distanceSq < minDistance )
+			{
+				minDistance = distanceSq;
+				minIndex = i;
+			}
+		}
+
+		return minIndex;
+	}
+
+	private static Vector3[] RotateCornerArray( Vector3[] corners, int pointStartIndex )
+	{
+		var rotatedCorners = new Vector3[4];
+
+		for ( int i = 0; i < 4; i++ )
+		{
+			rotatedCorners[i] = corners[(i + pointStartIndex) % 4];
+		}
+
+		return rotatedCorners;
+	}
+
 	public static void AddDisplacementMesh( this PolygonMesh mesh, ImportContext context, ushort faceIndex )
 	{
 		if ( !context.HasCompleteGeometry( out var geo ) )
@@ -152,15 +183,9 @@ public static class PolyMeshX
 		Material? dispMaterial = null;
 		if ( !string.IsNullOrEmpty( materialName ) )
 		{
-			try
-			{
-				dispMaterial = Material.Load( $"materials/{materialName}.vmat" );
-			}
-			catch
-			{
-				dispMaterial = null;
-			}
+			dispMaterial = Material.Load( $"materials/{materialName}.vmat" );
 		}
+
 		// fetch displacement info
 		if ( !geo.TryGetDisplacementInfo( face.DisplacementInfo, out var dInfo ) )
 		{
@@ -218,43 +243,66 @@ public static class PolyMeshX
 			return;
 		}
 
-		// match ordering used for regular faces
-		corners.Reverse();
+		int pointStartIndex = FindClosestCorner( corners.ToArray(), dInfo.StartPosition );
+		var rotatedCorners = RotateCornerArray( corners.ToArray(), pointStartIndex );
 
 		int power = dInfo.Power;
-		int side = (1 << power) + 1;
-		int count = side * side;
+		int side = dInfo.Side;
+		int count = dInfo.VertCount;
 
 		var positions = new Vector3[count];
 		var uvs = new Vector2[count];
 
-		// populate grid
-		for ( int y = 0; y < side; y++ )
+		// Read displacement vertices in storage order (X-major: x*side + y)
+		// Use flipped Y when reading to correct mirroring in many BSPs while preserving X-major ordering.
+		var storedVerts = new DisplacementVertex[count];
+		for ( int sx = 0; sx < side; sx++ )
 		{
-			for ( int x = 0; x < side; x++ )
+			for ( int sy = 0; sy < side; sy++ )
 			{
-				float s = side <= 1 ? 0f : (float)x / (side - 1);
-				float t = side <= 1 ? 0f : (float)y / (side - 1);
-
-				var bottom = Vector3.Lerp( corners[0], corners[1], s );
-				var top = Vector3.Lerp( corners[3], corners[2], s );
-				var basePos = Vector3.Lerp( bottom, top, t );
-
-				// Displacement vertices are stored in X-major order within the grid.
-				// Use x * side + y here instead of y * side + x to match the BSP layout
-				// and prevent a -90 degree rotation of the generated mesh.
-				// Flip the Y index when reading displacement vertices to correct
-				// mirroring around the Y axis while preserving X-major ordering.
-				int flippedY = (side - 1) - y;
-				int dvIndex = dInfo.FirstVertex + x * side + flippedY;
+				int dvIndex = dInfo.FirstVertex + sx * side + sy;
 				if ( !geo.TryGetDisplacementVertex( dvIndex, out var dVert ) )
 				{
 					mesh.AddMeshFaceInternal( context, face );
 					return;
 				}
 
+				storedVerts[sx * side + sy] = dVert;
+			}
+		}
+
+		// Build base grid positions (without displacement) for orientation matching
+		var baseGrid = new Vector3[count];
+		for ( int bx = 0; bx < side; bx++ )
+		{
+			for ( int by = 0; by < side; by++ )
+			{
+				float s = (float)bx / (side - 1);
+				float t = (float)by / (side - 1);
+				var bottom = Vector3.Lerp( rotatedCorners[0], rotatedCorners[1], s );
+				var top = Vector3.Lerp( rotatedCorners[3], rotatedCorners[2], s );
+				baseGrid[bx * side + by] = Vector3.Lerp( bottom, top, t );
+			}
+		}
+
+		// Populate positions/uvs by rotating the storage grid into the base grid orientation.
+		// Then rotate all displacement positions 90 degrees around world Z (up) about the face center.
+		for ( int sx = 0; sx < side; sx++ )
+		{
+			for ( int sy = 0; sy < side; sy++ )
+			{
+				var dVert = storedVerts[sx * side + sy];
+
+				float s = side <= 1 ? 0f : (float)sx / (side - 1);
+				float t = side <= 1 ? 0f : (float)sy / (side - 1);
+
+				var bottom = Vector3.Lerp( rotatedCorners[0], rotatedCorners[1], s );
+				var top = Vector3.Lerp( rotatedCorners[3], rotatedCorners[2], s );
+				var basePos = Vector3.Lerp( bottom, top, t );
+
 				var finalPos = basePos + dVert.Displacement * dVert.Distance;
-				int idx = y * side + x;
+
+				int idx = sy * side + sx; // base grid is row-major (y * side + x)
 				positions[idx] = finalPos;
 				uvs[idx] = GetTexCoords( context, face.TexInfo, finalPos );
 			}
@@ -273,14 +321,14 @@ public static class PolyMeshX
 				int d = c + 1;
 
 				// two tris: (a, b, c) and (b, d, c) — ordering chosen to match face winding
-				var t1 = mesh.AddFace( new[] { hVerts[a], hVerts[b], hVerts[c] } );
+				var t1 = mesh.AddFace( new[] { hVerts[a], hVerts[c], hVerts[b] } );
 				mesh.SetEdgeSmoothing( t1.Edge, PolygonMesh.EdgeSmoothMode.Soft );
-				mesh.SetFaceTextureCoords( t1, new[] { uvs[a], uvs[b], uvs[c] } );
+				mesh.SetFaceTextureCoords( t1, new[] { uvs[a], uvs[c], uvs[b] } );
 				if ( dispMaterial is not null && context.Settings.LoadMaterials ) mesh.SetFaceMaterial( t1, dispMaterial );
 
-				var t2 = mesh.AddFace( new[] { hVerts[b], hVerts[d], hVerts[c] } );
+				var t2 = mesh.AddFace( new[] { hVerts[c], hVerts[d], hVerts[b] } );
 				mesh.SetEdgeSmoothing( t2.Edge, PolygonMesh.EdgeSmoothMode.Soft );
-				mesh.SetFaceTextureCoords( t2, new[] { uvs[b], uvs[d], uvs[c] } );
+				mesh.SetFaceTextureCoords( t2, new[] { uvs[c], uvs[d], uvs[b] } );
 				if ( dispMaterial is not null && context.Settings.LoadMaterials ) mesh.SetFaceMaterial( t2, dispMaterial );
 			}
 		}
