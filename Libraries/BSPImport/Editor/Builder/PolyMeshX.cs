@@ -39,11 +39,6 @@ public static class PolyMeshX
 		// simple patch
 		materialName = materialName.Replace( "toolsskybox2d", "toolsskybox" );
 
-		if ( isToolsMaterial )
-		{
-			Log.Info( materialName );
-		}
-
 		if ( !context.Settings.ImportToolMaterials && isToolsMaterial )
 			return;
 

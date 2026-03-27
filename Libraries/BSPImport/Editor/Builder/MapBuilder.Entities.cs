@@ -29,7 +29,11 @@ public partial class MapBuilder
 			{
 				"info_node",
 				"info_node_air",
-				"env_sun"
+				"env_sun",
+				"sky_camera",
+				"path_track",
+				"water_lod_control",
+
 			};
 
 			// skip some useless entities

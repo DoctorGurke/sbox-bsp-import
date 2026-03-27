@@ -31,10 +31,6 @@ public class DisplacementInfoLump : BaseLump
 
 			var info = new DisplacementInfo( startPosition, firstVertex, firstTri, power, minTess, smoothingAngle, mapFace );
 			infos[i] = info;
-
-			var remaining = rInfo.GetLength();
-			Log.Info( $"remaining: {remaining}" );
-
 		}
 
 		Context.Geometry.SetDisplacementInfos( infos );
@@ -50,8 +46,6 @@ public struct DisplacementInfo
 	public int MinTess;
 	public float SmoothingAngle;
 	public ushort MapFace;
-
-	// helper: convert power level to side length
 
 	public DisplacementInfo( Vector3 startPosition, int firstVertex, int firstTri, int power, int minTess, float smoothingAngle, ushort mapFace )
 	{
