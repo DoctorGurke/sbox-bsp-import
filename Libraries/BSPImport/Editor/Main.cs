@@ -42,16 +42,10 @@ public static class Main
 		canvas.Layout.Margin = 16;
 		canvas.Layout.Spacing = 4;
 
-		var settings = new ImportSettings();
+		var newSettings = new ImportSettings();
 
 		var cookieString = "bsp-import.last-imported-bsp";
-		var lastPath = Game.Cookies.Get( cookieString, "" );
-
-		if ( !string.IsNullOrEmpty( lastPath ) )
-		{
-			Log.Info( $"loaded lastpath: {lastPath}" );
-			settings.FilePath = lastPath;
-		}
+		var settings = Game.Cookies.Get( cookieString, newSettings );
 
 		var ps = new ControlSheet();
 		ps.AddProperty( settings, x => x );
@@ -68,7 +62,7 @@ public static class Main
 		var btn = new Button( "Import", canvas );
 		btn.MouseClick += () =>
 		{
-			Game.Cookies.Set( cookieString, settings.FilePath );
+			Game.Cookies.Set<ImportSettings>( cookieString, settings );
 			DecompileAndImport( settings );
 			window.Close();
 		};
@@ -93,6 +87,6 @@ public static class Main
 
 		var repoURL = "https://github.com/DoctorGurke/sbox-bsp-import";
 		Log.Info( $"Report bugs or contribute @{repoURL}" );
-		Log.Info( "Imported Source 1 BSP File using bsp-import by DoctorGurke" );
+		Log.Info( "Imported Source 1 BSP File using sbox-bsp-import by DoctorGurke" );
 	}
 }
