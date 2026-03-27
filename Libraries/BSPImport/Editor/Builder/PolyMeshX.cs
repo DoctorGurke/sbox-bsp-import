@@ -74,7 +74,7 @@ public static class PolyMeshX
 		var hVertices = mesh.AddVertices( verts.ToArray() );
 		var hFace = mesh.AddFace( hVertices );
 
-		if ( context.Settings.LoadMaterials )
+		if ( context.Settings.LoadMaterials || isToolsMaterial && context.Settings.ImportToolMaterials )
 		{
 			var material = Material.Load( $"materials/{materialName}.vmat" );
 			mesh.SetFaceMaterial( hFace, material );
