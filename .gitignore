@@ -34,3 +34,6 @@ code/Editor/.vscode/*
 *.vpk
 
 .sbox/
+
+Assets/maps/berimbau/*
+Assets/maps/hl2/*

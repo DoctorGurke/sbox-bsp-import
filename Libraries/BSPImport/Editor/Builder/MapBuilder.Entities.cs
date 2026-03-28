@@ -2,7 +2,51 @@
 
 public partial class MapBuilder
 {
-	/// <summary>
+	private static HashSet<string> EntityClassBlacklist = new()
+	{
+				"info_node",
+				"info_node_air",
+				"env_sun",
+				"sky_camera",
+				"path_track",
+				"water_lod_control",
+				"func_areaportal",
+				"shadow_control",
+				"env_skypaint",
+				"lua_run",
+				"path_corner",
+				"info_hint",
+				"info_node_air_hint",
+				"info_node_climb",
+				"info_node_hint",
+				"filter_multi",
+				"point_template",
+				"filter_activator_class",
+				"point_message",
+				"item_item_crate",
+				"game_round_win",
+				"filter_activator_tfteam",
+				"item_ammopack_small",
+				"item_ammopack_medium",
+				"item_ammopack_full",
+				"item_healthkit_small",
+				"item_healthkit_medium",
+				"item_healthkit_full",
+				"info_player_teamspawn",
+				"team_control_point",
+				"point_devshot_camera",
+				"info_observer_point",
+				"info_intermission",
+				"team_round_timer",
+				"team_control_point_master",
+				"item_teamflag",
+				"info_null",
+				"game_intro_viewpoint",
+				"info_player_terrorist",
+				"info_player_counterterrorist",
+	};
+
+	/// <summary>;
 	/// Build entities parsed from entity lump and static props
 	/// </summary>
 	protected virtual void BuildEntities( GameObject parent )
@@ -26,21 +70,10 @@ public partial class MapBuilder
 			if ( ent.ClassName.Contains( "logic" ) )
 				continue;
 
-			var blacklist = new List<string>()
-			{
-				"info_node",
-				"info_node_air",
-				"env_sun",
-				"sky_camera",
-				"path_track",
-				"water_lod_control",
-				"func_areaportal",
-				"shadow_control",
-				"env_skypaint",
-			};
+
 
 			// skip some useless entities
-			if ( blacklist.Contains( ent.ClassName ) )
+			if ( EntityClassBlacklist.Contains( ent.ClassName ) )
 				continue;
 
 			// props and brush entities
