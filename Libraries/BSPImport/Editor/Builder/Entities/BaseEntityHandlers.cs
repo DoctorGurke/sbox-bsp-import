@@ -13,9 +13,31 @@ internal static class BaseEntities
 		var propComponent = obj.Components.Create<Prop>();
 
 		var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
-		propComponent.Model = (model is null || model.IsError) ? Model.Error : model;
-
+		propComponent.Model = model;
 		propComponent.IsStatic = true;
+	}
+
+	/// <summary>
+	/// prop_physics
+	/// </summary>
+	public static void HandlePhysicsPropEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	{
+		if ( !settings.LoadModels )
+			return;
+
+		var propComponent = obj.Components.Create<Prop>();
+		var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
+		propComponent.Model = model;
+		propComponent.IsStatic = false;
+
+		// apply tint
+		var tintVec = Vector3Int.Parse( ent.GetValue( "rendercolor" ) ?? "255 255 255" );
+		var tintCol = Color.FromBytes( tintVec.x, tintVec.y, tintVec.z );
+		propComponent.Tint = tintCol;
+
+		// apply model scale
+		var scale = ent.GetValue( "modelscale" )?.ToFloat() ?? 1.0f;
+		propComponent.GameObject.WorldScale = new Vector3( scale );
 	}
 
 	/// <summary>
