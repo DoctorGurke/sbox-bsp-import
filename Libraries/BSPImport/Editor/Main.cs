@@ -1,29 +1,5 @@
 ﻿namespace BspImport;
 
-
-public class BspImportComponent : Component, Component.ExecuteInEditor
-{
-
-	[Property]
-	public ImportSettings Settings { get; set; } = new ImportSettings();
-
-	[Button( "Test", "map" )]
-	public void Test()
-	{
-		// cleanup any children to get rid of previous import
-		foreach ( var child in GameObject.Children )
-		{
-			child.Destroy();
-		}
-
-		var data = Editor.FileSystem.Content.ReadAllBytes( Settings.FilePath );
-		var name = Path.GetFileName( Settings.FilePath );
-		var context = new ImportContext( name, data.ToArray(), Settings );
-		context.Decompile();
-		context.Build( GameObject );
-	}
-}
-
 public static class Main
 {
 	/// <summary>

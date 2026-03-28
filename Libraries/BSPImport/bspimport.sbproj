@@ -3,11 +3,13 @@
   "Type": "library",
   "Org": "doc",
   "Ident": "bsp_import",
-  "Tags": "tool editor scene map source bsp",
   "Schema": 1,
+  "IncludeSourceFiles": false,
   "Resources": null,
   "PackageReferences": [],
   "EditorReferences": null,
+  "Mounts": null,
+  "IsStandaloneOnly": false,
   "Metadata": {
     "CsProjName": "",
     "Compiler": {
