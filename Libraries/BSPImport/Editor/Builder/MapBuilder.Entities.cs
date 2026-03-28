@@ -11,6 +11,7 @@ public partial class MapBuilder
 			return;
 
 		var entityParent = new GameObject( parent, true, "entities" );
+		var unhandledEntities = new HashSet<string>();
 
 		foreach ( var ent in Context.Entities )
 		{
@@ -103,7 +104,11 @@ public partial class MapBuilder
 						break;
 
 					default:
-						Log.Warning( $"unhandled entity: {ent.ClassName} {(targetname != ent.ClassName ? targetname : null)}" );
+						if ( !unhandledEntities.Contains( ent.ClassName ) )
+						{
+							unhandledEntities.Add( ent.ClassName );
+							Log.Warning( $"unhandled entity class: {ent.ClassName}" );
+						}
 						break;
 				}
 			}
