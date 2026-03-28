@@ -188,9 +188,12 @@ public partial class MapBuilder
 
 		var brushEntity = CreatePointEntity( ent, parent );
 
-		var propComponent = brushEntity.Components.Create<Prop>();
-		propComponent.Model = polyMesh.Rebuild();
-		propComponent.IsStatic = true;
+		var meshComponent = brushEntity.Components.Create<MeshComponent>();
+		meshComponent.Mesh = polyMesh;
+
+		//var propComponent = brushEntity.Components.Create<Prop>();
+		//propComponent.Model = polyMesh.Rebuild();
+		//propComponent.IsStatic = true;
 
 		return brushEntity;
 	}
