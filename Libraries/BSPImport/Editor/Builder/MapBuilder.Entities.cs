@@ -33,7 +33,9 @@ public partial class MapBuilder
 				"sky_camera",
 				"path_track",
 				"water_lod_control",
-
+				"func_areaportal",
+				"shadow_control",
+				"env_skypaint",
 			};
 
 			// skip some useless entities
@@ -86,7 +88,9 @@ public partial class MapBuilder
 						{
 							var sunObj = new GameObject( entityParent, true, targetname );
 							sunObj.WorldPosition = ent.Position;
-							sunObj.WorldRotation = ent.Angles.WithPitch( 1 - ent.Angles.pitch ).ToRotation();
+							var pitch = ent.GetValue( "pitch" )?.ToFloat() ?? ent.Angles.pitch;
+							var forward = ent.Angles.WithPitch( pitch ).ToRotation().Forward;
+							sunObj.WorldRotation = Rotation.LookAt( -forward );
 
 							var light = sunObj.Components.Create<DirectionalLight>();
 
