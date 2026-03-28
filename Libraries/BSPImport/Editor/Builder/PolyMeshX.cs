@@ -183,7 +183,7 @@ public static class PolyMeshX
 
 		// load material for displacement triangles if we have a name
 		Material? dispMaterial = null;
-		if ( !string.IsNullOrEmpty( materialName ) )
+		if ( !string.IsNullOrEmpty( materialName ) && context.Settings.LoadMaterials )
 		{
 			dispMaterial = Material.Load( $"materials/{materialName}.vmat" );
 		}
@@ -325,12 +325,12 @@ public static class PolyMeshX
 				var t1 = mesh.AddFace( new[] { hVerts[a], hVerts[c], hVerts[b] } );
 				mesh.SetEdgeSmoothing( t1.Edge, PolygonMesh.EdgeSmoothMode.Soft );
 				mesh.SetFaceTextureCoords( t1, new[] { uvs[a], uvs[c], uvs[b] } );
-				if ( dispMaterial is not null && context.Settings.LoadMaterials ) mesh.SetFaceMaterial( t1, dispMaterial );
+				if ( dispMaterial is not null ) mesh.SetFaceMaterial( t1, dispMaterial );
 
 				var t2 = mesh.AddFace( new[] { hVerts[c], hVerts[d], hVerts[b] } );
 				mesh.SetEdgeSmoothing( t2.Edge, PolygonMesh.EdgeSmoothMode.Soft );
 				mesh.SetFaceTextureCoords( t2, new[] { uvs[c], uvs[d], uvs[b] } );
-				if ( dispMaterial is not null && context.Settings.LoadMaterials ) mesh.SetFaceMaterial( t2, dispMaterial );
+				if ( dispMaterial is not null ) mesh.SetFaceMaterial( t2, dispMaterial );
 			}
 		}
 	}
