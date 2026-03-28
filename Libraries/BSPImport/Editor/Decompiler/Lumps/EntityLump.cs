@@ -97,20 +97,39 @@ public class LumpEntity
 	public Vector3 Position => Vector3.Parse( $"[{GetValue( "origin" ) ?? ""}]" );
 	public bool IsBrushEntity => Model is not null && Model.StartsWith( '*' );
 
-	private Angles ConstructAngles()
+	public Angles Angles => GetRotation().Angles();
+	public string? Model => GetValue( "model" );
+
+	public Rotation GetRotation()
 	{
-		var split = GetValue( "angles" )?.Split( ' ' );
+		var vec = Vector3.Parse( GetValue( "angles" ) );
 
-		if ( split is null || split.Length != 3 )
-			return Angles.Zero;
+		var rotation = Rotation.Identity.RotateAroundAxis( Vector3.Up, vec.y ) // yaw
+			.RotateAroundAxis( Vector3.Right, vec.x ) // pitch
+			.RotateAroundAxis( Vector3.Forward, vec.z ); // roll
 
-
-		var angle = Angles.Parse( $"{split[0]},{split[1]},{split[2]}" );
-
-		return angle;
+		return rotation;
 	}
 
-	public Angles Angles => ConstructAngles();
+	public Rotation GetLightRotation()
+	{
+		float yaw = Angles.yaw;
+		float pitch = GetValue( "pitch" )?.ToInt() ?? Angles.pitch;
 
-	public string? Model => GetValue( "model" );
+		Log.Info( $"{Angles}" );
+		Log.Info( $"yaw: {Angles.yaw}" );
+
+		pitch = -pitch;
+
+		var rotation = Rotation.FromYaw( yaw ) * Rotation.FromPitch( pitch );
+		return rotation;
+	}
+
+	public void LogData()
+	{
+		foreach ( var entry in Data )
+		{
+			Log.Info( $"{entry.Key} {entry.Value}" );
+		}
+	}
 }

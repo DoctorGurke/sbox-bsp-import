@@ -68,15 +68,35 @@ internal static class BaseEntities
 		light.LightColor = color.WithAlpha( 1.0f );
 	}
 
+	public static void HandleSpotLightEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	{
+		ent.LogData();
+
+		// apply -pitch light rotation
+		obj.WorldRotation = ent.GetLightRotation();
+
+		var light = obj.Components.Create<SpotLight>();
+
+		// fetch qattenuation and distance
+		light.Attenuation = ent.GetValue( "_quadratic_attn" )?.ToFloat() ?? 1f;
+		var distance = ent.GetValue( "_distance" )?.ToInt();
+		if ( distance is not null && distance != 0 )
+			light.Radius = distance.Value;
+
+		// fetch color
+		var lightString = ent.GetValue( "_light" );
+		var colorVec = lightString is not null ? Vector4.Parse( ent.GetValue( "_light" ) ) : new Vector4( 1.0f );
+		var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
+		light.LightColor = color.WithAlpha( 1.0f );
+	}
+
 	/// <summary>
 	/// light_environment
 	/// </summary>
 	public static void HandleLightEnvironmentEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
 	{
-		// correct for inverted light direction (source 2013)
-		var pitch = ent.GetValue( "pitch" )?.ToFloat() ?? ent.Angles.pitch;
-		var forward = ent.Angles.WithPitch( pitch ).ToRotation().Forward;
-		obj.WorldRotation = Rotation.LookAt( -forward );
+		// apply -pitch light rotation
+		obj.WorldRotation = ent.GetLightRotation();
 
 		var light = obj.Components.Create<DirectionalLight>();
 

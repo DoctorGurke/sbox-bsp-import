@@ -15,6 +15,7 @@ public partial class MapBuilder
 		Handlers.Add( "prop_physics", BaseEntities.HandlePhysicsPropEntity );
 		Handlers.Add( "info_player_start", BaseEntities.HandlePlayerStartEntity );
 		Handlers.Add( "light", BaseEntities.HandleLightEntity );
+		Handlers.Add( "light_spot", BaseEntities.HandleSpotLightEntity );
 		Handlers.Add( "light_environment", BaseEntities.HandleLightEnvironmentEntity );
 	}
 
