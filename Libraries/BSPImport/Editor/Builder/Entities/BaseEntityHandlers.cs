@@ -41,6 +41,31 @@ internal static class BaseEntities
 	}
 
 	/// <summary>
+	/// prop_dynamic
+	/// </summary>
+	public static void HandleDynamicPropEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	{
+		if ( !settings.LoadModels )
+			return;
+
+		var propComponent = obj.Components.Create<Prop>();
+		var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
+		propComponent.Model = model;
+		propComponent.IsStatic = false;
+
+		// apply tint
+		var tintVec = Vector3Int.Parse( ent.GetValue( "rendercolor" ) ?? "255 255 255" );
+		var tintCol = Color.FromBytes( tintVec.x, tintVec.y, tintVec.z );
+		propComponent.Tint = tintCol;
+
+		// apply model scale
+		var scale = ent.GetValue( "modelscale" )?.ToFloat() ?? 1.0f;
+		propComponent.GameObject.WorldScale = new Vector3( scale );
+
+		propComponent.IsStatic = true;
+	}
+
+	/// <summary>
 	/// info_player_start
 	/// </summary>
 	public static void HandlePlayerStartEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )

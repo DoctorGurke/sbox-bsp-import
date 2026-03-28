@@ -13,6 +13,7 @@ public partial class MapBuilder
 
 		Handlers.Add( "prop_static", BaseEntities.HandleStaticPropEntity );
 		Handlers.Add( "prop_physics", BaseEntities.HandlePhysicsPropEntity );
+		Handlers.Add( "prop_dynamic", BaseEntities.HandleDynamicPropEntity );
 		Handlers.Add( "info_player_start", BaseEntities.HandlePlayerStartEntity );
 		Handlers.Add( "light", BaseEntities.HandleLightEntity );
 		Handlers.Add( "light_spot", BaseEntities.HandleSpotLightEntity );
