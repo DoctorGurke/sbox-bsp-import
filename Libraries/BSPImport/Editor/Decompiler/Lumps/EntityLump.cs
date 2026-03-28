@@ -116,9 +116,6 @@ public class LumpEntity
 		float yaw = Angles.yaw;
 		float pitch = GetValue( "pitch" )?.ToInt() ?? Angles.pitch;
 
-		Log.Info( $"{Angles}" );
-		Log.Info( $"yaw: {Angles.yaw}" );
-
 		pitch = -pitch;
 
 		var rotation = Rotation.FromYaw( yaw ) * Rotation.FromPitch( pitch );

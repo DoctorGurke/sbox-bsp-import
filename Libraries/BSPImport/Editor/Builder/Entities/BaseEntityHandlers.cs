@@ -70,8 +70,6 @@ internal static class BaseEntities
 
 	public static void HandleSpotLightEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
 	{
-		ent.LogData();
-
 		// apply -pitch light rotation
 		obj.WorldRotation = ent.GetLightRotation();
 
