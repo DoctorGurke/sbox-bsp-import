@@ -93,7 +93,9 @@ public class LumpEntity
 
 	// getting data for making actual MapEntity refs, parsed from kv data
 	public string? ClassName => GetValue( "classname" );
+	public string? TargetName => GetValue( "targetname" ) ?? ClassName ?? "entity";
 	public Vector3 Position => Vector3.Parse( $"[{GetValue( "origin" ) ?? ""}]" );
+	public bool IsBrushEntity => Model is not null && Model.StartsWith( '*' );
 
 	private Angles ConstructAngles()
 	{
@@ -101,6 +103,7 @@ public class LumpEntity
 
 		if ( split is null || split.Length != 3 )
 			return Angles.Zero;
+
 
 		var angle = Angles.Parse( $"{split[0]},{split[1]},{split[2]}" );
 

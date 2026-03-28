@@ -6,13 +6,11 @@ public partial class MapBuilder
 {
 	public void BuildModelMeshes()
 	{
-		Log.Info( $"Building PolygonMeshes..." );
-
 		var modelCount = Context.Models?.Length ?? 0;
 
 		if ( modelCount <= 0 )
 		{
-			Log.Error( $"Unable to BuildPolygonMeshes, Context has no Models!" );
+			Log.Error( $"Unable to build bsp models, Context has no Models!" );
 			return;
 		}
 
@@ -29,8 +27,45 @@ public partial class MapBuilder
 		}
 
 		Context.CachedPolygonMeshes = polyMeshes;
+	}
 
-		Log.Info( $"Done Building PolygonMeshes." );
+	/// <summary>
+	/// Builds the map world geometry of the current context. Brush entities require pre-built PolygonMeshes. See <see cref="BuildModelMeshes"/>.
+	/// </summary>
+	protected virtual void BuildWorldGeometry( GameObject parent )
+	{
+		var displacementMeshes = ConstructDisplacementMeshes().ToList();
+
+		if ( displacementMeshes.Any() )
+		{
+			Log.Info( $"Displacement Meshes: {displacementMeshes.Count}" );
+			var displacementParent = new GameObject( parent, true, "Displacements" );
+			int count = 1;
+			foreach ( var displacement in displacementMeshes )
+			{
+				var dispObject = new GameObject( displacementParent, true, $"Displacement {count}" );
+				var meshComponent = dispObject.Components.Create<MeshComponent>();
+				meshComponent.Mesh = displacement;
+				CenterMeshOrigin( meshComponent );
+				count++;
+			}
+		}
+
+		var worldspawnMeshes = ConstructWorldspawn().ToList();
+		if ( worldspawnMeshes.Any() )
+		{
+			Log.Info( $"World Meshes: {worldspawnMeshes.Count}" );
+			var meshParent = new GameObject( parent, true, "Meshes" );
+			int count = 1;
+			foreach ( var mesh in worldspawnMeshes )
+			{
+				var meshObject = new GameObject( meshParent, true, $"Mesh {count}" );
+				var meshComponent = meshObject.Components.Create<MeshComponent>();
+				meshComponent.Mesh = mesh;
+				CenterMeshOrigin( meshComponent );
+				count++;
+			}
+		}
 	}
 
 	static void CenterMeshOrigin( MeshComponent meshComponent )

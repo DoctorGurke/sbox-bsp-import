@@ -7,6 +7,8 @@ public partial class MapBuilder
 	public MapBuilder( ImportContext context )
 	{
 		Context = context;
+
+		SetupEntityHandlers();
 	}
 
 	/// <summary>
@@ -20,58 +22,24 @@ public partial class MapBuilder
 
 		var root = new GameObject( parent, true, name );
 
-		// prepares bsp model meshes (brush entities)
-		BuildModelMeshes();
 
-		// build map worldspawn geometry (model 0)
+		// build map worldspawn geometry (model 0), including displacements
 		if ( Context.Settings.ImportWorldGeometry )
 		{
-			var worldspawn = BuildWorldGeometry();
-			worldspawn.SetParent( root );
+
+			BuildWorldGeometry( root );
 		}
+
 		// builds entities, including prop static and brush entities
 		if ( Context.Settings.ImportEntities )
-			BuildEntities( root );
+		{
+			var entities = new GameObject( root, true, "Entities" );
 
+			// prepares bsp model meshes (brush entities)
+			BuildModelMeshes();
+			BuildEntities( entities );
+		}
 	}
 
-	/// <summary>
-	/// Builds the map world geometry of the current context, using the previously cached PolygonMesh.
-	/// </summary>
-	protected virtual GameObject BuildWorldGeometry()
-	{
-		var worldspawn = new GameObject( true, "worldspawn" );
 
-		var worldspawnMeshes = ConstructWorldspawn().ToList();
-		var displacementMeshes = ConstructDisplacementMeshes().ToList();
-
-		if ( displacementMeshes.Any() )
-		{
-			Log.Info( $"Displacement Meshes: {displacementMeshes.Count}" );
-			var displacementParent = new GameObject( worldspawn, true, "displacements" );
-
-			foreach ( var displacement in displacementMeshes )
-			{
-				var dispObject = new GameObject( displacementParent, true, "displacement" );
-				var meshComponent = dispObject.Components.Create<MeshComponent>();
-				meshComponent.Mesh = displacement;
-				CenterMeshOrigin( meshComponent );
-			}
-		}
-
-		if ( worldspawnMeshes.Any() )
-		{
-			Log.Info( $"World Meshes: {worldspawnMeshes.Count}" );
-			var meshParent = new GameObject( worldspawn, true, "world_meshes" );
-			foreach ( var mesh in worldspawnMeshes )
-			{
-				var meshObject = new GameObject( meshParent, true, "world_mesh" );
-				var meshComponent = meshObject.Components.Create<MeshComponent>();
-				meshComponent.Mesh = mesh;
-				CenterMeshOrigin( meshComponent );
-			}
-		}
-
-		return worldspawn;
-	}
 }

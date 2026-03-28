@@ -1,0 +1,67 @@
+﻿namespace BspImport.Builder.Entities;
+
+internal static class BaseEntities
+{
+	/// <summary>
+	/// prop_static
+	/// </summary>
+	public static void HandleStaticPropEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	{
+		if ( !settings.LoadModels )
+			return;
+
+		var propComponent = obj.Components.Create<Prop>();
+
+		var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
+		propComponent.Model = (model is null || model.IsError) ? Model.Error : model;
+
+		propComponent.IsStatic = true;
+	}
+
+	/// <summary>
+	/// info_player_start
+	/// </summary>
+	public static void HandlePlayerStartEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	{
+		obj.Components.Create<SpawnPoint>();
+	}
+
+	/// <summary>
+	/// light
+	/// </summary>
+	public static void HandleLightEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	{
+		var light = obj.Components.Create<PointLight>();
+
+		// fetch qattenuation and distance
+		light.Attenuation = ent.GetValue( "_quadratic_attn" )?.ToFloat() ?? 1f;
+		var distance = ent.GetValue( "_distance" )?.ToInt();
+		if ( distance is not null && distance != 0 )
+			light.Radius = distance.Value;
+
+		// fetch color
+		var lightString = ent.GetValue( "_light" );
+		var colorVec = lightString is not null ? Vector4.Parse( ent.GetValue( "_light" ) ) : new Vector4( 1.0f );
+		var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
+		light.LightColor = color.WithAlpha( 1.0f );
+	}
+
+	/// <summary>
+	/// light_environment
+	/// </summary>
+	public static void HandleLightEnvironmentEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	{
+		// correct for inverted light direction (source 2013)
+		var pitch = ent.GetValue( "pitch" )?.ToFloat() ?? ent.Angles.pitch;
+		var forward = ent.Angles.WithPitch( pitch ).ToRotation().Forward;
+		obj.WorldRotation = Rotation.LookAt( -forward );
+
+		var light = obj.Components.Create<DirectionalLight>();
+
+		// fetch color
+		var lightString = ent.GetValue( "_light" );
+		var colorVec = lightString is not null ? Vector4.Parse( ent.GetValue( "_light" ) ) : new Vector4( 1.0f );
+		var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
+		light.LightColor = color.WithAlpha( 1.0f );
+	}
+}

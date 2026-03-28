@@ -1,9 +1,28 @@
 ﻿namespace BspImport.Builder;
 
+using BspImport.Builder.Entities;
+
 public partial class MapBuilder
 {
-	private static HashSet<string> EntityClassBlacklist = new()
+	/// <summary>
+	/// Register common entity class handlers
+	/// </summary>
+	private void SetupEntityHandlers()
 	{
+		Handlers.Clear();
+
+		Handlers.Add( "prop_static", BaseEntities.HandleStaticPropEntity );
+		Handlers.Add( "info_player_start", BaseEntities.HandlePlayerStartEntity );
+		Handlers.Add( "light", BaseEntities.HandleLightEntity );
+		Handlers.Add( "light_environment", BaseEntities.HandleLightEnvironmentEntity );
+	}
+
+	private readonly Dictionary<string, Action<GameObject, LumpEntity, GameObject, ImportSettings>> Handlers = new();
+
+	// TODO: add filter system including target game so these rules can be split up
+	private List<string> EntityClassBlacklist = new()
+	{
+				"worldspawn",
 				"info_node",
 				"info_node_air",
 				"env_sun",
@@ -47,146 +66,130 @@ public partial class MapBuilder
 	};
 
 	/// <summary>;
-	/// Build entities parsed from entity lump and static props
+	/// Build entities parsed from entity lump and static props. Does not include brush entities.
 	/// </summary>
-	protected virtual void BuildEntities( GameObject parent )
+	protected virtual void BuildEntities( GameObject _parent )
 	{
 		if ( Context.Entities is null )
 			return;
 
-		var entityParent = new GameObject( parent, true, "entities" );
+		// for deduplicating "unhandled entity" messages
 		var unhandledEntities = new HashSet<string>();
 
-		foreach ( var ent in Context.Entities )
+		// handle brush entities separately...
+		var brushEntities = Context.Entities.Where( ent => ent.IsBrushEntity );
+		if ( brushEntities.Any() )
 		{
-			if ( ent.ClassName is null )
-				continue;
+			var parent = new GameObject( _parent, true, "Mesh Entities" );
 
-			// don't do shit with the worldspawn ent
-			if ( ent.ClassName == "worldspawn" )
-				continue;
-
-			// skip logic entities
-			if ( ent.ClassName.Contains( "logic" ) )
-				continue;
-
-
-
-			// skip some useless entities
-			if ( EntityClassBlacklist.Contains( ent.ClassName ) )
-				continue;
-
-			// props and brush entities
-			if ( ent.Model is not null )
+			foreach ( var ent in brushEntities )
 			{
-				HandleModelEntity( ent, entityParent );
-			}
-			else
-			{
-				var targetname = ent.GetValue( "targetname" ) ?? ent.ClassName;
+				if ( ent.ClassName is null )
+					continue;
 
-				switch ( ent.ClassName )
+				if ( EntityClassBlacklist.Contains( ent.ClassName ) )
+					continue;
+
+				// ... so we can gurantee they get their meshes
+				var meshObj = CreateBrushEntity( ent, parent );
+
+				if ( !meshObj.IsValid() )
+					continue;
+
+				// try to find handlers based on classname
+				if ( Handlers.TryGetValue( ent.ClassName, out var handler ) )
 				{
-					case "info_player_start":
-						{
-							var playerStart = new GameObject( entityParent, true, targetname );
-							playerStart.WorldPosition = ent.Position;
-							playerStart.WorldRotation = ent.Angles.ToRotation();
-							playerStart.Components.Create<SpawnPoint>();
-						}
-						break;
+					// apply class components via registered handler
+					handler.Invoke( meshObj, ent, parent, Context.Settings );
+				}
+				else
+				{
+					if ( !unhandledEntities.Contains( ent.ClassName ) )
+					{
+						unhandledEntities.Add( ent.ClassName );
+						Log.Warning( $"unhandled entity class: {ent.ClassName}" );
+					}
+				}
+			}
 
-					case "light":
-						{
-							var lightObj = new GameObject( entityParent, true, targetname );
-							lightObj.WorldPosition = ent.Position;
+		}
 
-							var light = lightObj.Components.Create<PointLight>();
+		var pointEntities = Context.Entities.Where( ent => !ent.IsBrushEntity );
+		if ( pointEntities.Any() )
+		{
+			var parent = new GameObject( _parent, true, "Point Entities" );
 
-							// fetch qattenuation and distance
-							light.Attenuation = ent.GetValue( "_quadratic_attn" )?.ToFloat() ?? 1f;
-							var distance = ent.GetValue( "_distance" )?.ToInt();
-							if ( distance is not null && distance != 0 )
-								light.Radius = distance.Value;
+			foreach ( var ent in pointEntities )
+			{
+				if ( ent.ClassName is null )
+					continue;
 
-							// fetch color
-							var lightString = ent.GetValue( "_light" );
-							var colorVec = lightString is not null ? Vector4.Parse( ent.GetValue( "_light" ) ) : new Vector4( 1.0f );
-							var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
-							light.LightColor = color.WithAlpha( 1.0f );
+				// skip logic entities
+				if ( ent.ClassName.Contains( "logic" ) )
+					continue;
 
-						}
-						break;
+				// skip some useless entities
+				if ( EntityClassBlacklist.Contains( ent.ClassName ) )
+					continue;
 
-					case "light_environment":
-						{
-							var sunObj = new GameObject( entityParent, true, targetname );
-							sunObj.WorldPosition = ent.Position;
-							var pitch = ent.GetValue( "pitch" )?.ToFloat() ?? ent.Angles.pitch;
-							var forward = ent.Angles.WithPitch( pitch ).ToRotation().Forward;
-							sunObj.WorldRotation = Rotation.LookAt( -forward );
-
-							var light = sunObj.Components.Create<DirectionalLight>();
-
-							// fetch color
-							var lightString = ent.GetValue( "_light" );
-							var colorVec = lightString is not null ? Vector4.Parse( ent.GetValue( "_light" ) ) : new Vector4( 1.0f );
-							var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
-							light.LightColor = color.WithAlpha( 1.0f );
-						}
-						break;
-
-					default:
-						if ( !unhandledEntities.Contains( ent.ClassName ) )
-						{
-							unhandledEntities.Add( ent.ClassName );
-							Log.Warning( $"unhandled entity class: {ent.ClassName}" );
-						}
-						break;
+				// try to find handlers based on classname
+				if ( Handlers.TryGetValue( ent.ClassName, out var handler ) )
+				{
+					var newObj = CreatePointEntity( ent, parent );
+					// apply class components via registered handler
+					handler.Invoke( newObj, ent, parent, Context.Settings );
+				}
+				else
+				{
+					if ( !unhandledEntities.Contains( ent.ClassName ) )
+					{
+						unhandledEntities.Add( ent.ClassName );
+						Log.Warning( $"unhandled entity class: {ent.ClassName}" );
+					}
 				}
 			}
 		}
 	}
 
-	private void HandleModelEntity( LumpEntity ent, GameObject parent )
+	/// <summary>
+	/// Create a basic point entity with Position and Rotation.
+	/// </summary>
+	/// <param name="ent"></param>
+	/// <param name="parent"></param>
+	/// <returns></returns>
+	private static GameObject CreatePointEntity( LumpEntity ent, GameObject parent )
 	{
-		if ( ent.ClassName is null || ent.Model is null )
-			return;
+		var obj = new GameObject( parent, true, ent.TargetName );
+		obj.WorldPosition = ent.Position;
+		obj.WorldRotation = ent.Angles.ToRotation();
 
-		if ( ent.Model.StartsWith( '*' ) )
-		{
-			var brushEntity = new GameObject( true, ent.ClassName );
-			brushEntity.SetParent( parent );
-			brushEntity.WorldPosition = ent.Position;
-			brushEntity.WorldRotation = ent.Angles.ToRotation();
-
-			var propComponent = brushEntity.Components.Create<Prop>();
-			var modelIndex = int.Parse( ent.Model.TrimStart( '*' ) );
-			var polyMesh = Context.CachedPolygonMeshes?[modelIndex];
-
-			if ( polyMesh is null )
-				return;
-
-			propComponent.Model = polyMesh!.Rebuild();
-
-			propComponent.IsStatic = true;
-		}
-		else
-		{
-			if ( !Context.Settings.LoadModels )
-				return;
-
-			var staticProp = new GameObject( true, ent.ClassName );
-			staticProp.SetParent( parent );
-			staticProp.WorldPosition = ent.Position;
-			staticProp.WorldRotation = ent.Angles.ToRotation();
-
-			var propComponent = staticProp.Components.Create<Prop>();
-
-			var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
-			propComponent.Model = (model is null || model.IsError) ? Model.Error : model;
-
-			propComponent.IsStatic = ent.ClassName.Contains( "static" );
-		}
+		return obj;
 	}
+
+	/// <summary>
+	/// Creates a GameObject based on a brush entity. If the entity doesn't have a valid model this will return null.
+	/// </summary>
+	/// <param name="ent"></param>
+	/// <param name="parent"></param>
+	/// <returns></returns>
+	private GameObject? CreateBrushEntity( LumpEntity ent, GameObject parent )
+	{
+		if ( ent.Model is null || !Context.Settings.ImportEntities )
+			return null;
+
+		var modelIndex = int.Parse( ent.Model.TrimStart( '*' ) );
+		var polyMesh = Context.CachedPolygonMeshes?[modelIndex];
+
+		if ( polyMesh is null )
+			return null;
+
+		var brushEntity = CreatePointEntity( ent, parent );
+
+		var propComponent = brushEntity.Components.Create<Prop>();
+		propComponent.Model = polyMesh.Rebuild();
+		propComponent.IsStatic = true;
+
+		return brushEntity;
+	}
+
 }
