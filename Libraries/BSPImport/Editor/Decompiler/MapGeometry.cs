@@ -2,24 +2,6 @@
 
 public class MapGeometry
 {
-	private Vector3[] Vertices = Array.Empty<Vector3>();
-	private EdgeIndices[] EdgeIndices = Array.Empty<EdgeIndices>();
-	private int[] SurfaceEdges = Array.Empty<int>();
-	private ushort[] LeafFaceIndices = Array.Empty<ushort>();
-	private Face[] Faces = Array.Empty<Face>();
-	private Face[] OriginalFaces = Array.Empty<Face>();
-	private DisplacementVertex[] DisplacementVertices = Array.Empty<DisplacementVertex>();
-	private DisplacementInfo[] DisplacementInfos = Array.Empty<DisplacementInfo>();
-
-	public int VertexCount => Vertices.Length;
-	public int EdgeIndicesCount => EdgeIndices.Length;
-	public int SurfaceEdgesCount => SurfaceEdges.Length;
-	public int LeafFaceIndicesCount => LeafFaceIndices.Length;
-	public int FacesCount => Faces.Length;
-	public int OriginalFaceCount => OriginalFaces.Length;
-	public int DisplacementVertexCount => DisplacementVertices.Length;
-	public int DisplacementInfoCount => DisplacementInfos.Length;
-
 	public bool IsValid()
 	{
 		return VertexCount > 0
@@ -30,6 +12,13 @@ public class MapGeometry
 			&& OriginalFaceCount > 0;
 	}
 
+	/// 
+	/// Vertices
+	/// 
+
+	private Vector3[] Vertices = Array.Empty<Vector3>();
+	public int VertexCount => Vertices.Length;
+	public void SetVertices( ReadOnlySpan<Vector3> span ) => Vertices = span.ToArray();
 	public bool TryGetVertex( int index, out Vector3 vertex )
 	{
 		if ( index >= 0 && index < Vertices.Length )
@@ -42,6 +31,14 @@ public class MapGeometry
 		return false;
 	}
 
+
+	/// 
+	/// Edge Indices
+	/// 
+
+	private EdgeIndices[] EdgeIndices = Array.Empty<EdgeIndices>();
+	public int EdgeIndicesCount => EdgeIndices.Length;
+	public void SetEdgeIndices( ReadOnlySpan<EdgeIndices> span ) => EdgeIndices = span.ToArray();
 	public bool TryGetEdgeIndices( int index, out EdgeIndices edgeIndices )
 	{
 		if ( index >= 0 && index < EdgeIndices.Length )
@@ -54,6 +51,13 @@ public class MapGeometry
 		return false;
 	}
 
+	/// 
+	/// Surface Edges
+	/// 
+
+	private int[] SurfaceEdges = Array.Empty<int>();
+	public int SurfaceEdgesCount => SurfaceEdges.Length;
+	public void SetSurfaceEdges( ReadOnlySpan<int> span ) => SurfaceEdges = span.ToArray();
 	public bool TryGetSurfaceEdge( int index, out int surfEdge )
 	{
 		if ( index >= 0 && index < SurfaceEdges.Length )
@@ -66,6 +70,13 @@ public class MapGeometry
 		return false;
 	}
 
+	/// 
+	/// Faces
+	/// 
+
+	private Face[] Faces = Array.Empty<Face>();
+	public int FacesCount => Faces.Length;
+	public void SetFaces( ReadOnlySpan<Face> span ) => Faces = span.ToArray();
 	public bool TryGetFace( int index, out Face face )
 	{
 		if ( index >= 0 && index < Faces.Length )
@@ -78,6 +89,13 @@ public class MapGeometry
 		return false;
 	}
 
+	/// 
+	/// Original Faces
+	/// 
+
+	private Face[] OriginalFaces = Array.Empty<Face>();
+	public int OriginalFaceCount => OriginalFaces.Length;
+	public void SetOriginalFaces( ReadOnlySpan<Face> span ) => OriginalFaces = span.ToArray();
 	public bool TryGetOriginalFace( int index, out Face face )
 	{
 		if ( index >= 0 && index < OriginalFaces.Length )
@@ -90,6 +108,13 @@ public class MapGeometry
 		return false;
 	}
 
+	/// 
+	/// Leaf Face Indices
+	/// 
+
+	private ushort[] LeafFaceIndices = Array.Empty<ushort>();
+	public int LeafFaceIndicesCount => LeafFaceIndices.Length;
+	public void SetLeafFaceIndices( ReadOnlySpan<ushort> span ) => LeafFaceIndices = span.ToArray();
 	public bool TryGetLeafFaceIndex( int index, out ushort value )
 	{
 		if ( index >= 0 && index < LeafFaceIndices.Length )
@@ -102,6 +127,13 @@ public class MapGeometry
 		return false;
 	}
 
+	/// 
+	/// Displacement Vertices
+	/// 
+
+	private DisplacementVertex[] DisplacementVertices = Array.Empty<DisplacementVertex>();
+	public int DisplacementVertexCount => DisplacementVertices.Length;
+	public void SetDisplacementVertices( ReadOnlySpan<DisplacementVertex> span ) => DisplacementVertices = span.ToArray();
 	public bool TryGetDisplacementVertex( int index, out DisplacementVertex dv )
 	{
 		if ( index >= 0 && index < DisplacementVertices.Length )
@@ -114,6 +146,13 @@ public class MapGeometry
 		return false;
 	}
 
+	/// 
+	/// Displacement Infos
+	/// 
+
+	private DisplacementInfo[] DisplacementInfos = Array.Empty<DisplacementInfo>();
+	public int DisplacementInfoCount => DisplacementInfos.Length;
+	public void SetDisplacementInfos( ReadOnlySpan<DisplacementInfo> span ) => DisplacementInfos = span.ToArray();
 	public bool TryGetDisplacementInfo( short index, out DisplacementInfo info )
 	{
 		if ( index >= 0 && index < DisplacementInfos.Length )
@@ -125,28 +164,4 @@ public class MapGeometry
 		info = default!;
 		return false;
 	}
-
-	public void SetVertices( ReadOnlySpan<Vector3> span ) => Vertices = span.ToArray();
-	public void SetVertices( IEnumerable<Vector3> items ) => Vertices = items is Vector3[] a ? a : items.ToArray();
-
-	public void SetEdgeIndices( ReadOnlySpan<EdgeIndices> span ) => EdgeIndices = span.ToArray();
-	public void SetEdgeIndices( IEnumerable<EdgeIndices> items ) => EdgeIndices = items is EdgeIndices[] a ? a : items.ToArray();
-
-	public void SetSurfaceEdges( ReadOnlySpan<int> span ) => SurfaceEdges = span.ToArray();
-	public void SetSurfaceEdges( IEnumerable<int> items ) => SurfaceEdges = items is int[] a ? a : items.ToArray();
-
-	public void SetLeafFaceIndices( ReadOnlySpan<ushort> span ) => LeafFaceIndices = span.ToArray();
-	public void SetLeafFaceIndices( IEnumerable<ushort> items ) => LeafFaceIndices = items is ushort[] a ? a : items.ToArray();
-
-	public void SetFaces( ReadOnlySpan<Face> span ) => Faces = span.ToArray();
-	public void SetFaces( IEnumerable<Face> items ) => Faces = items is Face[] a ? a : items.ToArray();
-
-	public void SetOriginalFaces( ReadOnlySpan<Face> span ) => OriginalFaces = span.ToArray();
-	public void SetOriginalFaces( IEnumerable<Face> items ) => OriginalFaces = items is Face[] a ? a : items.ToArray();
-
-	public void SetDisplacementVertices( ReadOnlySpan<DisplacementVertex> span ) => DisplacementVertices = span.ToArray();
-	public void SetDisplacementVertices( IEnumerable<DisplacementVertex> items ) => DisplacementVertices = items is DisplacementVertex[] a ? a : items.ToArray();
-
-	public void SetDisplacementInfos( ReadOnlySpan<DisplacementInfo> span ) => DisplacementInfos = span.ToArray();
-	public void SetDisplacementInfos( IEnumerable<DisplacementInfo> items ) => DisplacementInfos = items is DisplacementInfo[] a ? a : items.ToArray();
 }
