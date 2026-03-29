@@ -1,5 +1,7 @@
 ﻿namespace BspImport.Decompiler;
 
+using Formats;
+
 [MapDecompiler( "Default" )]
 public partial class MapDecompiler
 {
@@ -22,6 +24,9 @@ public partial class MapDecompiler
 		// read bsp header
 		var ident = reader.ReadInt32();
 		var mapversion = reader.ReadInt32();
+
+		// detect format based on version, this will be used to determine how to read lumps as we go along
+		Context.FormatDescriptor = BspFormatRegistry.DetectByVersion( mapversion );
 
 		// iterate all 64 possible lump headers
 		for ( int i = 0; i < 64; i++ )
@@ -50,6 +55,12 @@ public partial class MapDecompiler
 			catch ( Exception ex )
 			{
 				Log.Error( $"Failed decompiling lump: {(LumpType)i} {ex}" );
+			}
+
+			// refine format from entity classnames after lump 0, resolves shared BSP versions
+			if ( i == 0 )
+			{
+				RefineFormatFromEntities();
 			}
 
 			if ( lump is null )

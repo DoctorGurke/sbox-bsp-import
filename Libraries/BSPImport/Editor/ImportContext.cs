@@ -1,4 +1,6 @@
 ﻿using BspImport.Builder;
+using BspImport.Decompiler.Formats;
+using BspImport.Decompiler.Formats.Descriptors;
 
 namespace BspImport;
 
@@ -13,6 +15,10 @@ public class ImportContext
 		Lumps = new BaseLump[64];
 		Geometry = new();
 		CachedMaterials = new();
+
+		// Start as unknown; MapDecompiler will assign the correct descriptor
+		// after reading the BSP header version (and optionally refining via entities).
+		FormatDescriptor = UnknownBspFormatDescriptor.Instance;
 	}
 
 	/// <summary>
@@ -39,8 +45,16 @@ public class ImportContext
 
 	public BaseLump[] Lumps;
 
+	/// <summary>
+	/// The detected BSP format descriptor for this file.
+	/// Set by <see cref="MapDecompiler"/> immediately after reading the BSP header version,
+	/// and optionally refined after the entity lump (lump 0) is parsed.
+	/// Consumed by lumps that have format-specific binary layouts (e.g. FaceLump).
+	/// </summary>
+	public IBspFormatDescriptor FormatDescriptor { get; set; }
+
 	// bsp tree structure
-	public Decompiler.Lumps.MapNode[]? Nodes;
+	public MapNode[]? Nodes;
 	public MapLeaf[]? Leafs;
 
 	public LumpEntity[]? Entities { get; set; }
