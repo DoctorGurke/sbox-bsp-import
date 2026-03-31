@@ -1,4 +1,5 @@
 ﻿using BspImport;
+using HalfEdgeMesh;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace BspImport.Builder;
@@ -26,10 +27,13 @@ public static class PolyMeshX
 
 		string? materialName = null;
 
+		Vector3 reflectivity = Vector3.One;
+
 		// check for valid texinfo and fetch material name
 		if ( context.TexInfo is not null && texInfo >= 0 && texInfo < context.TexInfo.Length )
 		{
-			materialName = face.GetFaceMaterial( context );
+			materialName = face.GetMaterialName( context );
+			reflectivity = face.GetReflectivity( context );
 		}
 
 		if ( string.IsNullOrEmpty( materialName ) )
@@ -80,6 +84,17 @@ public static class PolyMeshX
 		{
 			var material = Material.Load( $"materials/{materialName}.vmat" );
 			mesh.SetFaceMaterial( hFace, material );
+		}
+		else
+		{
+			var material = Material.Load( $"materials/test_vertex_color.vmat" );
+			mesh.SetFaceMaterial( hFace, material );
+
+			foreach ( var edge in mesh.HalfEdgeHandles )
+			{
+				Color col = new Color( reflectivity.x, reflectivity.y, reflectivity.z );
+				mesh.SetVertexColor( edge, col.ToColor32( true ) );
+			}
 		}
 
 		if ( isToolsMaterial )

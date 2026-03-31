@@ -22,8 +22,6 @@ public class TexDataLump : BaseLump
 			texDatas[i] = texData;
 		}
 
-		//Log.Info( $"TEXDATA: {texDatas.Length}" );
-
 		Context.TexData = texDatas;
 	}
 }

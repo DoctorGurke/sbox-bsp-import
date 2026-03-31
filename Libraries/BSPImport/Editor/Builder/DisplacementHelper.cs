@@ -120,9 +120,11 @@ internal class DisplacementHelper
 
 		// resolve material for displacement face
 		string? materialName = null;
+		Vector3 reflectivity = Vector3.One;
 		if ( context.TexInfo is not null && face.TexInfo >= 0 && face.TexInfo < context.TexInfo.Length )
 		{
-			materialName = face.GetFaceMaterial( context );
+			materialName = face.GetMaterialName( context );
+			reflectivity = face.GetReflectivity( context );
 		}
 
 		// load material for displacement triangles if we have a name
@@ -257,12 +259,40 @@ internal class DisplacementHelper
 				var t1 = mesh.AddFace( v_t1 );
 				//mesh.SetEdgeSmoothing( t1.Edge, PolygonMesh.EdgeSmoothMode.Soft );
 				mesh.SetFaceTextureCoords( t1, uv_t1 );
-				if ( dispMaterial is not null ) mesh.SetFaceMaterial( t1, dispMaterial );
+				if ( dispMaterial is not null )
+				{
+					mesh.SetFaceMaterial( t1, dispMaterial );
+				}
+				else
+				{
+					var material = Material.Load( $"materials/test_vertex_color.vmat" );
+					mesh.SetFaceMaterial( t1, material );
+
+					foreach ( var edge in mesh.HalfEdgeHandles )
+					{
+						Color col = new Color( reflectivity.x, reflectivity.y, reflectivity.z );
+						mesh.SetVertexColor( edge, col.ToColor32( true ) );
+					}
+				}
 
 				var t2 = mesh.AddFace( v_t2 );
 				//mesh.SetEdgeSmoothing( t2.Edge, PolygonMesh.EdgeSmoothMode.Soft );
 				mesh.SetFaceTextureCoords( t2, uv_t2 );
-				if ( dispMaterial is not null ) mesh.SetFaceMaterial( t2, dispMaterial );
+				if ( dispMaterial is not null )
+				{
+					mesh.SetFaceMaterial( t2, dispMaterial );
+				}
+				else
+				{
+					var material = Material.Load( $"materials/test_vertex_color.vmat" );
+					mesh.SetFaceMaterial( t2, material );
+
+					foreach ( var edge in mesh.HalfEdgeHandles )
+					{
+						Color col = new Color( reflectivity.x, reflectivity.y, reflectivity.z );
+						mesh.SetVertexColor( edge, col.ToColor32( true ) );
+					}
+				}
 			}
 		}
 
