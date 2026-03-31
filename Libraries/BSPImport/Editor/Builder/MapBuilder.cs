@@ -54,10 +54,12 @@ public partial class MapBuilder
 		{
 			var entities = new GameObject( root, true, "Entities" );
 
+			// prepares bsp model meshes (brush entities)
+			await GameTask.Delay( 100 );
 			var sw = new Stopwatch();
 			sw.Start();
-			// prepares bsp model meshes (brush entities)
-			BuildModelMeshes();
+
+			await BuildModelMeshes( progress, token );
 
 			sw.Stop();
 			Log.Info( $"Build model meshes took: {sw.Elapsed.Seconds}s {sw.Elapsed.Milliseconds}ms" );

@@ -3,12 +3,13 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
+using System.Diagnostics;
 
 namespace BspImport.Builder;
 
 public partial class MapBuilder
 {
-	public void BuildModelMeshes()
+	public async Task BuildModelMeshes( IProgressSection progress, CancellationToken token )
 	{
 		var modelCount = Context.Models?.Length ?? 0;
 
@@ -18,16 +19,27 @@ public partial class MapBuilder
 			return;
 		}
 
+		Log.Info( $"Constructing {modelCount} Entity Models..." );
+		progress.Title = $"Constructing {modelCount} Entity Models...";
+		progress.TotalCount = modelCount;
+		progress.Current = 0;
+
 		var polyMeshes = new PolygonMesh[modelCount];
 
-		for ( int i = 0; i < modelCount; i++ )
+		for ( int i = 1; i < modelCount; i++ )
 		{
+			if ( token.IsCancellationRequested )
+				return;
+
 			var polyMesh = ConstructModel( i );
+			progress.Current = i;
 
 			if ( polyMesh is null )
 				continue;
 
 			polyMeshes[i] = polyMesh;
+
+			await GameTask.Yield();
 		}
 
 		Context.CachedPolygonMeshes = polyMeshes;
@@ -304,6 +316,8 @@ public partial class MapBuilder
 		}
 
 		var model = Context.Models[modelIndex];
+
+		Log.Info( $"model: firstFace: {model.FirstFace} faces: {model.FaceCount}" );
 
 		return ConstructPolygonMesh( model.FirstFace, model.FaceCount );
 	}
