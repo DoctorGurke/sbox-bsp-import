@@ -40,26 +40,37 @@ public partial class MapBuilder
 			progress.Icon = "map";
 
 			await GameTask.Delay( 100 );
-			await BuildWorldGeometry( root, token, progress, meshesPerFrame: 64 );
+			await BuildWorldGeometry( root, progress, meshesPerFrame: 64, token );
 		}
 
+		stopwatch.Stop();
+		Log.Info( $"Build World took: {stopwatch.Elapsed.Seconds}s {stopwatch.Elapsed.Milliseconds}ms" );
+		stopwatch.Restart();
+
 		progress.Title = "Building Entities";
-		await GameTask.Delay( 100 );
 
 		// builds entities, including prop static and brush entities
 		if ( Context.Settings.ImportEntities )
 		{
 			var entities = new GameObject( root, true, "Entities" );
 
+			var sw = new Stopwatch();
+			sw.Start();
 			// prepares bsp model meshes (brush entities)
 			BuildModelMeshes();
-			BuildEntities( entities );
+
+			sw.Stop();
+			Log.Info( $"Build model meshes took: {sw.Elapsed.Seconds}s {sw.Elapsed.Milliseconds}ms" );
+
+			await GameTask.Delay( 100 );
+			await BuildEntities( entities, progress, entitiesPerFrame: 64, token );
 		}
 
 		stopwatch.Stop();
+		Log.Info( $"Build Entities took: {stopwatch.Elapsed.Seconds}s {stopwatch.Elapsed.Milliseconds}ms" );
 
 		var repoURL = "https://github.com/DoctorGurke/sbox-bsp-import";
-		Log.Info( $"Took {stopwatch.Elapsed.Seconds}s {stopwatch.Elapsed.Milliseconds}ms" );
+
 		Log.Info( $"Report bugs or contribute @{repoURL}" );
 		Log.Info( $"Imported Source 1 BSP File using sbox-bsp-import by DoctorGurke" );
 	}

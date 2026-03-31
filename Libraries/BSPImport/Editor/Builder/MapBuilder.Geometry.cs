@@ -36,7 +36,7 @@ public partial class MapBuilder
 	/// <summary>
 	/// Builds the map world geometry of the current context. Brush entities require pre-built PolygonMeshes. See <see cref="BuildModelMeshes"/>.
 	/// </summary>
-	protected virtual async Task BuildWorldGeometry( GameObject parent, CancellationToken token, IProgressSection progress, int meshesPerFrame = 16 )
+	protected virtual async Task BuildWorldGeometry( GameObject parent, IProgressSection progress, int meshesPerFrame, CancellationToken token )
 	{
 		var displacementMeshes = await ConstructDisplacementMeshesAsync( token, progress, meshesPerFrame );
 
