@@ -1,10 +1,15 @@
-﻿using Sandbox.Builder;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using System.Linq;
+using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System.Diagnostics;
 
 namespace BspImport.Builder;
 
 public partial class MapBuilder
 {
-	public void BuildModelMeshes()
+	public async Task BuildModelMeshes( IProgressSection progress, CancellationToken token )
 	{
 		var modelCount = Context.Models?.Length ?? 0;
 
@@ -14,16 +19,27 @@ public partial class MapBuilder
 			return;
 		}
 
+		Log.Info( $"Constructing {modelCount} Entity Models..." );
+		progress.Title = $"Constructing {modelCount} Entity Models...";
+		progress.TotalCount = modelCount;
+		progress.Current = 0;
+
 		var polyMeshes = new PolygonMesh[modelCount];
 
-		for ( int i = 0; i < modelCount; i++ )
+		for ( int i = 1; i < modelCount; i++ )
 		{
+			if ( token.IsCancellationRequested )
+				return;
+
 			var polyMesh = ConstructModel( i );
+			progress.Current = i;
 
 			if ( polyMesh is null )
 				continue;
 
 			polyMeshes[i] = polyMesh;
+
+			await GameTask.Yield();
 		}
 
 		Context.CachedPolygonMeshes = polyMeshes;
@@ -32,40 +48,90 @@ public partial class MapBuilder
 	/// <summary>
 	/// Builds the map world geometry of the current context. Brush entities require pre-built PolygonMeshes. See <see cref="BuildModelMeshes"/>.
 	/// </summary>
-	protected virtual void BuildWorldGeometry( GameObject parent )
+	protected virtual async Task BuildWorldGeometry( GameObject parent, IProgressSection progress, int meshesPerFrame, CancellationToken token )
 	{
-		var displacementMeshes = ConstructDisplacementMeshes().ToList();
+		var displacementMeshes = await ConstructDisplacementMeshesAsync( token, progress, meshesPerFrame );
 
-		if ( displacementMeshes.Any() )
+		if ( token.IsCancellationRequested )
+			return;
+
+		var worldspawnMeshes = await ConstructWorldspawnMeshes( token, progress );
+
+		if ( token.IsCancellationRequested )
+			return;
+
+		Log.Info( "Building World..." );
+		progress.Title = "Building World...";
+		progress.TotalCount = displacementMeshes.Count + worldspawnMeshes.Count;
+
+		if ( displacementMeshes.Count >= 0 )
 		{
-			Log.Info( $"Displacement Meshes: {displacementMeshes.Count}" );
 			var displacementParent = new GameObject( parent, true, "Displacements" );
-			int count = 1;
+			int count = 0;
+
+			progress.Subtitle = $"Building {displacementMeshes.Count} Displacement Meshes";
+
 			foreach ( var displacement in displacementMeshes )
 			{
-				var dispObject = new GameObject( displacementParent, true, $"Displacement {count}" );
-				var meshComponent = dispObject.Components.Create<MeshComponent>();
-				meshComponent.Mesh = displacement;
-				CenterMeshOrigin( meshComponent );
-				count++;
+				try
+				{
+					if ( token.IsCancellationRequested )
+					{
+						return;
+					}
+
+					progress.Current = count;
+
+					ConstructMesh( displacementParent, $"Displacement {count}", displacement );
+
+					count++;
+
+					if ( count % meshesPerFrame == 0 )
+					{
+						await GameTask.Yield();
+					}
+				}
+				catch ( Exception )
+				{
+					Log.Error( "Failed building displacement!" );
+					continue;
+				}
 			}
 		}
 
-		var worldspawnMeshes = ConstructWorldspawn().ToList();
-		if ( worldspawnMeshes.Any() )
+		if ( worldspawnMeshes.Count >= 0 )
 		{
-			Log.Info( $"World Meshes: {worldspawnMeshes.Count}" );
 			var meshParent = new GameObject( parent, true, "Meshes" );
-			int count = 1;
+			int count = 0;
+
+			progress.Subtitle = $"Building {worldspawnMeshes.Count} World Meshes";
+
 			foreach ( var mesh in worldspawnMeshes )
 			{
-				var meshObject = new GameObject( meshParent, true, $"Mesh {count}" );
-				var meshComponent = meshObject.Components.Create<MeshComponent>();
-				meshComponent.Mesh = mesh;
-				CenterMeshOrigin( meshComponent );
+				if ( token.IsCancellationRequested )
+				{
+					return;
+				}
+
+				progress.Current = count + displacementMeshes.Count;
+				ConstructMesh( meshParent, $"Mesh {count}", mesh );
 				count++;
+
+				if ( count % meshesPerFrame == 0 )
+				{
+					await GameTask.Yield();
+				}
 			}
 		}
+	}
+
+	private void ConstructMesh( GameObject parent, string name, PolygonMesh mesh )
+	{
+		using var scope = parent.Scene.Push();
+		var meshObj = new GameObject( parent, true, name );
+		var meshComp = meshObj.Components.Create<MeshComponent>();
+		meshComp.Mesh = mesh;
+		CenterMeshOrigin( meshComp );
 	}
 
 	static void CenterMeshOrigin( MeshComponent meshComponent )
@@ -93,78 +159,129 @@ public partial class MapBuilder
 		}
 	}
 
-	private IEnumerable<PolygonMesh?> ConstructDisplacementMeshes()
+	private async Task<List<PolygonMesh>> ConstructDisplacementMeshesAsync( CancellationToken token, IProgressSection progress, int meshesPerFrame = 16 )
 	{
-		HashSet<ushort> DisplacementIndices = new();
+		// gather unique displacement face indices
+		HashSet<ushort> dispIndices = new();
 
 		for ( short i = 0; i < Context.Geometry.DisplacementInfoCount; i++ )
 		{
 			Context.Geometry.TryGetDisplacementInfo( i, out var dispInfo );
 
-			DisplacementIndices.Add( dispInfo.MapFace );
+			dispIndices.Add( dispInfo.MapFace );
 		}
 
-		// create one mesh per displacement
-		foreach ( ushort dispIndex in DisplacementIndices )
+		var displacements = new List<PolygonMesh>();
+		if ( dispIndices.Count == 0 )
+			return displacements;
+
+		Log.Info( "Constructing Displacement Meshes..." );
+		progress.Title = "Constructing Displacement Meshes...";
+		progress.TotalCount = dispIndices.Count;
+
+		int count = 0;
+		foreach ( ushort dispFaceIndex in dispIndices )
 		{
-			var dispMesh = ConstructDisplacement( dispIndex );
-			if ( dispMesh is not null )
+			if ( token.IsCancellationRequested )
+				return displacements;
+
+			// create one mesh per displacement
+			var dispMesh = DisplacementHelper.CreateDisplacementMesh( Context, dispFaceIndex );
+			if ( dispMesh is null )
+				continue;
+
+			if ( dispMesh.FaceHandles.Any() )
 			{
-				if ( dispMesh.FaceHandles.Any() )
-				{
-					yield return dispMesh;
-				}
+				displacements.Add( dispMesh );
+			}
+
+			progress.Current = count;
+
+			count++;
+			if ( count % meshesPerFrame == 0 )
+			{
+				await GameTask.Yield();
 			}
 		}
+
+		return displacements;
 	}
 
-	private IEnumerable<PolygonMesh?> ConstructWorldspawn()
+	public static Vector2 GetTexCoords( ImportContext context, int texInfoIndex, Vector3 position, int width = 1024, int height = 1024 )
+	{
+		// validate texinfo availability and index
+		if ( context.TexInfo is null || texInfoIndex < 0 || texInfoIndex >= context.TexInfo.Length )
+			return default;
+
+		var ti = context.TexInfo[texInfoIndex];
+
+		if ( context.TexData is not null && ti.TexData >= 0 && ti.TexData < context.TexData.Length )
+		{
+			var texData = context.TexData[ti.TexData];
+			width = texData.Width;
+			height = texData.Height;
+		}
+
+		return ti.GetUvs( position, width, height );
+	}
+
+	/// <summary>
+	/// Construct PolygonMeshes from the bsp-tree, chunked into individual Meshes based on Settings.ChunkSize.
+	/// </summary>
+	/// <returns></returns>
+	private async Task<List<PolygonMesh>> ConstructWorldspawnMeshes( CancellationToken token, IProgressSection progress )
 	{
 		var geo = Context.Geometry;
+
+		var meshes = new List<PolygonMesh>();
 
 		if ( !Context.HasCompleteGeometry( out geo ) )
 		{
 			Log.Error( $"Failed constructing worldspawn geometry! No valid geometry in Context!" );
-			yield return null;
+			return meshes;
 		}
 
 		// construct world mesh faces from bsp tree
-		var faces = TreeParse.ParseTreeFaces( Context );
+		var faceIndices = TreeParse.ParseTreeFaces( Context );
 
-		if ( faces.Count == 0 )
+		if ( faceIndices.Count == 0 )
 		{
 			Log.Error( $"Failed constructing worldspawn geometry! No faces in tree!" );
-			yield return null;
+			return meshes;
 		}
 
+		var chunks = faceIndices.Chunk( Context.Settings.ChunkSize );
+
+		if ( token.IsCancellationRequested )
+			return meshes;
+
+		Log.Info( "Constructing World Meshes..." );
+		progress.Title = "Constructing World Meshes...";
+		progress.TotalCount = chunks.Count();
+		progress.Current = 0;
+
 		// chunk tree faces into batches for MeshComponent
-		foreach ( var chunk in faces.Chunk( Context.Settings.ChunkSize ) )
+		foreach ( var chunk in chunks )
 		{
-			var polyMesh = new PolygonMesh();
+			var mesh = new PolygonMesh();
 
 			foreach ( var face in chunk )
 			{
-				if ( !geo.TryGetFace( face, out var f ) )
+				if ( !geo.TryGetFace( face, out var _ ) )
 					continue;
 
-				polyMesh.AddSplitMeshFace( Context, face );
+				mesh.AddMeshFace( Context, face );
 			}
 
-			if ( polyMesh is not null )
-			{
-				if ( polyMesh.FaceHandles.Any() )
-					yield return polyMesh;
-			}
+			progress.Current++;
+
+			if ( mesh.FaceHandles.Any() )
+				meshes.Add( mesh );
+
+			await GameTask.Yield();
 		}
-	}
 
-	private PolygonMesh ConstructDisplacement( ushort faceIndex )
-	{
-		var mesh = new PolygonMesh();
-
-		mesh.AddDisplacementMesh( Context, faceIndex );
-
-		return mesh;
+		return meshes;
 	}
 
 	/// <summary>
@@ -223,31 +340,19 @@ public partial class MapBuilder
 			throw new Exception( "No valid map geometry to construct!" );
 		}
 
-		var polyMesh = new PolygonMesh();
-
-		var faces = GetFaceIndices( firstFaceIndex, faceCount );
+		// models support int firstFace and faceCount for some reason, but faces are limited to ushort
+		var faces = GetFaceIndices( (ushort)firstFaceIndex, (ushort)faceCount );
 
 		// invalid world mesh
-		if ( faces.Count() <= 0 )
+		if ( faces.Length <= 0 )
 			return null;
 
 		// build all split faces
-		foreach ( var faceIndex in faces )
+		var polyMesh = new PolygonMesh();
+		foreach ( ushort faceIndex in faces )
 		{
-			polyMesh.AddSplitMeshFace( Context, faceIndex );
+			polyMesh.AddMeshFace( Context, faceIndex );
 		}
-
-		//Log.Info( $"face count: {faces.Length}" );
-		//Log.Info( $"poly mesh faces: {polyMesh.Faces.Count()}" );
-		//Log.Info( $"poly mesh vertices: {polyMesh.Vertices.Count()}" );
-		//Log.Info( $"------------" );
-
-		//// no valid faces in mesh
-		//if ( !polyMesh.Faces.Any() )
-		//{
-		//	Log.Error( $"ConstructPolygonMesh failed, [{firstFaceIndex}, {faceCount}] has no valid faces!" );
-		//	return null;
-		//}
 
 		return polyMesh;
 	}
@@ -259,7 +364,7 @@ public partial class MapBuilder
 	/// <param name="faceCount"></param>
 	/// <returns></returns>
 	/// <exception cref="Exception"></exception>
-	private int[] GetFaceIndices( int firstFaceIndex, int faceCount )
+	private ushort[] GetFaceIndices( ushort firstFaceIndex, ushort faceCount )
 	{
 		var geo = Context.Geometry;
 		if ( !geo.IsValid() )
@@ -267,11 +372,12 @@ public partial class MapBuilder
 			throw new Exception( "No valid map geometry to construct!" );
 		}
 
-		var faces = new HashSet<int>();
+		var faces = new HashSet<ushort>();
 
-		for ( int i = 0; i < faceCount; i++ )
+		for ( ushort i = 0; i < faceCount; i++ )
 		{
-			var faceIndex = firstFaceIndex + i;
+			var faceIndex = firstFaceIndex;
+			faceIndex += i;
 
 			geo.TryGetFace( faceIndex, out var face );
 

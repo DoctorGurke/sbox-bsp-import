@@ -77,7 +77,7 @@ public class MapGeometry
 	private Face[] Faces = Array.Empty<Face>();
 	public int FacesCount => Faces.Length;
 	public void SetFaces( ReadOnlySpan<Face> span ) => Faces = span.ToArray();
-	public bool TryGetFace( int index, out Face face )
+	public bool TryGetFace( ushort index, out Face face )
 	{
 		if ( index >= 0 && index < Faces.Length )
 		{

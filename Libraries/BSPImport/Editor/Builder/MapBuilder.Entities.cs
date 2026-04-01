@@ -1,6 +1,8 @@
 ﻿namespace BspImport.Builder;
 
 using BspImport.Builder.Entities;
+using System.Threading;
+using System.Threading.Tasks;
 
 public partial class MapBuilder
 {
@@ -68,10 +70,15 @@ public partial class MapBuilder
 				"info_player_counterterrorist",
 	};
 
+	private bool IsAllowedEntity( LumpEntity ent )
+	{
+		return ent.ClassName is not null && !ent.ClassName.Contains( "logic" ) && !EntityClassBlacklist.Contains( ent.ClassName );
+	}
+
 	/// <summary>;
 	/// Build entities parsed from entity lump and static props. Does not include brush entities.
 	/// </summary>
-	protected virtual void BuildEntities( GameObject _parent )
+	protected virtual async Task BuildEntities( GameObject _parent, IProgressSection progress, int entitiesPerFrame, CancellationToken token )
 	{
 		if ( Context.Entities is null )
 			return;
@@ -79,22 +86,41 @@ public partial class MapBuilder
 		// for deduplicating "unhandled entity" messages
 		var unhandledEntities = new HashSet<string>();
 
+		if ( token.IsCancellationRequested )
+			return;
+
+		Log.Info( "Building Entities..." );
+		progress.Title = "Building Entities...";
+
+		var brushEntities = Context.Entities.Where( ent => ent.IsBrushEntity && IsAllowedEntity( ent ) );
+		var pointEntities = Context.Entities.Where( ent => !ent.IsBrushEntity && IsAllowedEntity( ent ) );
+
+		int total = brushEntities.Count() + pointEntities.Count();
+		int count = 0;
+
+		progress.TotalCount = total;
+		progress.Current = count;
+
 		// handle brush entities separately...
-		var brushEntities = Context.Entities.Where( ent => ent.IsBrushEntity );
 		if ( brushEntities.Any() )
 		{
 			var parent = new GameObject( _parent, true, "Mesh Entities" );
 
+			progress.Subtitle = $"Building {brushEntities.Count()} Mesh Entities...";
+
 			foreach ( var ent in brushEntities )
 			{
-				if ( ent.ClassName is null )
-					continue;
+				if ( token.IsCancellationRequested )
+					return;
 
-				if ( EntityClassBlacklist.Contains( ent.ClassName ) )
+				if ( ent.ClassName is null )
 					continue;
 
 				// ... so we can gurantee they get their meshes
 				var meshObj = CreateBrushEntity( ent, parent );
+				count++;
+
+				progress.Current = count;
 
 				if ( !meshObj.IsValid() )
 					continue;
@@ -113,32 +139,36 @@ public partial class MapBuilder
 						Log.Warning( $"unhandled entity class: {ent.ClassName}" );
 					}
 				}
-			}
 
+				if ( count % entitiesPerFrame == 0 )
+				{
+					await GameTask.Yield();
+				}
+			}
 		}
 
-		var pointEntities = Context.Entities.Where( ent => !ent.IsBrushEntity );
+		if ( token.IsCancellationRequested )
+			return;
+
 		if ( pointEntities.Any() )
 		{
 			var parent = new GameObject( _parent, true, "Point Entities" );
 
+			progress.Subtitle = $"Building {pointEntities.Count()} Point Entities...";
+
 			foreach ( var ent in pointEntities )
 			{
+				if ( token.IsCancellationRequested )
+					return;
+
 				if ( ent.ClassName is null )
-					continue;
-
-				// skip logic entities
-				if ( ent.ClassName.Contains( "logic" ) )
-					continue;
-
-				// skip some useless entities
-				if ( EntityClassBlacklist.Contains( ent.ClassName ) )
 					continue;
 
 				// try to find handlers based on classname
 				if ( Handlers.TryGetValue( ent.ClassName, out var handler ) )
 				{
 					var newObj = CreatePointEntity( ent, parent );
+
 					// apply class components via registered handler
 					handler.Invoke( newObj, ent, parent, Context.Settings );
 				}
@@ -149,6 +179,16 @@ public partial class MapBuilder
 						unhandledEntities.Add( ent.ClassName );
 						Log.Warning( $"unhandled entity class: {ent.ClassName}" );
 					}
+				}
+
+				// unhandled entities still count towards total
+				count++;
+
+				progress.Current = count;
+
+				if ( count % entitiesPerFrame == 0 )
+				{
+					await GameTask.Yield();
 				}
 			}
 		}

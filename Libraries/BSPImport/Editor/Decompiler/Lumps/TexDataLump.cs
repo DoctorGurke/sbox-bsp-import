@@ -12,17 +12,15 @@ public class TexDataLump : BaseLump
 
 		for ( int i = 0; i < texDataCount; i++ )
 		{
-			reader.Skip<Vector3>(); // vec3 reflectivity
+			var reflectivity = reader.ReadVector3();
 			var nameStringTableID = reader.ReadInt32();
 			var width = reader.ReadInt32();
 			var height = reader.ReadInt32();
 			reader.Skip<int>( 2 ); // int view_width, view_height
 
-			var texData = new TexData( nameStringTableID, width, height );
+			var texData = new TexData( reflectivity, nameStringTableID, width, height );
 			texDatas[i] = texData;
 		}
-
-		//Log.Info( $"TEXDATA: {texDatas.Length}" );
 
 		Context.TexData = texDatas;
 	}
@@ -30,12 +28,14 @@ public class TexDataLump : BaseLump
 
 public struct TexData
 {
+	public Vector3 Reflectivity;
 	public int NameStringTableIndex;
 	public int Width;
 	public int Height;
 
-	public TexData( int index, int width, int height )
+	public TexData( Vector3 reflectivity, int index, int width, int height )
 	{
+		Reflectivity = reflectivity;
 		NameStringTableIndex = index;
 		Width = width;
 		Height = height;
