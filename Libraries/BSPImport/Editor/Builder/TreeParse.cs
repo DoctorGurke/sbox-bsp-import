@@ -101,9 +101,9 @@ public static class TreeParse
 		var leaf = context.Leafs[index];
 
 		//var isWaterLeaf = leaf.WaterDataIndex != -1;
+		//var isSkyboxLeaf = (leaf.Flags & 0x01) != 0;
 
-		var isSkyboxLeaf = (leaf.Flags & 0x01) != 0;
-		if ( context.SkyboxAreas.Contains( leaf.Area ) || isSkyboxLeaf )
+		if ( context.SkyboxAreas.Contains( leaf.Area ) )
 			return;
 
 		// contribute to faces collection
