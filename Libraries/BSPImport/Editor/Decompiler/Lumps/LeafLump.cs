@@ -17,7 +17,12 @@ public class LeafLump : BaseLump
 
 			int contents = leafReader.ReadInt32(); // contents
 			leafReader.Skip<short>(); // cluster
-			leafReader.Skip<short>(); // area:9 flags:7
+
+			// unpack flags, dont need area
+			short packed = leafReader.ReadInt16();// area:9 flags:7
+			short flags = (short)(packed >> 9);
+
+			leafReader.Skip<short>();
 			leafReader.Skip<short>( 3 ); // mins
 			leafReader.Skip<short>( 3 ); // maxs
 			ushort firstLeafFace = leafReader.ReadUInt16();
@@ -26,7 +31,7 @@ public class LeafLump : BaseLump
 			leafReader.Skip<ushort>(); // numleafbrushes
 			short waterDataID = reader.ReadInt16();
 
-			var leaf = new MapLeaf( contents, firstLeafFace, leafFaceCount, waterDataID );
+			var leaf = new MapLeaf( contents, flags, firstLeafFace, leafFaceCount, waterDataID );
 			leafs[i] = leaf;
 		}
 
@@ -37,15 +42,17 @@ public class LeafLump : BaseLump
 public struct MapLeaf
 {
 	public int Contents;
+	public short Flags; // 7 bits
 	public ushort FirstFaceIndex;
 	public ushort FaceCount;
 	public short WaterDataIndex;
 
-	public MapLeaf( int contents, ushort firstFaceIndex, ushort faceCount, short waterDataIndex )
+	public MapLeaf( int contents, short flags, ushort firstFaceIndex, ushort faceCount, short waterDataIndex )
 	{
 		Contents = contents;
+		Flags = flags;
 		FirstFaceIndex = firstFaceIndex;
 		FaceCount = faceCount;
-		waterDataIndex = waterDataIndex;
+		WaterDataIndex = waterDataIndex;
 	}
 }
