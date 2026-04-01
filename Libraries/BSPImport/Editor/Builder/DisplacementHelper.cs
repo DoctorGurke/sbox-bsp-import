@@ -191,9 +191,6 @@ internal class DisplacementHelper
 				var basePos = Vector3.Lerp( bottom, top, t );
 
 				var finalPos = basePos + dVert.Displacement * dVert.Distance;
-				finalPos.x = finalPos.x.Floor();
-				finalPos.y = finalPos.y.Floor();
-				finalPos.z = finalPos.z.Floor();
 
 				int idx = sy * side + sx; // base grid is row-major (y * side + x)
 				positions[idx] = finalPos;
