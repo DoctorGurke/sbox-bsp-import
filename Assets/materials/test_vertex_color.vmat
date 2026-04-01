@@ -1,0 +1,9 @@
+// THIS FILE IS AUTO-GENERATED
+
+Layer0
+{
+	shader "shaders/test_vertex_color.shader"
+
+	//---- Fog ----
+	g_bFogEnabled "1"
+}
