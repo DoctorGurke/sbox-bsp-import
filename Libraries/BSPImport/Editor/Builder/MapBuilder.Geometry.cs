@@ -45,11 +45,36 @@ public partial class MapBuilder
 		Context.CachedPolygonMeshes = polyMeshes;
 	}
 
+	private List<short> FindSkyboxAreas()
+	{
+		var result = new List<short>();
+		if ( Context.Entities is null )
+			return result;
+
+		foreach ( var ent in Context.Entities )
+		{
+			if ( ent.ClassName != "sky_camera" )
+				continue;
+
+			var origin = ent.Position;
+
+			var leafIndex = TreeParse.FindLeafIndex( Context, origin );
+			if ( leafIndex == -1 )
+				continue;
+
+			var leaf = Context.Leafs![leafIndex];
+			result.Add( leaf.Area );
+		}
+
+		return result;
+	}
+
 	/// <summary>
 	/// Builds the map world geometry of the current context. Brush entities require pre-built PolygonMeshes. See <see cref="BuildModelMeshes"/>.
 	/// </summary>
 	protected virtual async Task BuildWorldGeometry( GameObject parent, IProgressSection progress, int meshesPerFrame, CancellationToken token )
 	{
+		Context.SkyboxAreas = FindSkyboxAreas();
 		var displacementMeshes = await ConstructDisplacementMeshesAsync( token, progress, meshesPerFrame );
 
 		if ( token.IsCancellationRequested )
@@ -184,6 +209,13 @@ public partial class MapBuilder
 		{
 			if ( token.IsCancellationRequested )
 				return displacements;
+
+			var dispOrigin = DisplacementHelper.GetDisplacementOrigin( Context, dispFaceIndex );
+			var dispLeafIndex = TreeParse.FindLeafIndex( Context, dispOrigin!.Value );
+			var dispLeaf = Context.Leafs![dispLeafIndex];
+
+			if ( Context.SkyboxAreas.Contains( dispLeaf.Area ) )
+				continue;
 
 			// create one mesh per displacement
 			var dispMesh = DisplacementHelper.CreateDisplacementMesh( Context, dispFaceIndex );

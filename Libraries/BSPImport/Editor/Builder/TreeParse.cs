@@ -1,4 +1,7 @@
-﻿namespace BspImport.Builder;
+﻿using Editor.MovieMaker;
+using System.IO.Compression;
+
+namespace BspImport.Builder;
 
 public static class TreeParse
 {
@@ -6,6 +9,26 @@ public static class TreeParse
 	{
 		public List<ushort> FaceIndices = new();
 		public List<bool> IsWaterFace = new();
+	}
+
+
+
+	public static int FindLeafIndex( ImportContext context, Vector3 point )
+	{
+		int nodeIndex = 0; // Start at headnode (model 0)  
+		while ( nodeIndex >= 0 )
+		{
+			var node = context.Nodes![nodeIndex];
+			var plane = context.Planes![node.PlaneIndex];
+
+			float distance = plane.Normal.x * point.x +
+							plane.Normal.y * point.y +
+							plane.Normal.z * point.z - plane.Distance;
+
+			nodeIndex = distance >= 0 ? node.Children[0] : node.Children[1];
+		}
+
+		return -1 - nodeIndex; // Convert negative leaf index to positive  
 	}
 
 	/// <summary>
@@ -41,6 +64,9 @@ public static class TreeParse
 			ushort faceIndex = node.FirstFaceIndex;
 			faceIndex += i;
 
+			if ( context.SkyboxAreas.Contains( node.Area ) )
+				continue;
+
 			TryAddFace( context, faceIndex, ref faceIndices );
 		}
 
@@ -73,8 +99,12 @@ public static class TreeParse
 			return;
 
 		var leaf = context.Leafs[index];
+
 		//var isWaterLeaf = leaf.WaterDataIndex != -1;
+
 		var isSkyboxLeaf = (leaf.Flags & 0x01) != 0;
+		if ( context.SkyboxAreas.Contains( leaf.Area ) || isSkyboxLeaf )
+			return;
 
 		// contribute to faces collection
 		for ( ushort i = 0; i < leaf.FaceCount; i++ )
