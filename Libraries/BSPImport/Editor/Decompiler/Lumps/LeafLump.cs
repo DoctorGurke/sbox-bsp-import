@@ -15,30 +15,31 @@ public class LeafLump : BaseLump
 		{
 			var leafReader = reader.Split( leafSize );
 
-			leafReader.Skip<int>(); // contents
+			int contents = leafReader.ReadInt32(); // contents
 			leafReader.Skip<short>(); // cluster
 			leafReader.Skip<short>(); // area:9 flags:7
 			leafReader.Skip<short>( 3 ); // mins
 			leafReader.Skip<short>( 3 ); // maxs
-			var firstLeafFace = leafReader.ReadUInt16();
-			var leafFaceCount = leafReader.ReadUInt16();
+			ushort firstLeafFace = leafReader.ReadUInt16();
+			ushort leafFaceCount = leafReader.ReadUInt16();
 
-			var leaf = new MapLeaf( firstLeafFace, leafFaceCount );
+			var leaf = new MapLeaf( contents, firstLeafFace, leafFaceCount );
 			leafs[i] = leaf;
 		}
 
-		//Log.Info( $"LEAFS: {leafCount}" );
 		Context.Leafs = leafs;
 	}
 }
 
 public struct MapLeaf
 {
+	public int Contents;
 	public ushort FirstFaceIndex;
 	public ushort FaceCount;
 
-	public MapLeaf( ushort firstFaceIndex, ushort faceCount )
+	public MapLeaf( int contents, ushort firstFaceIndex, ushort faceCount )
 	{
+		Contents = contents;
 		FirstFaceIndex = firstFaceIndex;
 		FaceCount = faceCount;
 	}
