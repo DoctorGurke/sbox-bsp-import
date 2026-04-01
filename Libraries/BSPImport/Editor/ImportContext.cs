@@ -14,7 +14,6 @@ public class ImportContext
 
 		Lumps = new BaseLump[64];
 		Geometry = new();
-		CachedMaterials = new();
 
 		// Start as unknown; MapDecompiler will assign the correct descriptor
 		// after reading the BSP header version (and optionally refining via entities).
