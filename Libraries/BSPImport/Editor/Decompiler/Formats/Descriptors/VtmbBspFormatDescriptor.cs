@@ -9,7 +9,12 @@ public sealed class VtmbBspFormatDescriptor : IBspFormatDescriptor
 {
 	private static readonly IBspStructReaders _readers = new VtmbBspStructReaders();
 
-	private static readonly HashSet<string> VTMBSignatures = new( StringComparer.OrdinalIgnoreCase )
+	/// <summary>
+	/// Known VTMB map name prefixes. All retail VTMB maps follow this convention.
+	/// </summary>
+	private static readonly string[] MapPrefixes = ["la_", "sm_", "ch_", "hw_"];
+
+	private static readonly HashSet<string> Signatures = new( StringComparer.OrdinalIgnoreCase )
 	{
 		"events_world",
 		"events_player",
@@ -34,23 +39,27 @@ public sealed class VtmbBspFormatDescriptor : IBspFormatDescriptor
 	};
 
 	public BspGameFormat GameFormat => BspGameFormat.VampireBloodlines;
-	public int BspVersion => 17;
+	public IReadOnlySet<int> SupportedVersions { get; } = new HashSet<int> { 17 };
 	public string DisplayName => "Vampire: The Masquerade – Bloodlines (BSP v17)";
+	public int SpecificityScore => 100;
 
-	/// <summary>
-	/// BSP v17 is used by VTMB but also by some older Source engine versions (e.g. HL2 beta),
-	/// so the version number alone is not definitive.
-	/// </summary>
-	public bool IsDefinitiveForVersion => false;
+	public LumpHeaderLayout LumpHeaderLayout => LumpHeaderLayout.Standard;
+	public BrushSideLayout BrushSideLayout => BrushSideLayout.Standard;
+	public StaticPropLayout StaticPropLayout => StaticPropLayout.V4;
 
-	/// <summary>
-	/// Not called in practice because <see cref="IsDefinitiveForVersion"/> is true,
-	/// but returns true as a safe default.
-	/// </summary>
-	public bool MatchesEntities( IReadOnlyList<string> entityClassNames )
+	public IBspStructReaders GetStructReaders( int bspVersion ) => _readers;
+
+	public bool MatchesMapName( string mapName )
 	{
-		return VTMBSignatures.Overlaps( entityClassNames );
+		if ( string.IsNullOrEmpty( mapName ) )
+			return true;
+
+		return MapPrefixes.Any( prefix =>
+			mapName.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) );
 	}
 
-	public IBspStructReaders StructReaders => _readers;
+	public bool MatchesEntities( IReadOnlyList<string> entityClassNames )
+	{
+		return Signatures.Overlaps( entityClassNames );
+	}
 }

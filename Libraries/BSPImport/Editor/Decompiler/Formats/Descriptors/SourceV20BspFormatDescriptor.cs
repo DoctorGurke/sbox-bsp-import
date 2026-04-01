@@ -16,21 +16,29 @@ public sealed class SourceV20BspFormatDescriptor : IBspFormatDescriptor
 {
 	private static readonly IBspStructReaders _readers = new StandardBspStructReaders();
 
-	// Known entity classnames exclusive to specific v20 games.
-	// Used for optional disambiguation if callers request entity refinement.
-	private static readonly HashSet<string> TF2Signatures = new( StringComparer.OrdinalIgnoreCase )
-		{ "tf_gamerules", "item_teamflag", "func_respawnroom", "info_observer_point" };
-
-	private static readonly HashSet<string> CSSSignatures = new( StringComparer.OrdinalIgnoreCase )
-		{ "cs_team_manager", "func_bomb_target", "cs_player_manager", "hostage_entity" };
-
-	private static readonly HashSet<string> DodSSignatures = new( StringComparer.OrdinalIgnoreCase )
-		{ "dod_control_point", "dod_round_master", "dod_team_manager" };
-
 	public BspGameFormat GameFormat => BspGameFormat.SourceV20;
-	public int BspVersion => 20;
+	public IReadOnlySet<int> SupportedVersions { get; } = new HashSet<int> { 19, 20 };
 	public string DisplayName => "Source Engine BSP v20 (HL2 / CS:S / DoD:S / TF2 / Portal / ...)";
-	public bool IsDefinitiveForVersion => false;
+	/// <summary>
+	/// Score 0 — this is the broadest catch-all. Any more-specific v19/v20 descriptor
+	/// should use a higher score.
+	/// </summary>
+	public int SpecificityScore => 0;
+
+	public LumpHeaderLayout LumpHeaderLayout => LumpHeaderLayout.Standard;
+
+	public BrushSideLayout BrushSideLayout => BrushSideLayout.Standard;
+
+	public StaticPropLayout StaticPropLayout => StaticPropLayout.V4;
+
+	/// <summary>
+	/// All v19/v20 variants share the standard 56-byte face layout.
+	/// The bspVersion parameter is ignored — same readers for both.
+	/// </summary>
+	public IBspStructReaders GetStructReaders( int bspVersion ) => _readers;
+
+	/// <summary>No reliable naming opinion, so do not participate in map-name refinement.</summary>
+	public bool MatchesMapName( string mapName ) => false;
 
 	/// <summary>
 	/// Always returns true. This descriptor is the broadest fallback for v20 files.
@@ -38,6 +46,4 @@ public sealed class SourceV20BspFormatDescriptor : IBspFormatDescriptor
 	/// one in the registry to allow finer disambiguation.
 	/// </summary>
 	public bool MatchesEntities( IReadOnlyList<string> entityClassNames ) => true;
-
-	public IBspStructReaders StructReaders => _readers;
 }

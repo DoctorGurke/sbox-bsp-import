@@ -15,38 +15,16 @@ public sealed class SourceV22BspFormatDescriptor : IBspFormatDescriptor
 {
 	private static readonly IBspStructReaders _readers = new StandardBspStructReaders();
 
-	private static readonly HashSet<string> CSGOSignatures = new( StringComparer.OrdinalIgnoreCase )
-	{
-		"cs_gamerules",
-		"func_bomb_target",
-		"cs_team_manager",
-	};
-
-	private static readonly HashSet<string> Portal2Signatures = new( StringComparer.OrdinalIgnoreCase )
-	{
-		"prop_laser_catcher",
-		"info_coop_spawn",
-		"prop_button",
-		"info_fizzler",
-	};
-
-	private static readonly HashSet<string> Dota2Signatures = new( StringComparer.OrdinalIgnoreCase )
-	{
-		"ent_dota_game_events",
-		"dota_item_spawner",
-	};
-
 	public BspGameFormat GameFormat => BspGameFormat.SourceV22;
-	public int BspVersion => 22;
-	public string DisplayName => "Source Engine BSP v22 (CS:GO / Portal 2 / DOTA 2 / ...)";
-	public bool IsDefinitiveForVersion => false;
+	public IReadOnlySet<int> SupportedVersions { get; } = new HashSet<int> { 22 };
+	public string DisplayName => "Source Engine BSP v22";
+	public int SpecificityScore => 50;
 
-	public bool MatchesEntities( IReadOnlyList<string> entityClassNames )
-	{
-		return CSGOSignatures.Overlaps( entityClassNames )
-		       || Portal2Signatures.Overlaps( entityClassNames )
-		       || Dota2Signatures.Overlaps( entityClassNames );
-	}
+	public LumpHeaderLayout LumpHeaderLayout => LumpHeaderLayout.Standard;
+	public BrushSideLayout BrushSideLayout => BrushSideLayout.Standard;
+	public StaticPropLayout StaticPropLayout => StaticPropLayout.V10;
 
-	public IBspStructReaders StructReaders => _readers;
+	public IBspStructReaders GetStructReaders( int bspVersion ) => _readers;
+	public bool MatchesMapName( string mapName ) => false;
+	public bool MatchesEntities( IReadOnlyList<string> entityClassNames ) => true;
 }

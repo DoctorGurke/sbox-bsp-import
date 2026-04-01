@@ -6,7 +6,7 @@ public class FaceLump : BaseLump
 
 	protected override void Parse( BinaryReader reader )
 	{
-		var structReaders = Context.FormatDescriptor.StructReaders;
+		var structReaders = Context.FormatDescriptor.GetStructReaders( Context.BspVersion );
 
 		// Use the format descriptor's face size, e.g. 56 bytes for v20+, 104 for VTMB v17.
 		var faceCount = reader.GetLength() / structReaders.FaceStructSize;

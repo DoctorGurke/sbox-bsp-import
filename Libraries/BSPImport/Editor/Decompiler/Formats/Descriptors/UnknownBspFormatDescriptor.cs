@@ -17,11 +17,15 @@ public sealed class UnknownBspFormatDescriptor : IBspFormatDescriptor
 	private UnknownBspFormatDescriptor() { }
 
 	public BspGameFormat GameFormat => BspGameFormat.Unknown;
-	public int BspVersion => -1;
+	public IReadOnlySet<int> SupportedVersions { get; } = new HashSet<int>();
 	public string DisplayName => "Unknown BSP format (fallback: Source v20 readers)";
-	public bool IsDefinitiveForVersion => false;
+	public int SpecificityScore => -1;
 
+	public LumpHeaderLayout LumpHeaderLayout => LumpHeaderLayout.Standard;
+	public BrushSideLayout BrushSideLayout => BrushSideLayout.Standard;
+	public StaticPropLayout StaticPropLayout => StaticPropLayout.V4;
+
+	public IBspStructReaders GetStructReaders( int bspVersion ) => _readers;
+	public bool MatchesMapName( string mapName ) => false;
 	public bool MatchesEntities( IReadOnlyList<string> entityClassNames ) => false;
-
-	public IBspStructReaders StructReaders => _readers;
 }

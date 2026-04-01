@@ -51,4 +51,14 @@ public sealed class VtmbBspStructReaders : IBspStructReaders
 		// No numPrims / firstPrimID as those fields were added in v20+.
 		return new Face( firstEdge, numEdges, texInfo, dispInfo, area, oFace );
 	}
+
+	public BrushSide ReadBrushSide( BinaryReader reader )
+		=> throw new NotSupportedException( "VTMB brush side parsing is not implemented yet." );
+
+	public int GetStaticPropEntrySize( int staticPropVersion )
+		=> throw new NotSupportedException( "VTMB static prop parsing is not implemented yet." );
+
+	public StaticPropInstance ReadStaticProp( BinaryReader reader, IBspFormatDescriptor format,
+		int staticPropVersion )
+		=> throw new NotSupportedException( "VTMB static prop parsing is not implemented yet." );
 }

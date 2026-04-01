@@ -6,7 +6,7 @@ public class OriginalFaceLump : BaseLump
 
 	protected override void Parse( BinaryReader reader )
 	{
-		var structReaders = Context.FormatDescriptor.StructReaders;
+		var structReaders = Context.FormatDescriptor.GetStructReaders( Context.BspVersion );
 
 		// each face is different for each format, so we need to read them all in one go
 		var oFaceCount = reader.GetLength() / structReaders.FaceStructSize;

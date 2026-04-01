@@ -46,6 +46,14 @@ public class ImportContext
 	public BaseLump[] Lumps;
 
 	/// <summary>
+	/// The exact BSP version integer read from the file header.
+	/// Stored separately from <see cref="FormatDescriptor"/> because one descriptor
+	/// may support multiple versions and struct readers may differ between them.
+	/// Set by <see cref="MapDecompiler"/> immediately after reading the header.
+	/// </summary>
+	public int BspVersion { get; set; }
+
+	/// <summary>
 	/// The detected BSP format descriptor for this file.
 	/// Set by <see cref="MapDecompiler"/> immediately after reading the BSP header version,
 	/// and optionally refined after the entity lump (lump 0) is parsed.

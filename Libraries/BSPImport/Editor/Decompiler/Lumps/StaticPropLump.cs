@@ -1,78 +1,96 @@
-﻿namespace BspImport.Decompiler.Lumps;
+using BspImport.Decompiler.Formats;
+
+namespace BspImport.Decompiler.Lumps;
 
 public class StaticPropLump : BaseLump
 {
+	private const int NameEntrySize = 128;
+
 	private int DictEntryCount { get; set; }
-	private Dictionary<int, string>? Names { get; set; }
+	private Dictionary<int, string> Names { get; set; } = new();
 
 	public StaticPropLump( ImportContext context, byte[] data, int version = 0 ) : base( context, data, version ) { }
 
 	protected override void Parse( BinaryReader reader )
 	{
-		// parse static prop names (model names)
+		if ( reader.GetLength() < sizeof( int ) )
+			return;
+
 		DictEntryCount = reader.ReadInt32();
-		Names = new();
+		if ( DictEntryCount < 0 )
+			return;
+
+		Names = new Dictionary<int, string>( DictEntryCount );
 
 		for ( int i = 0; i < DictEntryCount; i++ )
 		{
-			var size = Marshal.SizeOf<StaticPropNameEntry>();
-			var sReader = new StructReader<StaticPropNameEntry>();
-			var name = sReader.Read( reader.ReadBytes( size ) );
+			if ( reader.GetLength() < NameEntrySize )
+			{
+				Log.Warning( $"[BSP] Static prop dictionary truncated at entry {i}/{DictEntryCount}." );
+				return;
+			}
 
-			var entry = new string( name.Name ).Trim( '\0' );
-
-			Names.TryAdd( i, entry );
+			string entry = Encoding.ASCII.GetString( reader.ReadBytes( NameEntrySize ) ).TrimEnd( '\0' );
+			Names[i] = entry;
 		}
 
-		// we don't care about leaf entries
-		var leafs = reader.ReadInt32(); // leaf entry count
-		reader.Skip<ushort>( leafs ); // leaf entries
-
-		// read static prop entries
-		var entries = reader.ReadInt32();
-
-		// no static props, don't bother
-		if ( entries <= 0 )
+		if ( reader.GetLength() < sizeof( int ) )
 			return;
 
-		// size per static prop
-		var propLength = reader.GetLength() / entries;
+		int leafRefCount = reader.ReadInt32();
+		if ( leafRefCount < 0 )
+			return;
 
-		for ( int i = 0; i < entries; i++ )
+		long leafRefBytes = (long)leafRefCount * sizeof( ushort );
+		if ( reader.GetLength() < leafRefBytes )
 		{
-			var sprp = reader.Split( propLength );
+			Log.Warning( $"[BSP] Static prop leaf refs truncated: expected {leafRefCount} entries." );
+			return;
+		}
 
-			var origin = sprp.ReadVector3();
-			var angles = sprp.ReadVector3();
+		reader.Skip<ushort>( leafRefCount );
 
-			var propType = sprp.ReadUInt16();
+		if ( reader.GetLength() < sizeof( int ) )
+			return;
+
+		int entryCount = reader.ReadInt32();
+		if ( entryCount <= 0 )
+			return;
+
+		var structReaders = Context.FormatDescriptor.GetStructReaders( Context.BspVersion );
+		var props = new List<LumpEntity>( entryCount );
+
+		for ( int i = 0; i < entryCount; i++ )
+		{
+			StaticPropInstance staticProp;
+			try
+			{
+				staticProp = structReaders.ReadStaticProp( reader, Context.FormatDescriptor, Version );
+			}
+			catch ( Exception ex ) when ( ex is ArgumentException or EndOfStreamException or InvalidOperationException )
+			{
+				Log.Warning( $"[BSP] Static prop entries truncated at entry {i}/{entryCount}: {ex.Message}" );
+				break;
+			}
 
 			var prop = new LumpEntity();
 			prop.SetClassName( "prop_static" );
-			prop.SetPosition( origin );
-			prop.SetAngles( new Angles( angles ) );
-			if ( Names.TryGetValue( propType, out var model ) )
-			{
-				prop.SetModel( Names[propType] );
-			}
+			prop.SetPosition( staticProp.Origin );
+			prop.SetAngles( new Angles( staticProp.Angles ) );
 
+			if ( Names.TryGetValue( staticProp.PropType, out var model ) )
+				prop.SetModel( model );
 
-			// bit dirty but we only throw props into the entity lump here
-			Context.Entities = Context.Entities?.Append( prop ).ToArray();
+			props.Add( prop );
 		}
 
-		//Log.Info( $"STATIC PROPS: {entries}" );
-	}
+		if ( props.Count == 0 )
+			return;
 
-	// helper for getting the dict entries
-	private struct StaticPropNameEntry
-	{
-		[MarshalAs( UnmanagedType.ByValArray, SizeConst = 128 )]
-		public char[] Name;
+		Context.Entities = Context.Entities is { Length: > 0 }
+			? Context.Entities.Concat( props ).ToArray()
+			: props.ToArray();
 
-		public StaticPropNameEntry()
-		{
-			Name = new char[128];
-		}
+		//Log.Info( $"STATIC PROPS: {entryCount}" );
 	}
 }
