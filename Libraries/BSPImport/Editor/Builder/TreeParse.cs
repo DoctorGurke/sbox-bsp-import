@@ -5,6 +5,7 @@ public static class TreeParse
 	public class TreeParseResult
 	{
 		public List<ushort> FaceIndices = new();
+		public List<bool> IsWaterFace = new();
 	}
 
 	/// <summary>
@@ -15,6 +16,9 @@ public static class TreeParse
 	public static TreeParseResult ParseTreeFaces( ImportContext context )
 	{
 		var result = new TreeParseResult();
+
+		if ( !context.HasCompleteGeometry( out var geo ) )
+			return result;
 
 		var faces = new HashSet<ushort>();
 		ParseNodeFacesRecursively( context, 0, ref faces );
@@ -69,6 +73,8 @@ public static class TreeParse
 			return;
 
 		var leaf = context.Leafs[index];
+		//var isWaterLeaf = leaf.WaterDataIndex != -1;
+		var isSkyboxLeaf = (leaf.Flags & 0x01) != 0;
 
 		// contribute to faces collection
 		for ( ushort i = 0; i < leaf.FaceCount; i++ )
@@ -82,9 +88,14 @@ public static class TreeParse
 		}
 	}
 
-	private static void TryAddFace( ImportContext context, ushort faceIndex, ref HashSet<ushort> faceIndices )
+	private static bool TryAddFace( ImportContext context, ushort faceIndex, ref HashSet<ushort> faceIndices )
 	{
-		context.Geometry.TryGetFace( faceIndex, out var face );
-		faceIndices.Add( faceIndex );
+		if ( !context.Geometry.TryGetFace( faceIndex, out var face ) )
+			return false;
+
+		if ( !faceIndices.Add( faceIndex ) )
+			return false;
+
+		return true;
 	}
 }
