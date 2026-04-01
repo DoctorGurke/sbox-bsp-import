@@ -64,6 +64,7 @@ public class ImportContext
 	// bsp tree structure
 	public MapNode[]? Nodes;
 	public MapLeaf[]? Leafs;
+	public Plane[]? Planes;
 
 	public LumpEntity[]? Entities { get; set; }
 	public MapModel[]? Models { get; set; }
@@ -74,9 +75,8 @@ public class ImportContext
 	public int[]? TexDataStringTable { get; set; }
 	public TexDataStringData TexDataStringData { get; set; }
 
-	public PolygonMesh? WorldSpawn { get; set; }
 	public PolygonMesh[]? CachedPolygonMeshes { get; set; }
-	public Dictionary<string, Material> CachedMaterials { get; set; }
+	public List<short> SkyboxAreas { get; set; }
 
 	/// <summary>
 	/// Checks that the context has a complete geometry set available for building meshes.

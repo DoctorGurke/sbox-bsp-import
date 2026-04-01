@@ -15,30 +15,43 @@ public class LeafLump : BaseLump
 		{
 			var leafReader = reader.Split( leafSize );
 
-			leafReader.Skip<int>(); // contents
+			int contents = leafReader.ReadInt32(); // contents
 			leafReader.Skip<short>(); // cluster
-			leafReader.Skip<short>(); // area:9 flags:7
+
+			// unpack flags, dont need area
+			short packed = leafReader.ReadInt16();
+
+			short area = (short)(packed & 0x01FF);      // 9 bits
+			short flags = (short)((packed >> 9) & 0x7F);  // 7 bits
+
 			leafReader.Skip<short>( 3 ); // mins
 			leafReader.Skip<short>( 3 ); // maxs
-			var firstLeafFace = leafReader.ReadUInt16();
-			var leafFaceCount = leafReader.ReadUInt16();
+			ushort firstLeafFace = leafReader.ReadUInt16();
+			ushort leafFaceCount = leafReader.ReadUInt16();
+			leafReader.Skip<ushort>(); // firstleafbrush
+			leafReader.Skip<ushort>(); // numleafbrushes
 
-			var leaf = new MapLeaf( firstLeafFace, leafFaceCount );
+			var leaf = new MapLeaf( contents, area, flags, firstLeafFace, leafFaceCount );
 			leafs[i] = leaf;
 		}
 
-		//Log.Info( $"LEAFS: {leafCount}" );
 		Context.Leafs = leafs;
 	}
 }
 
 public struct MapLeaf
 {
+	public int Contents;
+	public short Area; // 9 bits
+	public short Flags; // 7 bits
 	public ushort FirstFaceIndex;
 	public ushort FaceCount;
 
-	public MapLeaf( ushort firstFaceIndex, ushort faceCount )
+	public MapLeaf( int contents, short area, short flags, ushort firstFaceIndex, ushort faceCount )
 	{
+		Contents = contents;
+		Area = area;
+		Flags = flags;
 		FirstFaceIndex = firstFaceIndex;
 		FaceCount = faceCount;
 	}

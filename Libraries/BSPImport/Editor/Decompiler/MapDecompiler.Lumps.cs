@@ -7,6 +7,7 @@ public partial class MapDecompiler
 		return lumpType switch
 		{
 			LumpType.Entity => new EntityLump( Context, data ),
+			LumpType.Plane => new PlaneLump( Context, data ),
 			LumpType.TexData => new TexDataLump( Context, data ),
 			LumpType.Vertex => new VertexLump( Context, data ),
 			LumpType.Node => new NodeLump( Context, data ),
@@ -31,6 +32,7 @@ public partial class MapDecompiler
 public enum LumpType
 {
 	Entity = 0,
+	Plane = 1,
 	TexData = 2,
 	Vertex = 3,
 	Node = 5,

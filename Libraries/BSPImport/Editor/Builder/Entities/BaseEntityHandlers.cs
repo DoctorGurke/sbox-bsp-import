@@ -91,6 +91,11 @@ internal static class BaseEntities
 		var colorVec = lightString is not null ? Vector4.Parse( ent.GetValue( "_light" ) ) : new Vector4( 1.0f );
 		var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
 		light.LightColor = color.WithAlpha( 1.0f );
+
+		if ( light.Attenuation == 0 )
+		{
+			light.Attenuation = 1;
+		}
 	}
 
 	public static void HandleSpotLightEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )

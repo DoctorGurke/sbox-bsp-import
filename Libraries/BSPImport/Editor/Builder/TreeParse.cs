@@ -1,10 +1,34 @@
-﻿namespace BspImport.Builder;
+﻿using Editor.MovieMaker;
+using System.IO.Compression;
+
+namespace BspImport.Builder;
 
 public static class TreeParse
 {
 	public class TreeParseResult
 	{
 		public List<ushort> FaceIndices = new();
+		public List<bool> IsWaterFace = new();
+	}
+
+
+
+	public static int FindLeafIndex( ImportContext context, Vector3 point )
+	{
+		int nodeIndex = 0; // Start at headnode (model 0)  
+		while ( nodeIndex >= 0 )
+		{
+			var node = context.Nodes![nodeIndex];
+			var plane = context.Planes![node.PlaneIndex];
+
+			float distance = plane.Normal.x * point.x +
+							plane.Normal.y * point.y +
+							plane.Normal.z * point.z - plane.Distance;
+
+			nodeIndex = distance >= 0 ? node.Children[0] : node.Children[1];
+		}
+
+		return -1 - nodeIndex; // Convert negative leaf index to positive  
 	}
 
 	/// <summary>
@@ -12,12 +36,19 @@ public static class TreeParse
 	/// </summary>
 	/// <param name="context"></param>
 	/// <returns></returns>
-	public static List<ushort> ParseTreeFaces( ImportContext context )
+	public static TreeParseResult ParseTreeFaces( ImportContext context )
 	{
+		var result = new TreeParseResult();
+
+		if ( !context.HasCompleteGeometry( out var geo ) )
+			return result;
+
 		var faces = new HashSet<ushort>();
 		ParseNodeFacesRecursively( context, 0, ref faces );
 
-		return faces.ToList();
+		result.FaceIndices = faces.ToList();
+
+		return result;
 	}
 
 	private static void ParseNodeFacesRecursively( ImportContext context, int index, ref HashSet<ushort> faceIndices )
@@ -32,6 +63,9 @@ public static class TreeParse
 		{
 			ushort faceIndex = node.FirstFaceIndex;
 			faceIndex += i;
+
+			if ( context.SkyboxAreas.Contains( node.Area ) )
+				continue;
 
 			TryAddFace( context, faceIndex, ref faceIndices );
 		}
@@ -66,6 +100,12 @@ public static class TreeParse
 
 		var leaf = context.Leafs[index];
 
+		//var isWaterLeaf = leaf.WaterDataIndex != -1;
+		//var isSkyboxLeaf = (leaf.Flags & 0x01) != 0;
+
+		if ( context.SkyboxAreas.Contains( leaf.Area ) )
+			return;
+
 		// contribute to faces collection
 		for ( ushort i = 0; i < leaf.FaceCount; i++ )
 		{
@@ -78,9 +118,14 @@ public static class TreeParse
 		}
 	}
 
-	private static void TryAddFace( ImportContext context, ushort faceIndex, ref HashSet<ushort> faceIndices )
+	private static bool TryAddFace( ImportContext context, ushort faceIndex, ref HashSet<ushort> faceIndices )
 	{
-		context.Geometry.TryGetFace( faceIndex, out var face );
-		faceIndices.Add( faceIndex );
+		if ( !context.Geometry.TryGetFace( faceIndex, out var face ) )
+			return false;
+
+		if ( !faceIndices.Add( faceIndex ) )
+			return false;
+
+		return true;
 	}
 }

@@ -38,6 +38,39 @@ internal class DisplacementHelper
 		return rotatedCorners;
 	}
 
+	public static Vector3? GetDisplacementOrigin( ImportContext context, ushort faceIndex )
+	{
+		if ( !context.HasCompleteGeometry( out var geo ) )
+			return null;
+
+		if ( faceIndex < 0 || faceIndex >= geo.FacesCount )
+			return null;
+
+		if ( !geo.TryGetFace( faceIndex, out var face ) )
+			return null;
+
+		if ( face.OriginalFaceIndex < 0 || face.OriginalFaceIndex > geo.OriginalFaceCount || !geo.TryGetOriginalFace( face.OriginalFaceIndex, out var oFace ) )
+			return null;
+
+		int surfEdgeIdx = oFace.FirstEdge;
+		if ( !geo.TryGetSurfaceEdge( surfEdgeIdx, out var edge ) )
+			return null;
+
+		int edgeIndex = edge >= 0 ? edge : -edge;
+		if ( !geo.TryGetEdgeIndices( edgeIndex, out var edgeIndices ) )
+			return null;
+
+		var indices = edgeIndices.Indices;
+		if ( indices is null || indices.Length < 2 )
+			return null;
+
+		int vertIndex = edge >= 0 ? indices[0] : indices[1];
+		if ( !geo.TryGetVertex( vertIndex, out var vertex ) )
+			return null;
+
+		return vertex;
+	}
+
 	/// <summary>
 	/// Creates a displacement Mesh for a face index. Will return null for invalid state. Will Fallback to the base quad if displacement reconstruction fails.
 	/// </summary>
@@ -191,9 +224,6 @@ internal class DisplacementHelper
 				var basePos = Vector3.Lerp( bottom, top, t );
 
 				var finalPos = basePos + dVert.Displacement * dVert.Distance;
-				finalPos.x = finalPos.x.Floor();
-				finalPos.y = finalPos.y.Floor();
-				finalPos.z = finalPos.z.Floor();
 
 				int idx = sy * side + sx; // base grid is row-major (y * side + x)
 				positions[idx] = finalPos;
