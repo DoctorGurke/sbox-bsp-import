@@ -12,7 +12,6 @@ public class ImportContext
 
 		Lumps = new BaseLump[64];
 		Geometry = new();
-		CachedMaterials = new();
 	}
 
 	/// <summary>
@@ -52,9 +51,7 @@ public class ImportContext
 	public int[]? TexDataStringTable { get; set; }
 	public TexDataStringData TexDataStringData { get; set; }
 
-	public PolygonMesh? WorldSpawn { get; set; }
 	public PolygonMesh[]? CachedPolygonMeshes { get; set; }
-	public Dictionary<string, Material> CachedMaterials { get; set; }
 
 	/// <summary>
 	/// Checks that the context has a complete geometry set available for building meshes.
