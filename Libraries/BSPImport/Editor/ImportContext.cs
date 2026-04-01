@@ -41,6 +41,7 @@ public class ImportContext
 	// bsp tree structure
 	public Decompiler.Lumps.MapNode[]? Nodes;
 	public MapLeaf[]? Leafs;
+	public Plane[]? Planes;
 
 	public LumpEntity[]? Entities { get; set; }
 	public MapModel[]? Models { get; set; }
@@ -52,6 +53,7 @@ public class ImportContext
 	public TexDataStringData TexDataStringData { get; set; }
 
 	public PolygonMesh[]? CachedPolygonMeshes { get; set; }
+	public List<short> SkyboxAreas { get; set; }
 
 	/// <summary>
 	/// Checks that the context has a complete geometry set available for building meshes.

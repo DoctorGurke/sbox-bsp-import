@@ -15,15 +15,16 @@ public class NodeLump : BaseLump
 		{
 			var nodeReader = reader.Split( nodeSize );
 
-			nodeReader.Skip<int>(); // int planenum
-			var firstChildIndex = nodeReader.ReadInt32();
-			var secondChildIndex = nodeReader.ReadInt32();
+			int planeIndex = nodeReader.ReadInt32();
+			int firstChildIndex = nodeReader.ReadInt32();
+			int secondChildIndex = nodeReader.ReadInt32();
 			nodeReader.Skip<short>( 3 ); // mins
 			nodeReader.Skip<short>( 3 ); // maxs
-			var firstFaceIndex = nodeReader.ReadUInt16();
-			var faceCount = nodeReader.ReadUInt16();
+			ushort firstFaceIndex = nodeReader.ReadUInt16();
+			ushort faceCount = nodeReader.ReadUInt16();
+			short area = nodeReader.ReadInt16();
 
-			var node = new MapNode( new int[] { firstChildIndex, secondChildIndex }, firstFaceIndex, faceCount );
+			var node = new MapNode( planeIndex, new int[] { firstChildIndex, secondChildIndex }, firstFaceIndex, faceCount, area );
 			nodes[i] = node;
 		}
 
@@ -34,14 +35,18 @@ public class NodeLump : BaseLump
 
 public struct MapNode
 {
+	public int PlaneIndex;
 	public int[] Children;
 	public ushort FirstFaceIndex;
 	public ushort FaceCount;
+	public short Area;
 
-	public MapNode( int[] childIndices, ushort firstFaceIndex, ushort faceCount )
+	public MapNode( int planeIndex, int[] childIndices, ushort firstFaceIndex, ushort faceCount, short area )
 	{
+		PlaneIndex = planeIndex;
 		Children = childIndices;
 		FirstFaceIndex = firstFaceIndex;
 		FaceCount = faceCount;
+		Area = area;
 	}
 }

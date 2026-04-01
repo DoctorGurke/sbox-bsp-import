@@ -8,6 +8,8 @@ public partial class MapDecompiler
 		{
 			case LumpType.Entity:
 				return new EntityLump( Context, data );
+			case LumpType.Plane:
+				return new PlaneLump( Context, data );
 			case LumpType.TexData:
 				return new TexDataLump( Context, data );
 			case LumpType.Vertex:
@@ -49,6 +51,7 @@ public partial class MapDecompiler
 public enum LumpType
 {
 	Entity = 0,
+	Plane = 1,
 	TexData = 2,
 	Vertex = 3,
 	Node = 5,
