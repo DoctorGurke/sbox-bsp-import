@@ -12,12 +12,16 @@ public static class TreeParse
 	/// </summary>
 	/// <param name="context"></param>
 	/// <returns></returns>
-	public static List<ushort> ParseTreeFaces( ImportContext context )
+	public static TreeParseResult ParseTreeFaces( ImportContext context )
 	{
+		var result = new TreeParseResult();
+
 		var faces = new HashSet<ushort>();
 		ParseNodeFacesRecursively( context, 0, ref faces );
 
-		return faces.ToList();
+		result.FaceIndices = faces.ToList();
+
+		return result;
 	}
 
 	private static void ParseNodeFacesRecursively( ImportContext context, int index, ref HashSet<ushort> faceIndices )

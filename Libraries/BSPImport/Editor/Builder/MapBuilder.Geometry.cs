@@ -242,7 +242,9 @@ public partial class MapBuilder
 		}
 
 		// construct world mesh faces from bsp tree
-		var faceIndices = TreeParse.ParseTreeFaces( Context );
+		var result = TreeParse.ParseTreeFaces( Context );
+
+		var faceIndices = result.FaceIndices;
 
 		if ( faceIndices.Count == 0 )
 		{
