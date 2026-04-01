@@ -317,8 +317,6 @@ public partial class MapBuilder
 
 		var model = Context.Models[modelIndex];
 
-		Log.Info( $"model: firstFace: {model.FirstFace} faces: {model.FaceCount}" );
-
 		return ConstructPolygonMesh( model.FirstFace, model.FaceCount );
 	}
 
