@@ -1,6 +1,7 @@
 ﻿namespace BspImport.Decompiler;
 
 using Formats;
+using System.Diagnostics;
 
 [MapDecompiler( "Default" )]
 public partial class MapDecompiler
@@ -90,7 +91,7 @@ public partial class MapDecompiler
 	/// <param name="index"></param>
 	/// <returns></returns>
 	/// <exception cref="InvalidOperationException"></exception>
-	private LumpInfo ReadLumpInfo( BinaryReader reader, int index)
+	private LumpInfo ReadLumpInfo( BinaryReader reader, int index )
 	{
 		int offset; // offset into bsp
 		int length; // length in bytes
@@ -111,8 +112,7 @@ public partial class MapDecompiler
 				break;
 
 			default:
-				throw new InvalidOperationException( $"Unsupported lump header layout: " +
-				                                     $"{Context.FormatDescriptor.LumpHeaderLayout}" );
+				throw new InvalidOperationException( $"Unsupported lump header layout: " + $"{Context.FormatDescriptor.LumpHeaderLayout}" );
 		}
 
 		reader.Skip( 4 ); // fourCC - unused
@@ -120,7 +120,7 @@ public partial class MapDecompiler
 	}
 }
 
-public readonly record struct LumpInfo(int Index, int Offset, int Length, int Version)
+public readonly record struct LumpInfo( int Index, int Offset, int Length, int Version )
 {
 	public bool IsEmpty => Offset == 0 || Length == 0;
 }

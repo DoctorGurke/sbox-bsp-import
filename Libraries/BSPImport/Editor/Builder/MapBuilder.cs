@@ -28,7 +28,6 @@ public partial class MapBuilder
 		var name = Context.Name;
 		var root = new GameObject( parent, true, name );
 
-		// start timer
 		var stopwatch = new Stopwatch();
 		stopwatch.Start();
 
@@ -78,23 +77,5 @@ public partial class MapBuilder
 
 		Log.Info( $"Report bugs or contribute @{repoURL}" );
 		Log.Info( $"Imported Source 1 BSP File using sbox-bsp-import by DoctorGurke" );
-	}
-
-	public static async Task<T?> RunWithTimeout<T>(
-	Func<Task<T>> taskFactory,
-	int timeoutMs )
-	{
-		var task = taskFactory();
-		var delay = Task.Delay( timeoutMs );
-
-		var completed = await Task.WhenAny( task, delay );
-
-		if ( completed == delay )
-		{
-			Log.Warning( "Operation timed out" );
-			return default;
-		}
-
-		return await task;
 	}
 }
