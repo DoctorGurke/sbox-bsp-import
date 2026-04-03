@@ -45,12 +45,12 @@ public sealed class StandardBspStructReaders : IBspStructReaders
 		IBspFormatDescriptor format,
 		int staticPropVersion )
 	{
-		int entrySize = ResolveStaticPropEntrySize( format, staticPropVersion );
-		using var sprp = reader.Split( entrySize );
+		//int entrySize = ResolveStaticPropEntrySize( format, staticPropVersion );
+		//using var sprp = reader.Split( entrySize );
 
-		Vector3 origin = sprp.ReadVector3();
-		Vector3 angles = sprp.ReadVector3();
-		ushort propType = sprp.ReadUInt16();
+		Vector3 origin = reader.ReadVector3();
+		Vector3 angles = reader.ReadVector3();
+		ushort propType = reader.ReadUInt16();
 
 		return new StaticPropInstance( origin, angles, propType );
 	}

@@ -59,13 +59,16 @@ public class StaticPropLump : BaseLump
 
 		var structReaders = Context.FormatDescriptor.GetStructReaders( Context.BspVersion );
 		var props = new List<LumpEntity>( entryCount );
+		var propLength = reader.GetLength() / entryCount;
 
 		for ( int i = 0; i < entryCount; i++ )
 		{
+
 			StaticPropInstance staticProp;
 			try
 			{
-				staticProp = structReaders.ReadStaticProp( reader, Context.FormatDescriptor, Version );
+				var propReader = reader.Split( propLength );
+				staticProp = structReaders.ReadStaticProp( propReader, Context.FormatDescriptor, Version );
 			}
 			catch ( Exception ex ) when ( ex is ArgumentException or EndOfStreamException or InvalidOperationException )
 			{
@@ -79,7 +82,9 @@ public class StaticPropLump : BaseLump
 			prop.SetAngles( new Angles( staticProp.Angles ) );
 
 			if ( Names.TryGetValue( staticProp.PropType, out var model ) )
+			{
 				prop.SetModel( model );
+			}
 
 			props.Add( prop );
 		}
