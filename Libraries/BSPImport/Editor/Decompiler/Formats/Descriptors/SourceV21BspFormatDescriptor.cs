@@ -13,7 +13,7 @@ public sealed class SourceV21BspFormatDescriptor : IBspFormatDescriptor
 
 	public BspGameFormat GameFormat => BspGameFormat.SourceV21;
 	public IReadOnlySet<int> SupportedVersions { get; } = new HashSet<int> { 20, 21 };
-	public string DisplayName => "Source Engine BSP v21 (L4D2 / Alien Swarm / Portal 2)";
+	public string DisplayName => "Source Engine BSP v21 (L4D2 / Alien Swarm / Portal 2 / Garry's Mod)";
 	public int SpecificityScore => 50;
 
 	public LumpHeaderLayout LumpHeaderLayout => LumpHeaderLayout.Standard;
