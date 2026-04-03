@@ -73,8 +73,13 @@ public partial class MapBuilder
 	private bool IsAllowedEntity( LumpEntity ent )
 	{
 		var isModel = BaseEntities.IsModelEntity( ent );
+
+		var leafIndex = TreeParse.FindLeafIndex( Context, ent.Position );
+		var leafArea = Context.Leafs![leafIndex].Area;
+
+		var cullSkyboxModel = isModel && Context.Settings.CullSkybox ? Context.SkyboxAreas.Contains( leafArea ) : false;
 		var cullModel = isModel ? !Context.Settings.LoadModels : false;
-		return ent.ClassName is not null && !ent.ClassName.Contains( "logic" ) && !EntityClassBlacklist.Contains( ent.ClassName ) && !cullModel;
+		return ent.ClassName is not null && !ent.ClassName.Contains( "logic" ) && !EntityClassBlacklist.Contains( ent.ClassName ) && !cullModel && !cullSkyboxModel;
 	}
 
 	/// <summary>;
