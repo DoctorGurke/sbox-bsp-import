@@ -13,7 +13,7 @@
  - Separate options to allow for importing only entities, only geometry, or skipping tools materials.
 
 ## Planned features:
- - More Entites; basic environment entities should be supported.
+ - More Entities; basic environment entities should be supported.
  - Clip materials and similar. These need to be reconstructed.
  - Vertex paint from displacements.
 
