@@ -74,7 +74,6 @@ public partial class MapBuilder
 	/// </summary>
 	protected virtual async Task BuildWorldGeometry( GameObject parent, IProgressSection progress, int meshesPerFrame, CancellationToken token )
 	{
-		Context.SkyboxAreas = FindSkyboxAreas();
 		var displacementMeshes = await ConstructDisplacementMeshesAsync( token, progress, meshesPerFrame );
 
 		if ( token.IsCancellationRequested )
@@ -214,7 +213,7 @@ public partial class MapBuilder
 			var dispLeafIndex = TreeParse.FindLeafIndex( Context, dispOrigin!.Value );
 			var dispLeaf = Context.Leafs![dispLeafIndex];
 
-			if ( Context.SkyboxAreas.Contains( dispLeaf.Area ) )
+			if ( Context.Settings.Cull3DSkybox && Context.SkyboxAreas.Contains( dispLeaf.Area ) )
 				continue;
 
 			// create one mesh per displacement

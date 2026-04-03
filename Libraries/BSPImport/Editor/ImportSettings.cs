@@ -42,4 +42,10 @@ public class ImportSettings
 	/// </summary>
 	[Property]
 	public bool ImportWorldGeometry { get; set; } = true;
+
+	/// <summary>
+	/// Cull 3D skybox Geometry and Models. 
+	/// </summary>
+	[Property]
+	public bool Cull3DSkybox { get; set; } = true;
 }

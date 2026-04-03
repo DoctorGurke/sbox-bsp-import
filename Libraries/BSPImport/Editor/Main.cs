@@ -31,6 +31,7 @@ public static class Main
 		ps.AddProperty( settings, x => x.ImportEntities );
 		ps.AddProperty( settings, x => x.ImportToolMaterials );
 		ps.AddProperty( settings, x => x.ImportWorldGeometry );
+		ps.AddProperty( settings, x => x.Cull3DSkybox );
 
 		canvas.Layout.Add( ps );
 

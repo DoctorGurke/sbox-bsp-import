@@ -32,6 +32,9 @@ public partial class MapBuilder
 		var stopwatch = new Stopwatch();
 		stopwatch.Start();
 
+		// for skybox culling
+		Context.SkyboxAreas = FindSkyboxAreas();
+
 		// build map worldspawn geometry (model 0), including displacements
 		if ( Context.Settings.ImportWorldGeometry )
 		{
