@@ -49,18 +49,20 @@ public struct Face
 	/// <returns>The name of the texture taken from context.TexDataStringData.</returns>
 	public string? GetMaterialName( ImportContext context )
 	{
+		if ( context.TexInfo is null || TexInfo < 0 || TexInfo >= context.TexInfo.Length )
+			return null;
+
 		// get texture/material for face
-		var texData = context.TexInfo?[TexInfo].TexData;
-
-		if ( texData is null )
+		var texData = context.TexInfo[TexInfo].TexData;
+		if ( context.TexData is null || texData < 0 || texData >= context.TexData.Length )
 			return null;
 
-		var stringTableIndex = context.TexDataStringTable?[texData.Value];
-
-		if ( stringTableIndex is null )
+		var stringTableIndex = context.TexData[texData].NameStringTableIndex;
+		if ( context.TexDataStringTable is null || stringTableIndex < 0 || stringTableIndex >= context.TexDataStringTable.Length )
 			return null;
 
-		return context.TexDataStringData.FromStringTableIndex( stringTableIndex.Value ).ToLower();
+		var stringDataIndex = context.TexDataStringTable[stringTableIndex];
+		return context.TexDataStringData.FromStringTableIndex( stringDataIndex ).ToLower();
 	}
 
 	public Vector3 GetReflectivity( ImportContext context )
