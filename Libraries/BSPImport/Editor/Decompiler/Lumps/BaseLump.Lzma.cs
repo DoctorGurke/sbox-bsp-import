@@ -14,8 +14,14 @@ public partial class BaseLump
 	/// </summary>
 	/// <param name="data">Byte data to check for LZMA compression magic number.</param>
 	/// <returns>True if the first 4 bytes represent the chars 'LZMA', false otherwise.</returns>
-	private bool IsCompressed( byte[] data )
+	private bool IsCompressed( byte[]? data )
 	{
+		if ( data is null || data.Length < sizeof( uint ) )
+			return false;
+
+		if ( data.Length < Marshal.SizeOf<SourceLzmaHeader>() )
+			return false;
+
 		var reader = new BinaryReader( new MemoryStream( data ) );
 		var lzmaId = reader.ReadUInt32();
 

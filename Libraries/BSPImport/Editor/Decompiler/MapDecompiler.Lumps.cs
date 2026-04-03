@@ -2,49 +2,30 @@
 
 public partial class MapDecompiler
 {
-	protected virtual BaseLump? ParseLump( int index, byte[] data, int version )
+	protected virtual BaseLump? ParseLump( LumpType lumpType, byte[] data, int version )
 	{
-		switch ( (LumpType)index )
+		return lumpType switch
 		{
-			case LumpType.Entity:
-				return new EntityLump( Context, data );
-			case LumpType.Plane:
-				return new PlaneLump( Context, data );
-			case LumpType.TexData:
-				return new TexDataLump( Context, data );
-			case LumpType.Vertex:
-				return new VertexLump( Context, data );
-			case LumpType.Node:
-				return new NodeLump( Context, data );
-			case LumpType.TexInfo:
-				return new TexInfoLump( Context, data );
-			case LumpType.Face:
-				return new FaceLump( Context, data );
-			case LumpType.Leaf:
-				return new LeafLump( Context, data );
-			case LumpType.Edge:
-				return new EdgeLump( Context, data );
-			case LumpType.SurfaceEdge:
-				return new SurfaceEdgeLump( Context, data );
-			case LumpType.Model:
-				return new ModelLump( Context, data );
-			case LumpType.LeafFace:
-				return new LeafFaceLump( Context, data );
-			case LumpType.DisplacementInfo:
-				return new DisplacementInfoLump( Context, data );
-			case LumpType.OriginalFace:
-				return new OriginalFaceLump( Context, data );
-			case LumpType.DisplacementVertices:
-				return new DisplacementVertexLump( Context, data );
-			case LumpType.Game:
-				return new GameLumpHeader( Context, data );
-			case LumpType.TexDataStringData:
-				return new TexDataStringDataLump( Context, data );
-			case LumpType.TexDataStringTable:
-				return new TexDataStringTableLump( Context, data );
-			default:
-				throw new ArgumentException( $"Tried parsing Lump with unknown type! ({index})" );
-		}
+			LumpType.Entity => new EntityLump( Context, data ),
+			LumpType.Plane => new PlaneLump( Context, data ),
+			LumpType.TexData => new TexDataLump( Context, data ),
+			LumpType.Vertex => new VertexLump( Context, data ),
+			LumpType.Node => new NodeLump( Context, data ),
+			LumpType.TexInfo => new TexInfoLump( Context, data ),
+			LumpType.Face => new FaceLump( Context, data ),
+			LumpType.Leaf => new LeafLump( Context, data ),
+			LumpType.Edge => new EdgeLump( Context, data ),
+			LumpType.SurfaceEdge => new SurfaceEdgeLump( Context, data ),
+			LumpType.Model => new ModelLump( Context, data ),
+			LumpType.LeafFace => new LeafFaceLump( Context, data ),
+			LumpType.DisplacementInfo => new DisplacementInfoLump( Context, data ),
+			LumpType.OriginalFace => new OriginalFaceLump( Context, data ),
+			LumpType.DisplacementVertices => new DisplacementVertexLump( Context, data ),
+			LumpType.Game => new GameLumpHeader( Context, data ),
+			LumpType.TexDataStringData => new TexDataStringDataLump( Context, data ),
+			LumpType.TexDataStringTable => new TexDataStringTableLump( Context, data ),
+			_ => throw new ArgumentException( $"Tried parsing Lump with unknown type!" )
+		};
 	}
 }
 
