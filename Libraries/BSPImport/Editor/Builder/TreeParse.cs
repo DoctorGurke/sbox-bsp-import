@@ -8,10 +8,7 @@ public static class TreeParse
 	public class TreeParseResult
 	{
 		public List<ushort> FaceIndices = new();
-		public List<bool> IsWaterFace = new();
 	}
-
-
 
 	public static int FindLeafIndex( ImportContext context, Vector3 point )
 	{
@@ -56,16 +53,16 @@ public static class TreeParse
 		if ( context.Nodes is null )
 			return;
 
-		var node = context.Nodes[index];
+		MapNode node = context.Nodes[index];
+
+		if ( context.Settings.CullSkybox && context.SkyboxAreas.Contains( node.Area ) )
+			return;
 
 		// contribute to faces collection
 		for ( ushort i = 0; i < node.FaceCount; i++ )
 		{
 			ushort faceIndex = node.FirstFaceIndex;
 			faceIndex += i;
-
-			if ( context.Settings.CullSkybox && context.SkyboxAreas.Contains( node.Area ) )
-				continue;
 
 			TryAddFace( context, faceIndex, ref faceIndices );
 		}
@@ -99,6 +96,14 @@ public static class TreeParse
 			return;
 
 		var leaf = context.Leafs[index];
+
+		if ( leaf.WaterDataIndex != -1 )
+			return;
+
+
+		bool isWater = (leaf.Contents & ContentsFlags.Water) == ContentsFlags.Water;
+		if ( isWater )
+			return;
 
 		//var isWaterLeaf = leaf.WaterDataIndex != -1;
 		//var isSkyboxLeaf = (leaf.Flags & 0x01) != 0;
