@@ -13,12 +13,12 @@
  - Separate options to allow for importing only entities, only geometry, or skipping tools materials.
 
 ## Planned features:
- - More Entites; basic environment entities should be supported.
+ - More Entities; basic environment entities should be supported.
  - Clip materials and similar. These need to be reconstructed.
  - Vertex paint from displacements.
 
 ## Issues and bugs
- Please make issues for bsp files the tool can't decompile&import. Provide the bsp and game info if possible.
+ Please make issues for bsp files the tool can't decompile&import. Provide the bsp and game info if possible. https://github.com/DoctorGurke/sbox-bsp-import
 
 ## Contribute
  Feel free to contribute via PRs. The decompiler is written in a way where each lump and alterations thereof can be dissected in one type. Check existing Lump types for examples.
