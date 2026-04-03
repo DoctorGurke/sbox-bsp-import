@@ -75,7 +75,7 @@ public class ImportContext
 	public TexDataStringData TexDataStringData { get; set; }
 
 	public PolygonMesh[]? CachedPolygonMeshes { get; set; }
-	public List<short> SkyboxAreas { get; set; }
+	public List<short> SkyboxAreas { get; set; } = new();
 
 	/// <summary>
 	/// Checks that the context has a complete geometry set available for building meshes.
