@@ -213,7 +213,7 @@ public partial class MapBuilder
 			var dispLeafIndex = TreeParse.FindLeafIndex( Context, dispOrigin!.Value );
 			var dispLeaf = Context.Leafs![dispLeafIndex];
 
-			if ( Context.Settings.Cull3DSkybox && Context.SkyboxAreas.Contains( dispLeaf.Area ) )
+			if ( Context.Settings.CullSkybox && Context.SkyboxAreas.Contains( dispLeaf.Area ) )
 				continue;
 
 			// create one mesh per displacement

@@ -72,7 +72,9 @@ public partial class MapBuilder
 
 	private bool IsAllowedEntity( LumpEntity ent )
 	{
-		return ent.ClassName is not null && !ent.ClassName.Contains( "logic" ) && !EntityClassBlacklist.Contains( ent.ClassName );
+		var isModel = BaseEntities.IsModelEntity( ent );
+		var cullModel = isModel ? !Context.Settings.LoadModels : false;
+		return ent.ClassName is not null && !ent.ClassName.Contains( "logic" ) && !EntityClassBlacklist.Contains( ent.ClassName ) && !cullModel;
 	}
 
 	/// <summary>;

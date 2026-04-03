@@ -64,7 +64,7 @@ public static class TreeParse
 			ushort faceIndex = node.FirstFaceIndex;
 			faceIndex += i;
 
-			if ( context.Settings.Cull3DSkybox && context.SkyboxAreas.Contains( node.Area ) )
+			if ( context.Settings.CullSkybox && context.SkyboxAreas.Contains( node.Area ) )
 				continue;
 
 			TryAddFace( context, faceIndex, ref faceIndices );
@@ -103,7 +103,7 @@ public static class TreeParse
 		//var isWaterLeaf = leaf.WaterDataIndex != -1;
 		//var isSkyboxLeaf = (leaf.Flags & 0x01) != 0;
 
-		if ( context.Settings.Cull3DSkybox && context.SkyboxAreas.Contains( leaf.Area ) )
+		if ( context.Settings.CullSkybox && context.SkyboxAreas.Contains( leaf.Area ) )
 			return;
 
 		// contribute to faces collection

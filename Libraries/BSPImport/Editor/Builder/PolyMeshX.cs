@@ -39,11 +39,11 @@ public static class PolyMeshX
 		if ( string.IsNullOrEmpty( materialName ) )
 			return;
 
-		var isToolsMaterial = materialName.Contains( "tools", StringComparison.OrdinalIgnoreCase );
 		// simple patch
 		materialName = materialName.Replace( "toolsskybox2d", "toolsskybox" );
 
-		if ( !context.Settings.ImportToolMaterials && isToolsMaterial )
+		// cull skybox faces entirely
+		if ( context.Settings.CullSkybox && materialName.Contains( "toolsskybox" ) )
 			return;
 
 		var verts = new List<Vector3>();
@@ -80,7 +80,7 @@ public static class PolyMeshX
 		var hVertices = mesh.AddVertices( verts.ToArray() );
 		var hFace = mesh.AddFace( hVertices );
 
-		if ( context.Settings.LoadMaterials || isToolsMaterial && context.Settings.ImportToolMaterials )
+		if ( context.Settings.LoadMaterials )
 		{
 			var material = Material.Load( $"materials/{materialName}.vmat" );
 			mesh.SetFaceMaterial( hFace, material );
@@ -97,7 +97,8 @@ public static class PolyMeshX
 			}
 		}
 
-		if ( isToolsMaterial )
+		// uv fix for tools materials
+		if ( materialName.Contains( "tools" ) )
 			mesh.TextureAlignToGrid( Transform.Zero );
 		else
 			mesh.SetFaceTextureCoords( hFace, uvs.ToArray() );

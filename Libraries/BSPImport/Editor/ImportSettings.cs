@@ -20,22 +20,16 @@ public class ImportSettings
 	public bool LoadMaterials { get; set; } = false;
 
 	/// <summary>
-	/// Load and spawn Model paths as Props. Includes static props.
-	/// </summary>
-	[Property]
-	public bool LoadModels { get; set; } = false;
-
-	/// <summary>
 	/// Include Entities (Lights, Brush Entities, etc) as GameObjects.
 	/// </summary>
 	[Property]
 	public bool ImportEntities { get; set; } = true;
 
 	/// <summary>
-	/// Include Tool Materials (toolsskybox, trigger, etc) in the world mesh.
+	/// Load and spawn Model paths as Props. Includes static props.
 	/// </summary>
-	[Property]
-	public bool ImportToolMaterials { get; set; } = false;
+	[Property, HideIf( nameof( ImportEntities ), false )]
+	public bool LoadModels { get; set; } = false;
 
 	/// <summary>
 	/// Include world geometry, including displacements.
@@ -47,5 +41,5 @@ public class ImportSettings
 	/// Cull 3D skybox Geometry and Models. 
 	/// </summary>
 	[Property]
-	public bool Cull3DSkybox { get; set; } = true;
+	public bool CullSkybox { get; set; } = true;
 }

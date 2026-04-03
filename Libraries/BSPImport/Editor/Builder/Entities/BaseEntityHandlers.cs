@@ -2,14 +2,22 @@
 
 internal static class BaseEntities
 {
+	public static bool IsModelEntity( LumpEntity ent )
+	{
+		if ( ent.Model is null || ent.Model == string.Empty )
+			return false;
+
+		if ( !ent.ClassName!.Contains( "prop" ) )
+			return false;
+
+		return true;
+	}
+
 	/// <summary>
 	/// prop_static
 	/// </summary>
 	public static void HandleStaticPropEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
 	{
-		if ( !settings.LoadModels )
-			return;
-
 		var propComponent = obj.Components.Create<Prop>();
 
 		var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
@@ -22,9 +30,6 @@ internal static class BaseEntities
 	/// </summary>
 	public static void HandlePhysicsPropEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
 	{
-		if ( !settings.LoadModels )
-			return;
-
 		var propComponent = obj.Components.Create<Prop>();
 		var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
 		propComponent.Model = model;
@@ -45,9 +50,6 @@ internal static class BaseEntities
 	/// </summary>
 	public static void HandleDynamicPropEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
 	{
-		if ( !settings.LoadModels )
-			return;
-
 		var propComponent = obj.Components.Create<Prop>();
 		var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
 		propComponent.Model = model;

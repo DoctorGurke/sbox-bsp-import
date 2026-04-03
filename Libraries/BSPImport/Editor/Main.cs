@@ -24,16 +24,10 @@ public static class Main
 		var settings = Game.Cookies.Get( cookieString, newSettings );
 
 		var ps = new ControlSheet();
-		ps.AddProperty( settings, x => x.FilePath );
-		ps.AddProperty( settings, x => x.ChunkSize );
-		ps.AddProperty( settings, x => x.LoadMaterials );
-		ps.AddProperty( settings, x => x.LoadModels );
-		ps.AddProperty( settings, x => x.ImportEntities );
-		ps.AddProperty( settings, x => x.ImportToolMaterials );
-		ps.AddProperty( settings, x => x.ImportWorldGeometry );
-		ps.AddProperty( settings, x => x.Cull3DSkybox );
+		ps.AddObject( settings.GetSerialized() );
 
 		canvas.Layout.Add( ps );
+		canvas.Layout.AddStretchCell();
 
 		var btn = new Button( "Import", canvas );
 		btn.MouseClick += () =>
