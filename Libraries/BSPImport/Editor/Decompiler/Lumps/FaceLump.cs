@@ -29,15 +29,17 @@ public struct Face
 	public short EdgeCount;
 	public short TexInfo;
 	public short DisplacementInfo;
+	public short SurfaceFogVolumeIndex;
 	public float Area;
 	public int OriginalFaceIndex;
 
-	public Face( int firstEdge, short edgeCount, short texInfo, short dispInfo, float area, int oFace )
+	public Face( int firstEdge, short edgeCount, short texInfo, short dispInfo, short surfaceFogVolumeID, float area, int oFace )
 	{
 		FirstEdge = firstEdge;
 		EdgeCount = edgeCount;
 		TexInfo = texInfo;
 		DisplacementInfo = dispInfo;
+		SurfaceFogVolumeIndex = surfaceFogVolumeID;
 		Area = area;
 		OriginalFaceIndex = oFace;
 	}

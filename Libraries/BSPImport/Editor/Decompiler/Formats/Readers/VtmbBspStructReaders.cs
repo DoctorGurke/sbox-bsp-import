@@ -24,12 +24,12 @@ public sealed class VtmbBspStructReaders : IBspStructReaders
 		reader.ReadByte();                // side
 		reader.ReadByte();                // onNode
 
-		var firstEdge = reader.ReadInt32();
-		var numEdges = reader.ReadInt16();
-		var texInfo = reader.ReadInt16();
-		var dispInfo = reader.ReadInt16();
+		int firstEdge = reader.ReadInt32();
+		short numEdges = reader.ReadInt16();
+		short texInfo = reader.ReadInt16();
+		short dispInfo = reader.ReadInt16();
 
-		reader.Skip<short>();             // surfaceFogVolumeID
+		short surfaceFogVolumeID = reader.ReadInt16();             // surfaceFogVolumeID
 
 		// MAXLIGHTMAPS=8 in VTMB: styles[8] + day[8] + night[8] = 24 bytes.
 		// Standard v20 only has styles[4] = 4 bytes.
@@ -39,17 +39,17 @@ public sealed class VtmbBspStructReaders : IBspStructReaders
 
 		reader.Skip<int>();               // lightofs
 
-		var area = reader.ReadSingle();
+		float area = reader.ReadSingle();
 
 		reader.Skip<int>( 2 );            // m_LightmapTextureMinsInLuxels[2]
 		reader.Skip<int>( 2 );            // m_LightmapTextureSizeInLuxels[2]
 
-		var oFace = reader.ReadInt32();
+		int oFace = reader.ReadInt32();
 
 		reader.Skip<uint>();              // smoothingGroups
 
 		// No numPrims / firstPrimID as those fields were added in v20+.
-		return new Face( firstEdge, numEdges, texInfo, dispInfo, area, oFace );
+		return new Face( firstEdge, numEdges, texInfo, dispInfo, surfaceFogVolumeID, area, oFace );
 	}
 
 	public BrushSide ReadBrushSide( BinaryReader reader )
