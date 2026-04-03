@@ -18,7 +18,7 @@
  - Vertex paint from displacements.
 
 ## Issues and bugs
- Please make issues for bsp files the tool can't decompile&import. Provide the bsp and game info if possible.
+ Please make issues for bsp files the tool can't decompile&import. Provide the bsp and game info if possible. https://github.com/DoctorGurke/sbox-bsp-import
 
 ## Contribute
  Feel free to contribute via PRs. The decompiler is written in a way where each lump and alterations thereof can be dissected in one type. Check existing Lump types for examples.
