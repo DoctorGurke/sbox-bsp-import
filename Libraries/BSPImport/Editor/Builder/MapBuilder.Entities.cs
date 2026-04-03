@@ -231,6 +231,8 @@ public partial class MapBuilder
 		var meshComponent = brushEntity.Components.Create<MeshComponent>();
 		meshComponent.Mesh = polyMesh;
 
+		CenterMeshOrigin( meshComponent );
+
 		//var propComponent = brushEntity.Components.Create<Prop>();
 		//propComponent.Model = polyMesh.Rebuild();
 		//propComponent.IsStatic = true;
