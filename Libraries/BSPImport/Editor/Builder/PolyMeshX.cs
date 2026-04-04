@@ -29,11 +29,19 @@ public static class PolyMeshX
 
 		Vector3 reflectivity = Vector3.One;
 
+		bool isWater = false;
+
 		// check for valid texinfo and fetch material name
 		if ( context.TexInfo is not null && texInfo >= 0 && texInfo < context.TexInfo.Length )
 		{
 			materialName = face.GetMaterialName( context );
 			reflectivity = face.GetReflectivity( context );
+
+			var surfaceFlags = face.GetSurfaceFlags( context );
+			if ( (surfaceFlags & SurfaceFlags.Warp) != 0 )
+			{
+				isWater = true;
+			}
 		}
 
 		if ( string.IsNullOrEmpty( materialName ) )
@@ -87,7 +95,14 @@ public static class PolyMeshX
 		}
 		else
 		{
-			var material = Material.Load( $"materials/test_vertex_color.vmat" );
+			var materialFallback = $"test_vertex_color";
+
+			if ( isWater )
+			{
+				materialFallback = "test_water";
+			}
+
+			var material = Material.Load( $"materials/{materialFallback}.vmat" );
 			mesh.SetFaceMaterial( hFace, material );
 
 			foreach ( var edge in mesh.HalfEdgeHandles )

@@ -1,9 +1,10 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using System.Linq;
+﻿using SkiaSharp;
 using System.Collections.Generic;
-using System.Diagnostics.Metrics;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace BspImport.Builder;
 
@@ -130,15 +131,28 @@ public partial class MapBuilder
 
 			progress.Subtitle = $"Building {worldspawnMeshes.Count} World Meshes";
 
-			foreach ( var mesh in worldspawnMeshes )
+			foreach ( var meshResult in worldspawnMeshes )
 			{
 				if ( token.IsCancellationRequested )
 				{
 					return;
 				}
+				var mesh = meshResult.Mesh;
+				if ( mesh is null )
+					continue;
+
+
+				var meshName = $"Mesh {count}";
+
+				if ( meshResult.IsWater )
+				{
+					meshName = $"Water Mesh";
+				}
+
+				var meshComp = ConstructMesh( meshParent, meshName, mesh );
+				meshComp.Collision = meshResult.IsWater ? MeshComponent.CollisionType.None : MeshComponent.CollisionType.Mesh;
 
 				progress.Current = count + displacementMeshes.Count;
-				ConstructMesh( meshParent, $"Mesh {count}", mesh );
 				count++;
 
 				if ( count % meshesPerFrame == 0 )
@@ -149,13 +163,15 @@ public partial class MapBuilder
 		}
 	}
 
-	private void ConstructMesh( GameObject parent, string name, PolygonMesh mesh )
+	private MeshComponent ConstructMesh( GameObject parent, string name, PolygonMesh mesh )
 	{
 		using var scope = parent.Scene.Push();
 		var meshObj = new GameObject( parent, true, name );
 		var meshComp = meshObj.Components.Create<MeshComponent>();
 		meshComp.Mesh = mesh;
 		CenterMeshOrigin( meshComp );
+
+		return meshComp;
 	}
 
 	static void CenterMeshOrigin( MeshComponent meshComponent )
@@ -256,15 +272,34 @@ public partial class MapBuilder
 		return ti.GetUvs( position, width, height );
 	}
 
+	private bool IsWaterSurface( ushort faceIndex )
+	{
+		if ( !Context.HasCompleteGeometry( out var geo ) )
+			return false;
+
+		if ( !geo.TryGetFace( faceIndex, out var face ) )
+			return false;
+
+		var surfaceFlags = face.GetSurfaceFlags( Context );
+		return (surfaceFlags & SurfaceFlags.Warp) != 0;
+	}
+
+	public class WorldspawnMesh
+	{
+		public PolygonMesh? Mesh { get; set; }
+		public bool IsTranslucent { get; set; }
+		public bool IsWater { get; set; }
+	}
+
 	/// <summary>
-	/// Construct PolygonMeshes from the bsp-tree, chunked into individual Meshes based on Settings.ChunkSize.
+	/// Construct PolygonMeshes from the bsp-tree, chunked into individual Meshes based on Settings.ChunkSize and surface properties such as Translucent or Water.
 	/// </summary>
 	/// <returns></returns>
-	private async Task<List<PolygonMesh>> ConstructWorldspawnMeshes( CancellationToken token, IProgressSection progress )
+	private async Task<List<WorldspawnMesh>> ConstructWorldspawnMeshes( CancellationToken token, IProgressSection progress )
 	{
 		var geo = Context.Geometry;
 
-		var meshes = new List<PolygonMesh>();
+		var meshes = new List<WorldspawnMesh>();
 
 		if ( !Context.HasCompleteGeometry( out geo ) )
 		{
@@ -276,14 +311,33 @@ public partial class MapBuilder
 		var result = TreeParse.GetUniqueWorldspawnFaces();
 
 		var faceIndices = result.FaceIndices;
+		var waterFaces = faceIndices.Where( fi => IsWaterSurface( fi ) ).ToList();
+		var solidFaces = faceIndices.Where( fi => !IsWaterSurface( fi ) ).ToList();
 
-		if ( faceIndices.Count == 0 )
+		if ( solidFaces.Count == 0 )
 		{
 			Log.Error( $"Failed constructing worldspawn geometry! No faces in tree!" );
 			return meshes;
 		}
 
-		var chunks = faceIndices.Chunk( Context.Settings.ChunkSize );
+		Log.Info( $"water faces: {waterFaces.Count}" );
+		var waterMesh = new PolygonMesh();
+		foreach ( var face in waterFaces )
+		{
+			waterMesh.AddMeshFace( Context, face );
+		}
+		if ( waterMesh.FaceHandles.Any() )
+		{
+			var meshResult = new WorldspawnMesh()
+			{
+				Mesh = waterMesh,
+				IsTranslucent = true,
+				IsWater = true
+			};
+			meshes.Add( meshResult );
+		}
+
+		var chunks = solidFaces.Chunk( Context.Settings.ChunkSize );
 
 		if ( token.IsCancellationRequested )
 			return meshes;
@@ -296,10 +350,16 @@ public partial class MapBuilder
 		// chunk tree faces into batches for MeshComponent
 		foreach ( var chunk in chunks )
 		{
+			if ( token.IsCancellationRequested )
+				return meshes;
+
 			var mesh = new PolygonMesh();
 
 			foreach ( var face in chunk )
 			{
+				if ( token.IsCancellationRequested )
+					return meshes;
+
 				if ( !geo.TryGetFace( face, out var _ ) )
 					continue;
 
@@ -309,7 +369,15 @@ public partial class MapBuilder
 			progress.Current++;
 
 			if ( mesh.FaceHandles.Any() )
-				meshes.Add( mesh );
+			{
+				var meshResult = new WorldspawnMesh()
+				{
+					Mesh = mesh,
+					IsTranslucent = false,
+					IsWater = false
+				};
+				meshes.Add( meshResult );
+			}
 
 			await GameTask.Yield();
 		}

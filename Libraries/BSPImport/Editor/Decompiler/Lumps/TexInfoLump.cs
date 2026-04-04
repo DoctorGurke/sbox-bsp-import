@@ -15,10 +15,10 @@ public class TexInfoLump : BaseLump
 			var tv0 = reader.ReadVector4();
 			var tv1 = reader.ReadVector4();
 			reader.Skip<Vector4>( 2 ); // vec4 * 2 : lightmapVecs[2][4]
-			reader.Skip<int>(); // int flags
+			uint flags = reader.ReadUInt32();
 			var texData = reader.ReadInt32();
 
-			var texInfo = new TexInfo( tv0, tv1, texData );
+			var texInfo = new TexInfo( tv0, tv1, flags, texData );
 			texInfos[i] = texInfo;
 		}
 
@@ -28,16 +28,40 @@ public class TexInfoLump : BaseLump
 	}
 }
 
+[Flags]
+public enum SurfaceFlags : int
+{
+	None = 0,
+	Light = 1,
+	Sky2D = 2,
+	Sky = 4,
+	Warp = 8,
+	Trans = 16,
+	NoPortal = 32,
+	Trigger = 64,
+	NoDraw = 128,
+	Hint = 256,
+	Skip = 512,
+	NoLight = 1024,
+	BumpLight = 2048,
+	NoShadows = 4096,
+	NoDecals = 8192,
+	NoChop = 16384,
+	Hitbox = 32768
+}
+
 public struct TexInfo
 {
 	public Vector4[] TextureVecs;
+	public SurfaceFlags Flags;
 	public int TexData;
 
-	public TexInfo( Vector4 tv0, Vector4 tv1, int texData )
+	public TexInfo( Vector4 tv0, Vector4 tv1, uint flags, int texData )
 	{
 		TextureVecs = new Vector4[2];
 		TextureVecs[0] = tv0;
 		TextureVecs[1] = tv1;
+		Flags = (SurfaceFlags)flags;
 		TexData = texData;
 	}
 

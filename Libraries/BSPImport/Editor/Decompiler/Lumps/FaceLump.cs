@@ -81,4 +81,14 @@ public struct Face
 
 		return texData.Value.Reflectivity;
 	}
+
+	public SurfaceFlags GetSurfaceFlags( ImportContext context )
+	{
+		var texInfo = context.TexInfo?[TexInfo];
+
+		if ( texInfo is null )
+			return 0;
+
+		return texInfo.Value.Flags;
+	}
 }
