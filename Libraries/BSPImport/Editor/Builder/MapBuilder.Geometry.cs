@@ -141,19 +141,18 @@ public partial class MapBuilder
 		return output;
 	}
 
-	/// <summary>
-	/// Builds the map world geometry of the current context. Brush entities require pre-built PolygonMeshes. See <see cref="BuildModelMeshes"/>.
-	/// </summary>
-	protected virtual async Task BuildWorldGeometry( GameObject parent, IProgressSection progress, int meshesPerFrame, CancellationToken token )
+	private void BuildClipBrushes( GameObject parent )
 	{
 		if ( Context.Brushes is not null && Context.BrushSides is not null && Context.Planes is not null )
 		{
+			int count = 0;
+
 			foreach ( var brush in Context.Brushes )
 			{
 				if ( !brush.IsClipBrush )
 					continue;
 
-				var clipObject = new GameObject( parent, true, "Clip Brush" );
+				var clipObject = new GameObject( parent, true, $"Clip Brush {count}" );
 				var clipMesh = new PolygonMesh();
 
 				// get brush sides
@@ -202,9 +201,17 @@ public partial class MapBuilder
 				meshComp.HideInGame = true;
 
 				CenterMeshOrigin( meshComp );
+
+				count++;
 			}
 		}
+	}
 
+	/// <summary>
+	/// Builds the map world geometry of the current context. Brush entities require pre-built PolygonMeshes. See <see cref="BuildModelMeshes"/>.
+	/// </summary>
+	protected virtual async Task BuildWorldGeometry( GameObject parent, IProgressSection progress, int meshesPerFrame, CancellationToken token )
+	{
 		var displacementMeshes = await ConstructDisplacementMeshesAsync( token, progress, meshesPerFrame );
 
 		if ( token.IsCancellationRequested )
@@ -291,6 +298,8 @@ public partial class MapBuilder
 				}
 			}
 		}
+
+		BuildClipBrushes( parent );
 	}
 
 	private MeshComponent ConstructMesh( GameObject parent, string name, PolygonMesh mesh )
