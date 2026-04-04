@@ -141,13 +141,17 @@ public partial class MapBuilder
 		return output;
 	}
 
-	private void BuildClipBrushes( GameObject parent )
+	private void BuildClipBrushes( GameObject _parent )
 	{
 		if ( Context.Brushes is not null && Context.BrushSides is not null && Context.Planes is not null )
 		{
-			int count = 0;
+			var clipBrushes = Context.Brushes.Where( b => b.IsClipBrush ).ToList();
+			if ( clipBrushes.Count == 0 )
+				return;
 
-			foreach ( var brush in Context.Brushes )
+			int count = 0;
+			var parent = new GameObject( _parent, true, "Clip Brushes" );
+			foreach ( var brush in clipBrushes )
 			{
 				if ( !brush.IsClipBrush )
 					continue;
