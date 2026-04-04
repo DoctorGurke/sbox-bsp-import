@@ -15,6 +15,7 @@ public class BrushLump : BaseLump
 		int brushLength = sizeof( int ) * 3;
 
 		int brushCount = _reader.GetLength() / brushLength;
+		Context.Brushes = new Brush[brushCount];
 
 		for ( int i = 0; i < brushCount; i++ )
 		{
@@ -23,10 +24,17 @@ public class BrushLump : BaseLump
 			int numSides = reader.ReadInt32();
 			uint contents = reader.ReadUInt32();
 			var contentsFlags = (ContentsFlags)contents;
-			if ( (contentsFlags & ContentsFlags.PlayerClip) != 0 )
-			{
-				//Log.Warning( $"Found clip brush!" );
-			}
+
+			Context.Brushes[i] = new Brush( firstSide, numSides, contentsFlags );
 		}
 	}
+}
+
+public struct Brush( int firstSide, int numSides, ContentsFlags contents )
+{
+	public int FirstSide = firstSide;
+	public int NumSides = numSides;
+	public ContentsFlags Contents = contents;
+
+	public bool IsClipBrush => (Contents & ContentsFlags.PlayerClip) != 0;
 }

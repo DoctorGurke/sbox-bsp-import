@@ -9,6 +9,7 @@ public sealed class StandardBspStructReaders : IBspStructReaders
 {
 	public int FaceStructSize => 56;
 	public int LeafStructSize => 32;
+	public int BrushSideStructSize => 8;
 
 	public Face ReadFace( BinaryReader reader ) => reader.ReadFace();
 

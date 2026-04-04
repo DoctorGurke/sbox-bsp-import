@@ -9,6 +9,7 @@ public sealed class VtmbBspStructReaders : IBspStructReaders
 {
 	public int FaceStructSize => 104;
 	public int LeafStructSize => 32;
+	public int BrushSideStructSize => 8;
 
 	public Face ReadFace( BinaryReader reader )
 	{
