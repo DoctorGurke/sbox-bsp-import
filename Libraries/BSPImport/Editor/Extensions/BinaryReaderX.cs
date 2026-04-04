@@ -21,7 +21,7 @@ public static class BinaryReaderX
 		short dispInfo = reader.ReadInt16();
 
 		short surfaceFogVolumeID = reader.ReadInt16(); // short surfaceFogVolumeID
-													   // don't need any of this
+
 		reader.Skip( 4 ); // byte styles[4]
 		reader.Skip<int>(); // int lightofs
 

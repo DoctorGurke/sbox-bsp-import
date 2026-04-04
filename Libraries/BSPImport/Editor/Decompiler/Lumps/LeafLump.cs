@@ -15,7 +15,7 @@ public class LeafLump : BaseLump
 		{
 			var leafReader = reader.Split( leafSize );
 
-			int contents = leafReader.ReadInt32(); // contents
+			uint contents = leafReader.ReadUInt32(); // contents
 			leafReader.Skip<short>(); // cluster
 
 			// unpack flags, dont need area
@@ -86,7 +86,7 @@ public struct MapLeaf
 	public ushort FaceCount;
 	public short WaterDataIndex;
 
-	public MapLeaf( int contents, short area, short flags, ushort firstFaceIndex, ushort faceCount, short waterDataID )
+	public MapLeaf( uint contents, short area, short flags, ushort firstFaceIndex, ushort faceCount, short waterDataID )
 	{
 		Contents = (ContentsFlags)contents;
 		Area = area;

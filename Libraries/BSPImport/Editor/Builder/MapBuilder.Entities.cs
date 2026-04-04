@@ -74,7 +74,7 @@ public partial class MapBuilder
 	{
 		var isModel = BaseEntities.IsModelEntity( ent );
 
-		var leafIndex = TreeParse.FindLeafIndex( Context, ent.Position );
+		var leafIndex = TreeParse.FindLeafIndex( ent.Position );
 		var leafArea = Context.Leafs![leafIndex].Area;
 
 		var cullSkyboxModel = isModel && Context.Settings.CullSkybox ? Context.SkyboxAreas.Contains( leafArea ) : false;

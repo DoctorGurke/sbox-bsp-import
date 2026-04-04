@@ -58,7 +58,7 @@ public partial class MapBuilder
 
 			var origin = ent.Position;
 
-			var leafIndex = TreeParse.FindLeafIndex( Context, origin );
+			var leafIndex = TreeParse.FindLeafIndex( origin );
 			if ( leafIndex == -1 )
 				continue;
 
@@ -210,7 +210,7 @@ public partial class MapBuilder
 				return displacements;
 
 			var dispOrigin = DisplacementHelper.GetDisplacementOrigin( Context, dispFaceIndex );
-			var dispLeafIndex = TreeParse.FindLeafIndex( Context, dispOrigin!.Value );
+			var dispLeafIndex = TreeParse.FindLeafIndex( dispOrigin!.Value );
 			var dispLeaf = Context.Leafs![dispLeafIndex];
 
 			if ( Context.Settings.CullSkybox && Context.SkyboxAreas.Contains( dispLeaf.Area ) )
@@ -273,7 +273,7 @@ public partial class MapBuilder
 		}
 
 		// construct world mesh faces from bsp tree
-		var result = TreeParse.ParseTreeFaces( Context );
+		var result = TreeParse.GetUniqueWorldspawnFaces();
 
 		var faceIndices = result.FaceIndices;
 

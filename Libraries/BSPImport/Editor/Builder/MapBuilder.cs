@@ -6,10 +6,12 @@ namespace BspImport.Builder;
 public partial class MapBuilder
 {
 	protected ImportContext Context { get; set; }
+	protected BspTreeParser TreeParse { get; set; }
 
 	public MapBuilder( ImportContext context )
 	{
 		Context = context;
+		TreeParse = new BspTreeParser( context );
 
 		SetupEntityHandlers();
 	}
