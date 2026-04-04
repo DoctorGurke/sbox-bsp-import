@@ -80,10 +80,131 @@ public partial class MapBuilder
 	}
 
 	/// <summary>
+	/// Constructs quad corners for a plane.
+	/// </summary>
+	/// <param name="p"></param>
+	private List<Vector3> BuildBasePolygon( Plane p )
+	{
+		var normal = p.Normal;
+
+		// pick a tangent
+		Vector3 up = Math.Abs( normal.z ) > 0.99f ? Vector3.Forward : Vector3.Up;
+		Vector3 right = Vector3.Cross( up, normal ).Normal;
+		up = Vector3.Cross( normal, right );
+
+		float size = 16384f; // big enough for BSP scale
+
+		Vector3 center = normal * p.Distance;
+		return new List<Vector3>
+		{
+			center + (-right - up) * size,
+			center + ( right - up) * size,
+			center + ( right + up) * size,
+			center + (-right + up) * size,
+		};
+	}
+
+	List<Vector3> ClipPolygon( List<Vector3> input, Plane plane )
+	{
+		var output = new List<Vector3>();
+
+		for ( int i = 0; i < input.Count; i++ )
+		{
+			var a = input[i];
+			var b = input[(i + 1) % input.Count];
+
+			float da = Vector3.Dot( plane.Normal, a ) - plane.Distance;
+			float db = Vector3.Dot( plane.Normal, b ) - plane.Distance;
+
+			const float EPS = 0.001f;
+
+			bool ina = da <= EPS;
+			bool inb = db <= EPS;
+
+			if ( ina && inb )
+			{
+				output.Add( b );
+			}
+			else if ( ina && !inb )
+			{
+				float t = da / (da - db);
+				output.Add( a + (b - a) * t );
+			}
+			else if ( !ina && inb )
+			{
+				float t = da / (da - db);
+				output.Add( a + (b - a) * t );
+				output.Add( b );
+			}
+		}
+
+		return output;
+	}
+
+	/// <summary>
 	/// Builds the map world geometry of the current context. Brush entities require pre-built PolygonMeshes. See <see cref="BuildModelMeshes"/>.
 	/// </summary>
 	protected virtual async Task BuildWorldGeometry( GameObject parent, IProgressSection progress, int meshesPerFrame, CancellationToken token )
 	{
+		if ( Context.Brushes is not null && Context.BrushSides is not null && Context.Planes is not null )
+		{
+			foreach ( var brush in Context.Brushes )
+			{
+				if ( !brush.IsClipBrush )
+					continue;
+
+				var clipObject = new GameObject( parent, true, "Clip Brush" );
+				var clipMesh = new PolygonMesh();
+
+				// get brush sides
+				var firstSide = brush.FirstSide;
+				var numSides = brush.NumSides;
+
+				for ( int i = 0; i < numSides; i++ )
+				{
+					int sideIndex = firstSide + i;
+
+					var brushSide = Context.BrushSides[sideIndex];
+					var planeIndex = brushSide.PlaneNum;
+
+					var plane = Context.Planes[planeIndex];
+
+					// build quad
+					var poly = BuildBasePolygon( plane );
+					for ( int j = 0; j < numSides; j++ )
+					{
+						int otherSideIndex = firstSide + j;
+
+						if ( sideIndex == otherSideIndex )
+							continue;
+
+						var other = Context.Planes[Context.BrushSides[otherSideIndex].PlaneNum];
+
+						poly = ClipPolygon( poly, other );
+
+						if ( poly.Count == 0 )
+						{
+							break;
+						}
+					}
+
+					if ( poly.Count >= 3 )
+					{
+						var hVerts = clipMesh.AddVertices( poly.ToArray() );
+						var hFace = clipMesh.AddFace( hVerts );
+						clipMesh.SetFaceMaterial( hFace, "materials/tools/toolsclip.vmat" );
+						clipMesh.TextureAlignToGrid( Transform.Zero, hFace );
+					}
+				}
+
+				var meshComp = clipObject.Components.Create<MeshComponent>();
+				meshComp.Mesh = clipMesh;
+				meshComp.HideInGame = true;
+
+				CenterMeshOrigin( meshComp );
+			}
+		}
+
 		var displacementMeshes = await ConstructDisplacementMeshesAsync( token, progress, meshesPerFrame );
 
 		if ( token.IsCancellationRequested )

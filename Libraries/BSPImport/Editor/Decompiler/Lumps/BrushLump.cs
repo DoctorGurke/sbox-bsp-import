@@ -36,5 +36,5 @@ public struct Brush( int firstSide, int numSides, ContentsFlags contents )
 	public int NumSides = numSides;
 	public ContentsFlags Contents = contents;
 
-	public bool IsClipBrush => (Contents & ContentsFlags.PlayerClip) != 0;
+	public bool IsClipBrush => (Contents & ContentsFlags.PlayerClip) != 0 || (Contents & ContentsFlags.MonsterClip) != 0;
 }
