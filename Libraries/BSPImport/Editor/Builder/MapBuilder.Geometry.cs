@@ -320,23 +320,7 @@ public partial class MapBuilder
 			return meshes;
 		}
 
-		Log.Info( $"water faces: {waterFaces.Count}" );
-		var waterMesh = new PolygonMesh();
-		foreach ( var face in waterFaces )
-		{
-			waterMesh.AddMeshFace( Context, face );
-		}
-		if ( waterMesh.FaceHandles.Any() )
-		{
-			var meshResult = new WorldspawnMesh()
-			{
-				Mesh = waterMesh,
-				IsTranslucent = true,
-				IsWater = true
-			};
-			meshes.Add( meshResult );
-		}
-
+		// spawn solid geometry first
 		var chunks = solidFaces.Chunk( Context.Settings.ChunkSize );
 
 		if ( token.IsCancellationRequested )
@@ -380,6 +364,23 @@ public partial class MapBuilder
 			}
 
 			await GameTask.Yield();
+		}
+
+		// add water surfaces as a mesh
+		var waterMesh = new PolygonMesh();
+		foreach ( var face in waterFaces )
+		{
+			waterMesh.AddMeshFace( Context, face );
+		}
+		if ( waterMesh.FaceHandles.Any() )
+		{
+			var meshResult = new WorldspawnMesh()
+			{
+				Mesh = waterMesh,
+				IsTranslucent = true,
+				IsWater = true
+			};
+			meshes.Add( meshResult );
 		}
 
 		return meshes;
