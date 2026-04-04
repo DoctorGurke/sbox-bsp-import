@@ -68,10 +68,17 @@ public partial class MapBuilder
 				"game_intro_viewpoint",
 				"info_player_terrorist",
 				"info_player_counterterrorist",
+				"func_areaportalwindow"
 	};
 
 	private bool IsAllowedEntity( LumpEntity ent )
 	{
+		if ( ent.ClassName is null || EntityClassBlacklist.Contains( ent.ClassName ) )
+			return false;
+
+		if ( ent.ClassName.Contains( "logic" ) )
+			return false;
+
 		var isModel = BaseEntities.IsModelEntity( ent );
 
 		var leafIndex = TreeParse.FindLeafIndex( ent.Position );
@@ -79,7 +86,7 @@ public partial class MapBuilder
 
 		var cullSkyboxModel = isModel && Context.Settings.CullSkybox ? Context.SkyboxAreas.Contains( leafArea ) : false;
 		var cullModel = isModel ? !Context.Settings.LoadModels : false;
-		return ent.ClassName is not null && !ent.ClassName.Contains( "logic" ) && !EntityClassBlacklist.Contains( ent.ClassName ) && !cullModel && !cullSkyboxModel;
+		return !cullModel && !cullSkyboxModel;
 	}
 
 	/// <summary>;
@@ -108,7 +115,6 @@ public partial class MapBuilder
 		progress.TotalCount = total;
 		progress.Current = count;
 
-		// handle brush entities separately...
 		if ( brushEntities.Any() )
 		{
 			var parent = new GameObject( _parent, true, "Mesh Entities" );
@@ -125,8 +131,8 @@ public partial class MapBuilder
 
 				// ... so we can gurantee they get their meshes
 				var meshObj = CreateBrushEntity( ent, parent );
-				count++;
 
+				count++;
 				progress.Current = count;
 
 				if ( !meshObj.IsValid() )
@@ -190,8 +196,8 @@ public partial class MapBuilder
 
 				// unhandled entities still count towards total
 				count++;
-
 				progress.Current = count;
+
 
 				if ( count % entitiesPerFrame == 0 )
 				{

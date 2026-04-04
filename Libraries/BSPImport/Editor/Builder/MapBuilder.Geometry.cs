@@ -10,6 +10,11 @@ namespace BspImport.Builder;
 
 public partial class MapBuilder
 {
+	/// <summary>
+	/// Builds cached PolygonMeshes for bsp models, skips index 0 (worldspawn).
+	/// </summary>
+	/// <param name="progress">Current progress section</param>
+	/// <param name="token">Progress cancellation token</param>
 	public async Task BuildModelMeshes( IProgressSection progress, CancellationToken token )
 	{
 		var modelCount = Context.Models?.Length ?? 0;
@@ -27,6 +32,7 @@ public partial class MapBuilder
 
 		var polyMeshes = new PolygonMesh[modelCount];
 
+		// i = 1 to skip 0 (worldspawn)
 		for ( int i = 1; i < modelCount; i++ )
 		{
 			if ( token.IsCancellationRequested )
@@ -46,11 +52,14 @@ public partial class MapBuilder
 		Context.CachedPolygonMeshes = polyMeshes;
 	}
 
+	/// <summary>
+	/// Find all areas with a sky_camera entity in them.
+	/// </summary>
 	private List<short> FindSkyboxAreas()
 	{
 		var result = new List<short>();
-		if ( Context.Entities is null )
-			return result;
+
+		ArgumentNullException.ThrowIfNull( Context.Entities );
 
 		foreach ( var ent in Context.Entities )
 		{
