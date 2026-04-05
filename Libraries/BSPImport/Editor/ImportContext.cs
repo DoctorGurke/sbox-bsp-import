@@ -65,6 +65,9 @@ public class ImportContext
 	public MapLeaf[]? Leafs;
 	public Plane[]? Planes;
 
+	public Brush[]? Brushes { get; set; }
+	public BrushSide[]? BrushSides { get; set; }
+
 	public LumpEntity[]? Entities { get; set; }
 	public MapModel[]? Models { get; set; }
 	public GameLump[]? GameLumps { get; set; }

@@ -19,6 +19,11 @@ public interface IBspStructReaders
 	int LeafStructSize { get; }
 
 	/// <summary>
+	/// The byte size of a single brush side (dbrushside_t) entry in this format.
+	/// </summary>
+	int BrushSideStructSize { get; }
+
+	/// <summary>
 	/// Reads a single face (dface_t) from the binary stream using this format's layout.
 	/// Leaves the reader positioned exactly at the start of the next entry.
 	/// </summary>
