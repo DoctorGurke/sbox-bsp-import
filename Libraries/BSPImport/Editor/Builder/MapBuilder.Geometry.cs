@@ -203,6 +203,7 @@ public partial class MapBuilder
 				var meshComp = clipObject.Components.Create<MeshComponent>();
 				meshComp.Mesh = clipMesh;
 				meshComp.HideInGame = true;
+				meshComp.RenderType = ModelRenderer.ShadowRenderType.Off;
 
 				CenterMeshOrigin( meshComp );
 
