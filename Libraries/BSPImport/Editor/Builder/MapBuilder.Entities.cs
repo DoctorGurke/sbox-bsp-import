@@ -244,6 +244,13 @@ public partial class MapBuilder
 		var meshComponent = brushEntity.Components.Create<MeshComponent>();
 		meshComponent.Mesh = polyMesh;
 
+		if ( ent.ClassName!.Contains( "trigger" ) )
+		{
+			meshComponent.Tags.Add( "trigger" );
+			meshComponent.IsTrigger = true;
+			meshComponent.HideInGame = true;
+		}
+
 		CenterMeshOrigin( meshComponent );
 
 		//var propComponent = brushEntity.Components.Create<Prop>();
