@@ -89,20 +89,17 @@ internal static class BaseEntities
 			light.Radius = distance.Value;
 
 		// fetch color
+		Vector3Int colorVec = new( 255 );
 		var lightString = ent.GetValue( "_light" );
 		if ( lightString is not null )
 		{
-			Vector3Int colorVec = new( 255 );
-
 			var components = lightString.Split( ' ' );
-			if ( components.Length < 3 )
-				return;
 
-			colorVec = Vector3Int.Parse( $"{components[0]} {components[1]} {components[2]}" );
-
-			var color = Color.FromBytes( colorVec.x, colorVec.y, colorVec.z );
-			light.LightColor = color.WithAlpha( 1.0f );
+			if ( components.Length >= 3 )
+				colorVec = Vector3Int.Parse( $"{components[0]} {components[1]} {components[2]}" );
 		}
+		var color = Color.FromBytes( colorVec.x, colorVec.y, colorVec.z );
+		light.LightColor = color.WithAlpha( 1.0f );
 
 		if ( light.Attenuation == 0 )
 		{
@@ -124,20 +121,17 @@ internal static class BaseEntities
 			light.Radius = distance.Value;
 
 		// fetch color
+		Vector3Int colorVec = new( 255 );
 		var lightString = ent.GetValue( "_light" );
 		if ( lightString is not null )
 		{
-			Vector3Int colorVec = new( 255 );
-
 			var components = lightString.Split( ' ' );
-			if ( components.Length < 3 )
-				return;
 
-			colorVec = Vector3Int.Parse( $"{components[0]} {components[1]} {components[2]}" );
-
-			var color = Color.FromBytes( colorVec.x, colorVec.y, colorVec.z );
-			light.LightColor = color.WithAlpha( 1.0f );
+			if ( components.Length >= 3 )
+				colorVec = Vector3Int.Parse( $"{components[0]} {components[1]} {components[2]}" );
 		}
+		var color = Color.FromBytes( colorVec.x, colorVec.y, colorVec.z );
+		light.LightColor = color.WithAlpha( 1.0f );
 	}
 
 	/// <summary>
@@ -151,19 +145,16 @@ internal static class BaseEntities
 		var light = obj.Components.Create<DirectionalLight>();
 
 		// fetch color
+		Vector3Int colorVec = new( 255 );
 		var lightString = ent.GetValue( "_light" );
 		if ( lightString is not null )
 		{
-			Vector3Int colorVec = new( 255 );
-
 			var components = lightString.Split( ' ' );
-			if ( components.Length < 3 )
-				return;
 
-			colorVec = Vector3Int.Parse( $"{components[0]} {components[1]} {components[2]}" );
-
-			var color = Color.FromBytes( colorVec.x, colorVec.y, colorVec.z );
-			light.LightColor = color.WithAlpha( 1.0f );
+			if ( components.Length >= 3 )
+				colorVec = Vector3Int.Parse( $"{components[0]} {components[1]} {components[2]}" );
 		}
+		var color = Color.FromBytes( colorVec.x, colorVec.y, colorVec.z );
+		light.LightColor = color.WithAlpha( 1.0f );
 	}
 }
