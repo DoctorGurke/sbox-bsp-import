@@ -100,7 +100,7 @@ internal static class BaseEntities
 
 			colorVec = Vector3Int.Parse( $"{components[0]} {components[1]} {components[2]}" );
 
-			var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
+			var color = Color.FromBytes( colorVec.x, colorVec.y, colorVec.z );
 			light.LightColor = color.WithAlpha( 1.0f );
 		}
 
@@ -135,7 +135,7 @@ internal static class BaseEntities
 
 			colorVec = Vector3Int.Parse( $"{components[0]} {components[1]} {components[2]}" );
 
-			var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
+			var color = Color.FromBytes( colorVec.x, colorVec.y, colorVec.z );
 			light.LightColor = color.WithAlpha( 1.0f );
 		}
 	}
@@ -162,7 +162,7 @@ internal static class BaseEntities
 
 			colorVec = Vector3Int.Parse( $"{components[0]} {components[1]} {components[2]}" );
 
-			var color = Color.FromBytes( (int)colorVec.x, (int)colorVec.y, (int)colorVec.z );
+			var color = Color.FromBytes( colorVec.x, colorVec.y, colorVec.z );
 			light.LightColor = color.WithAlpha( 1.0f );
 		}
 	}
