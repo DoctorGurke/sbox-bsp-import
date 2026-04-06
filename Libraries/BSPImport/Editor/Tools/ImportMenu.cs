@@ -1,6 +1,6 @@
-﻿namespace BspImport;
+﻿namespace BspImport.Tools;
 
-public static class Main
+public static class ImportMenu
 {
 	/// <summary>
 	/// Main entry point for the tool. Prompt user to import a bsp file.
@@ -56,3 +56,4 @@ public static class Main
 		context.Build();
 	}
 }
+
