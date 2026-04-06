@@ -18,7 +18,7 @@ public static class ImportMenu
 		canvas.Layout.Margin = 16;
 		canvas.Layout.Spacing = 4;
 
-		var newSettings = new ImportSettings();
+		var newSettings = new BuildSettings();
 
 		var cookieString = "bsp-import.last-imported-bsp";
 		var settings = Game.Cookies.Get( cookieString, newSettings );
@@ -32,7 +32,7 @@ public static class ImportMenu
 		var btn = new Button( "Import", canvas );
 		btn.MouseClick += () =>
 		{
-			Game.Cookies.Set<ImportSettings>( cookieString, settings );
+			Game.Cookies.Set<BuildSettings>( cookieString, settings );
 			DecompileAndImport( settings );
 			window.Close();
 		};
@@ -47,13 +47,15 @@ public static class ImportMenu
 	/// Read bsp byte data, decompile into ImportContext, parse and Build the map geometry and entities into the s&box scene.
 	/// </summary>
 	/// <param name="file"></param>
-	private static void DecompileAndImport( ImportSettings settings )
+	private static void DecompileAndImport( BuildSettings settings )
 	{
-		var data = Editor.FileSystem.Content.ReadAllBytes( settings.FilePath );
-		var name = Path.GetFileName( settings.FilePath );
-		var context = new ImportContext( name, data.ToArray(), settings );
+		var path = settings.FilePath;
+		var data = Editor.FileSystem.Content.ReadAllBytes( path );
+		var name = Path.GetFileName( path );
+
+		var context = new ImportContext( name, data.ToArray() );
 		context.Decompile();
-		context.Build();
+		context.Build( settings );
 	}
 }
 

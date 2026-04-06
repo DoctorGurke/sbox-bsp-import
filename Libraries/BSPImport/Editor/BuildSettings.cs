@@ -1,6 +1,6 @@
 ﻿namespace BspImport;
 
-public class ImportSettings
+public class BuildSettings
 {
 	[Property, FilePath( Extension = "bsp" )]
 	public string FilePath { get; set; } = string.Empty;

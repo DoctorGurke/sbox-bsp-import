@@ -37,7 +37,7 @@ public partial class MapBuilder
 		Context.SkyboxAreas = FindSkyboxAreas();
 
 		// build map worldspawn geometry (model 0), including displacements
-		if ( Context.Settings.ImportWorldGeometry )
+		if ( Context.BuildSettings.ImportWorldGeometry )
 		{
 			progress.Title = "Building World Geometry";
 			progress.Subtitle = " Test";
@@ -54,7 +54,7 @@ public partial class MapBuilder
 		progress.Title = "Building Entities";
 
 		// builds entities, including prop static and brush entities
-		if ( Context.Settings.ImportEntities )
+		if ( Context.BuildSettings.ImportEntities )
 		{
 			var entities = new GameObject( root, true, "Entities" );
 

@@ -51,7 +51,7 @@ public static class PolyMeshX
 		materialName = materialName.Replace( "toolsskybox2d", "toolsskybox" );
 
 		// cull skybox faces entirely
-		if ( context.Settings.CullSkybox && materialName.Contains( "toolsskybox" ) )
+		if ( context.BuildSettings.CullSkybox && materialName.Contains( "toolsskybox" ) )
 			return;
 
 		var verts = new List<Vector3>();
@@ -88,7 +88,7 @@ public static class PolyMeshX
 		var hVertices = mesh.AddVertices( verts.ToArray() );
 		var hFace = mesh.AddFace( hVertices );
 
-		if ( context.Settings.LoadMaterials )
+		if ( context.BuildSettings.LoadMaterials )
 		{
 			var material = Material.Load( $"materials/{materialName}.vmat" );
 			mesh.SetFaceMaterial( hFace, material );

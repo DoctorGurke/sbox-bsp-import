@@ -33,8 +33,14 @@ public static class BinaryReaderX
 		int oFace = reader.ReadInt32();
 
 		// don't need this either, but need to get rid of the padding
-		reader.Skip<ushort>(); // ushort numPrims
-		reader.Skip<ushort>(); // ushort firstPrimID
+		var numPrims = reader.ReadUInt16(); // ushort numPrims
+		var primID = reader.ReadUInt16(); // ushort firstPrimID
+
+		if ( numPrims != 0 )
+		{
+			//Log.Warning( $"Found Prims: count:{numPrims} id:{primID}" );
+		}
+
 		reader.Skip<uint>(); // uint smoothingGroups
 
 		return new Face( firstEdge, numEdges, texInfo, dispInfo, surfaceFogVolumeID, area, oFace );

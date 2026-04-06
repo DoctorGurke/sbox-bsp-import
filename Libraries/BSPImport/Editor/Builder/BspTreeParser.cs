@@ -67,7 +67,7 @@ public class BspTreeParser
 
 		MapNode node = Context.Nodes[index];
 
-		if ( Context.Settings.CullSkybox && Context.SkyboxAreas.Contains( node.Area ) )
+		if ( Context.BuildSettings.CullSkybox && Context.SkyboxAreas.Contains( node.Area ) )
 			return;
 
 		// contribute to faces collection
@@ -120,7 +120,7 @@ public class BspTreeParser
 		//var isWaterLeaf = leaf.WaterDataIndex != -1;
 		//var isSkyboxLeaf = (leaf.Flags & 0x01) != 0;
 
-		if ( Context.Settings.CullSkybox && Context.SkyboxAreas.Contains( leaf.Area ) )
+		if ( Context.BuildSettings.CullSkybox && Context.SkyboxAreas.Contains( leaf.Area ) )
 			return;
 
 		// contribute to faces collection

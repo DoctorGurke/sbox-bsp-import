@@ -373,7 +373,7 @@ public partial class MapBuilder
 			var dispLeafIndex = TreeParse.FindLeafIndex( dispOrigin!.Value );
 			var dispLeaf = Context.Leafs![dispLeafIndex];
 
-			if ( Context.Settings.CullSkybox && Context.SkyboxAreas.Contains( dispLeaf.Area ) )
+			if ( Context.BuildSettings.CullSkybox && Context.SkyboxAreas.Contains( dispLeaf.Area ) )
 				continue;
 
 			// create one mesh per displacement
@@ -465,7 +465,7 @@ public partial class MapBuilder
 		}
 
 		// spawn solid geometry first
-		var chunks = solidFaces.Chunk( Context.Settings.ChunkSize );
+		var chunks = solidFaces.Chunk( Context.BuildSettings.ChunkSize );
 
 		if ( token.IsCancellationRequested )
 			return meshes;

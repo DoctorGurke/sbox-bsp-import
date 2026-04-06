@@ -16,7 +16,7 @@ internal static class BaseEntities
 	/// <summary>
 	/// prop_static
 	/// </summary>
-	public static void HandleStaticPropEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	public static void HandleStaticPropEntity( GameObject obj, LumpEntity ent, GameObject parent, BuildSettings settings )
 	{
 		var propComponent = obj.Components.Create<Prop>();
 
@@ -28,7 +28,7 @@ internal static class BaseEntities
 	/// <summary>
 	/// prop_physics
 	/// </summary>
-	public static void HandlePhysicsPropEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	public static void HandlePhysicsPropEntity( GameObject obj, LumpEntity ent, GameObject parent, BuildSettings settings )
 	{
 		var propComponent = obj.Components.Create<Prop>();
 		var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
@@ -48,7 +48,7 @@ internal static class BaseEntities
 	/// <summary>
 	/// prop_dynamic
 	/// </summary>
-	public static void HandleDynamicPropEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	public static void HandleDynamicPropEntity( GameObject obj, LumpEntity ent, GameObject parent, BuildSettings settings )
 	{
 		var propComponent = obj.Components.Create<Prop>();
 		var model = Model.Load( ent.Model!.Replace( ".mdl", ".vmdl" ) );
@@ -70,7 +70,7 @@ internal static class BaseEntities
 	/// <summary>
 	/// info_player_start
 	/// </summary>
-	public static void HandlePlayerStartEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	public static void HandlePlayerStartEntity( GameObject obj, LumpEntity ent, GameObject parent, BuildSettings settings )
 	{
 		obj.Components.Create<SpawnPoint>();
 	}
@@ -78,7 +78,7 @@ internal static class BaseEntities
 	/// <summary>
 	/// light
 	/// </summary>
-	public static void HandleLightEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	public static void HandleLightEntity( GameObject obj, LumpEntity ent, GameObject parent, BuildSettings settings )
 	{
 		var light = obj.Components.Create<PointLight>();
 
@@ -107,7 +107,7 @@ internal static class BaseEntities
 		}
 	}
 
-	public static void HandleSpotLightEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	public static void HandleSpotLightEntity( GameObject obj, LumpEntity ent, GameObject parent, BuildSettings settings )
 	{
 		// apply -pitch light rotation
 		obj.WorldRotation = ent.GetLightRotation();
@@ -137,7 +137,7 @@ internal static class BaseEntities
 	/// <summary>
 	/// light_environment
 	/// </summary>
-	public static void HandleLightEnvironmentEntity( GameObject obj, LumpEntity ent, GameObject parent, ImportSettings settings )
+	public static void HandleLightEnvironmentEntity( GameObject obj, LumpEntity ent, GameObject parent, BuildSettings settings )
 	{
 		// apply -pitch light rotation
 		obj.WorldRotation = ent.GetLightRotation();

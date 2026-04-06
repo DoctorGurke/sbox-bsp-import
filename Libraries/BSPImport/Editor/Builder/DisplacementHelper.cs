@@ -162,7 +162,7 @@ internal class DisplacementHelper
 
 		// load material for displacement triangles if we have a name
 		Material? dispMaterial = null;
-		if ( !string.IsNullOrEmpty( materialName ) && context.Settings.LoadMaterials )
+		if ( !string.IsNullOrEmpty( materialName ) && context.BuildSettings.LoadMaterials )
 		{
 			dispMaterial = Material.Load( $"materials/{materialName}.vmat" );
 		}

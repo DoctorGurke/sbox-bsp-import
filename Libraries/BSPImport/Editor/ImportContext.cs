@@ -6,11 +6,10 @@ namespace BspImport;
 
 public class ImportContext
 {
-	public ImportContext( string name, byte[] data, ImportSettings settings )
+	public ImportContext( string name, byte[] data )
 	{
 		Name = name;
 		Data = data;
-		Settings = settings;
 
 		Lumps = new BaseLump[64];
 		Geometry = new();
@@ -32,15 +31,16 @@ public class ImportContext
 	/// <summary>
 	/// Construct the decompiled context into the scene.
 	/// </summary>
-	public void Build( GameObject? parent = null )
+	public void Build( BuildSettings settings, GameObject? parent = null )
 	{
+		BuildSettings = settings;
 		var builder = new MapBuilder( this );
 		builder.Build( parent );
 	}
 
 	public string Name { get; private set; }
 	public byte[] Data { get; private set; }
-	public ImportSettings Settings { get; private set; }
+	public BuildSettings BuildSettings { get; private set; } = new BuildSettings();
 
 	public BaseLump[] Lumps;
 

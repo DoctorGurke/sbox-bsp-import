@@ -22,7 +22,7 @@ public partial class MapBuilder
 		Handlers.Add( "light_environment", BaseEntities.HandleLightEnvironmentEntity );
 	}
 
-	private readonly Dictionary<string, Action<GameObject, LumpEntity, GameObject, ImportSettings>> Handlers = new();
+	private readonly Dictionary<string, Action<GameObject, LumpEntity, GameObject, BuildSettings>> Handlers = new();
 
 	// TODO: add filter system including target game so these rules can be split up
 	private List<string> EntityClassBlacklist = new()
@@ -84,8 +84,8 @@ public partial class MapBuilder
 		var leafIndex = TreeParse.FindLeafIndex( ent.Position );
 		var leafArea = Context.Leafs![leafIndex].Area;
 
-		var cullSkyboxModel = isModel && Context.Settings.CullSkybox ? Context.SkyboxAreas.Contains( leafArea ) : false;
-		var cullModel = isModel ? !Context.Settings.LoadModels : false;
+		var cullSkyboxModel = isModel && Context.BuildSettings.CullSkybox ? Context.SkyboxAreas.Contains( leafArea ) : false;
+		var cullModel = isModel ? !Context.BuildSettings.LoadModels : false;
 		return !cullModel && !cullSkyboxModel;
 	}
 
@@ -142,7 +142,7 @@ public partial class MapBuilder
 				if ( Handlers.TryGetValue( ent.ClassName, out var handler ) )
 				{
 					// apply class components via registered handler
-					handler.Invoke( meshObj, ent, parent, Context.Settings );
+					handler.Invoke( meshObj, ent, parent, Context.BuildSettings );
 				}
 				else
 				{
@@ -183,7 +183,7 @@ public partial class MapBuilder
 					var newObj = CreatePointEntity( ent, parent );
 
 					// apply class components via registered handler
-					handler.Invoke( newObj, ent, parent, Context.Settings );
+					handler.Invoke( newObj, ent, parent, Context.BuildSettings );
 				}
 				else
 				{
@@ -230,7 +230,7 @@ public partial class MapBuilder
 	/// <returns></returns>
 	private GameObject? CreateBrushEntity( LumpEntity ent, GameObject parent )
 	{
-		if ( ent.Model is null || !Context.Settings.ImportEntities )
+		if ( ent.Model is null || !Context.BuildSettings.ImportEntities )
 			return null;
 
 		var modelIndex = int.Parse( ent.Model.TrimStart( '*' ) );
