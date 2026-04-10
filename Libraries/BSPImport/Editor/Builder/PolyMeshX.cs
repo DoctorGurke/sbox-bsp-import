@@ -95,11 +95,11 @@ public static class PolyMeshX
 		}
 		else
 		{
-			var materialFallback = $"test_vertex_color";
+			var materialFallback = $"bsp_vertex_color";
 
 			if ( isWater )
 			{
-				materialFallback = "test_water";
+				materialFallback = "bsp_water";
 			}
 
 			var material = Material.Load( $"materials/{materialFallback}.vmat" );

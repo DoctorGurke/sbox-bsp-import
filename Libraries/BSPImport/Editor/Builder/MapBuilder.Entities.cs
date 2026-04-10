@@ -242,14 +242,19 @@ public partial class MapBuilder
 		var brushEntity = CreatePointEntity( ent, parent );
 
 		var meshComponent = brushEntity.Components.Create<MeshComponent>();
-		meshComponent.Mesh = polyMesh;
 
 		if ( ent.ClassName!.Contains( "trigger" ) )
 		{
 			meshComponent.Tags.Add( "trigger" );
 			meshComponent.IsTrigger = true;
 			meshComponent.HideInGame = true;
+
+			foreach ( var face in polyMesh.FaceHandles )
+			{
+				polyMesh.SetFaceMaterial( face, "materials/tools/toolstrigger.vmat" );
+			}
 		}
+		meshComponent.Mesh = polyMesh;
 
 		CenterMeshOrigin( meshComponent );
 

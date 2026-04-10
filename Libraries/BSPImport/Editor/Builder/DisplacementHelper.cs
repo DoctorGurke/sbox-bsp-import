@@ -286,6 +286,8 @@ internal class DisplacementHelper
 				var uv_t1 = new[] { uv_a, uv_c, uv_b };
 				var uv_t2 = new[] { uv_c, uv_d, uv_b };
 
+				var materialFallback = $"test_vertex_color";
+
 				var t1 = mesh.AddFace( v_t1 );
 				//mesh.SetEdgeSmoothing( t1.Edge, PolygonMesh.EdgeSmoothMode.Soft );
 				mesh.SetFaceTextureCoords( t1, uv_t1 );
@@ -295,7 +297,7 @@ internal class DisplacementHelper
 				}
 				else
 				{
-					var material = Material.Load( $"materials/test_vertex_color.vmat" );
+					var material = Material.Load( $"materials/{materialFallback}.vmat" );
 					mesh.SetFaceMaterial( t1, material );
 
 					foreach ( var edge in mesh.HalfEdgeHandles )
@@ -314,7 +316,7 @@ internal class DisplacementHelper
 				}
 				else
 				{
-					var material = Material.Load( $"materials/test_vertex_color.vmat" );
+					var material = Material.Load( $"materials/{materialFallback}.vmat" );
 					mesh.SetFaceMaterial( t2, material );
 
 					foreach ( var edge in mesh.HalfEdgeHandles )
