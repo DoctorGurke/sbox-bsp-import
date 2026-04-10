@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SkiaSharp;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
@@ -455,7 +456,7 @@ public partial class MapBuilder
 		var result = TreeParse.GetUniqueWorldspawnFaces();
 
 		var faceIndices = result.FaceIndices;
-		var waterFaces = faceIndices.Where( fi => IsWaterSurface( fi ) ).ToList();
+		var waterFaceIndices = faceIndices.Where( fi => IsWaterSurface( fi ) ).ToList();
 		var solidFaces = faceIndices.Where( fi => !IsWaterSurface( fi ) ).ToList();
 
 		if ( solidFaces.Count == 0 )
@@ -483,12 +484,12 @@ public partial class MapBuilder
 
 			var mesh = new PolygonMesh();
 
-			foreach ( var face in chunk )
+			foreach ( ushort faceIndex in chunk )
 			{
 				if ( token.IsCancellationRequested )
 					return meshes;
 
-				if ( !geo.TryGetFace( face, out var _ ) )
+				if ( !geo.TryGetFace( faceIndex, out var face ) )
 					continue;
 
 				mesh.AddMeshFace( Context, face );
@@ -512,8 +513,11 @@ public partial class MapBuilder
 
 		// add water surfaces as a mesh
 		var waterMesh = new PolygonMesh();
-		foreach ( var face in waterFaces )
+		foreach ( var faceIndex in waterFaceIndices )
 		{
+			if ( !geo.TryGetFace( faceIndex, out var face ) )
+				continue;
+
 			waterMesh.AddMeshFace( Context, face );
 		}
 		if ( waterMesh.FaceHandles.Any() )
@@ -580,11 +584,8 @@ public partial class MapBuilder
 
 		//Log.Info( $"construct poly mesh: [{firstFaceIndex}, {faceCount}]" );
 
-		var geo = Context.Geometry;
-		if ( !geo.IsValid() )
-		{
-			throw new Exception( "No valid map geometry to construct!" );
-		}
+		if ( !Context.HasCompleteGeometry( out var geo ) )
+			return null;
 
 		// models support int firstFace and faceCount for some reason, but faces are limited to ushort
 		var faces = GetFaceIndices( (ushort)firstFaceIndex, (ushort)faceCount );
@@ -597,7 +598,10 @@ public partial class MapBuilder
 		var polyMesh = new PolygonMesh();
 		foreach ( ushort faceIndex in faces )
 		{
-			polyMesh.AddMeshFace( Context, faceIndex );
+			if ( !geo.TryGetFace( faceIndex, out var face ) )
+				continue;
+
+			polyMesh.AddMeshFace( Context, face );
 		}
 
 		return polyMesh;

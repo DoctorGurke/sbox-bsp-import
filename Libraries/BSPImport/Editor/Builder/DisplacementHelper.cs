@@ -98,14 +98,14 @@ internal class DisplacementHelper
 		// fetch displacement info
 		if ( !geo.TryGetDisplacementInfo( face.DisplacementInfo, out var dInfo ) )
 		{
-			mesh.AddMeshFace( context, faceIndex );
+			mesh.AddMeshFace( context, face );
 			return mesh;
 		}
 
 		// original face index should point to a base quad
 		if ( face.OriginalFaceIndex < 0 || !geo.TryGetOriginalFace( face.OriginalFaceIndex, out var oFace ) )
 		{
-			mesh.AddMeshFace( context, faceIndex );
+			mesh.AddMeshFace( context, face );
 			return mesh;
 		}
 
@@ -116,28 +116,28 @@ internal class DisplacementHelper
 			int surfEdgeIdx = oFace.FirstEdge + i;
 			if ( !geo.TryGetSurfaceEdge( surfEdgeIdx, out var edge ) )
 			{
-				mesh.AddMeshFace( context, faceIndex );
+				mesh.AddMeshFace( context, face );
 				return mesh;
 			}
 
 			int edgeIndex = edge >= 0 ? edge : -edge;
 			if ( !geo.TryGetEdgeIndices( edgeIndex, out var edgeIndices ) )
 			{
-				mesh.AddMeshFace( context, faceIndex );
+				mesh.AddMeshFace( context, face );
 				return mesh;
 			}
 
 			var indices = edgeIndices.Indices;
 			if ( indices is null || indices.Length < 2 )
 			{
-				mesh.AddMeshFace( context, faceIndex );
+				mesh.AddMeshFace( context, face );
 				return mesh;
 			}
 
 			int vertIndex = edge >= 0 ? indices[0] : indices[1];
 			if ( !geo.TryGetVertex( vertIndex, out var vertex ) )
 			{
-				mesh.AddMeshFace( context, faceIndex );
+				mesh.AddMeshFace( context, face );
 				return mesh;
 			}
 
@@ -147,7 +147,7 @@ internal class DisplacementHelper
 		// we expect a quad base
 		if ( corners.Count != 4 )
 		{
-			mesh.AddMeshFace( context, faceIndex );
+			mesh.AddMeshFace( context, face );
 			return mesh;
 		}
 
@@ -187,7 +187,7 @@ internal class DisplacementHelper
 				int dvIndex = dInfo.FirstVertex + sx * side + sy;
 				if ( !geo.TryGetDisplacementVertex( dvIndex, out var dVert ) )
 				{
-					mesh.AddMeshFace( context, faceIndex );
+					mesh.AddMeshFace( context, face );
 					return mesh;
 				}
 

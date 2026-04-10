@@ -19,11 +19,17 @@ public static class PolyMeshX
 
 		// only construct valid primitives, 2 edges needed for a triangle
 		if ( face.EdgeCount < 2 )
+		{
+			Log.Warning( $"skipped degenerate face!" );
 			return;
+		}
 
 		// validate surface edge range
 		if ( face.FirstEdge < 0 || face.FirstEdge >= geo.SurfaceEdgesCount || face.FirstEdge + face.EdgeCount > geo.SurfaceEdgesCount )
+		{
+			Log.Warning( $"skipped face with invalid surface edge range!" );
 			return;
+		}
 
 		string? materialName = null;
 
@@ -54,32 +60,11 @@ public static class PolyMeshX
 		if ( context.BuildSettings.CullSkybox && materialName.Contains( "toolsskybox" ) )
 			return;
 
-		var verts = new List<Vector3>();
-		var uvs = new List<Vector2>();
+		var verts = face.GetEdgeVertices( context );
+		if ( verts is null )
+			return;
 
-		// get verts from surf edges -> edges -> vertices
-		for ( int i = 0; i < face.EdgeCount; i++ )
-		{
-			int surfEdgeIdx = face.FirstEdge + i;
-			if ( !geo.TryGetSurfaceEdge( surfEdgeIdx, out var edge ) )
-				return;
-
-			// edge sign affects winding order, indexing back to front or vice versa on the edge vertices
-			int edgeIndex = edge >= 0 ? edge : -edge;
-			if ( !geo.TryGetEdgeIndices( edgeIndex, out var edgeIndices ) )
-				return;
-
-			var indices = edgeIndices.Indices;
-			if ( indices is null || indices.Length < 2 )
-				return;
-
-			int vertIdx = edge >= 0 ? indices[0] : indices[1];
-			if ( !geo.TryGetVertex( vertIdx, out var vertex ) )
-				return;
-
-			verts.Add( vertex );
-			uvs.Add( MapBuilder.GetTexCoords( context, texInfo, vertex ) );
-		}
+		var uvs = verts.Select( v => MapBuilder.GetTexCoords( context, texInfo, v ) ).ToList();
 
 		verts.Reverse();
 		uvs.Reverse();
@@ -119,17 +104,8 @@ public static class PolyMeshX
 			mesh.SetFaceTextureCoords( hFace, uvs.ToArray() );
 	}
 
-	public static void AddMeshFace( this PolygonMesh mesh, ImportContext context, ushort faceIndex )
+	public static void AddMeshFace( this PolygonMesh mesh, ImportContext context, Face face )
 	{
-		if ( !context.HasCompleteGeometry( out var geo ) )
-			return;
-
-		if ( faceIndex < 0 || faceIndex >= geo.FacesCount )
-			return;
-
-		if ( !geo.TryGetFace( faceIndex, out var face ) )
-			return;
-
 		mesh.AddMeshFaceInternal( context, face );
 	}
 }

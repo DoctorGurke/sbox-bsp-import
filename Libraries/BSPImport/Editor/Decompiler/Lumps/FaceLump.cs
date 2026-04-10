@@ -1,4 +1,10 @@
-﻿namespace BspImport.Decompiler.Lumps;
+﻿using BspImport.Builder;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Globalization;
+using static Editor.MeshEditor.PrimitiveBuilder.PolygonMesh;
+using static Sandbox.ParticleSnapshot;
+
+namespace BspImport.Decompiler.Lumps;
 
 public class FaceLump : BaseLump
 {
@@ -90,5 +96,38 @@ public struct Face
 			return 0;
 
 		return texInfo.Value.Flags;
+	}
+
+	public List<Vector3>? GetEdgeVertices( ImportContext context )
+	{
+		if ( !context.HasCompleteGeometry( out var geo ) )
+			return null;
+
+		var verts = new List<Vector3>();
+
+		// get verts from surf edges -> edges -> vertices
+		for ( int i = 0; i < EdgeCount; i++ )
+		{
+			int surfEdgeIdx = FirstEdge + i;
+			if ( !geo.TryGetSurfaceEdge( surfEdgeIdx, out var edge ) )
+				return null;
+
+			// edge sign affects winding order, indexing back to front or vice versa on the edge vertices
+			int edgeIndex = edge >= 0 ? edge : -edge;
+			if ( !geo.TryGetEdgeIndices( edgeIndex, out var edgeIndices ) )
+				return null;
+
+			var indices = edgeIndices.Indices;
+			if ( indices is null || indices.Length < 2 )
+				return null;
+
+			int vertIdx = edge >= 0 ? indices[0] : indices[1];
+			if ( !geo.TryGetVertex( vertIdx, out var vertex ) )
+				return null;
+
+			verts.Add( vertex );
+		}
+
+		return verts;
 	}
 }
