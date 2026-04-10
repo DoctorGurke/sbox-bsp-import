@@ -1,4 +1,7 @@
-﻿namespace BspImport.Decompiler.Lumps;
+﻿using System.ComponentModel;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace BspImport.Decompiler.Lumps;
 
 public class TexDataStringDataLump : BaseLump
 {
@@ -17,13 +20,18 @@ public class TexDataStringDataLump : BaseLump
 	}
 }
 
-public struct TexDataStringData
+public class TexDataStringData
 {
+	//private string[] StringList { get; set; }
+
+	[Hide]
 	private string Data;
 
 	public TexDataStringData( string data )
 	{
 		Data = data;
+		//var splits = data.Split( '\0', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries );
+		//StringList = splits.ToArray();
 	}
 
 	public string FromStringTableIndex( int index )
@@ -31,6 +39,4 @@ public struct TexDataStringData
 		var end = Data.IndexOf( '\0', index );
 		return Data.Substring( index, end - index );
 	}
-
-	public int Count => Data.Split( '\0' ).Count();
 }

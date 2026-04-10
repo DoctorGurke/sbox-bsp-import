@@ -75,7 +75,7 @@ public class ImportContext
 	public TexInfo[]? TexInfo { get; set; }
 	public TexData[]? TexData { get; set; }
 	public int[]? TexDataStringTable { get; set; }
-	public TexDataStringData TexDataStringData { get; set; }
+	public TexDataStringData? TexDataStringData { get; set; }
 
 	public PolygonMesh[]? CachedPolygonMeshes { get; set; }
 	public List<short> SkyboxAreas { get; set; } = new();

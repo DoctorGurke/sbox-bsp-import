@@ -64,7 +64,7 @@ public struct Face
 			return null;
 
 		var stringDataIndex = context.TexDataStringTable[stringTableIndex];
-		return context.TexDataStringData.FromStringTableIndex( stringDataIndex ).ToLower();
+		return context.TexDataStringData?.FromStringTableIndex( stringDataIndex ).ToLower() ?? null;
 	}
 
 	public Vector3 GetReflectivity( ImportContext context )
