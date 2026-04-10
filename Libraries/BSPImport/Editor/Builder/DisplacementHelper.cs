@@ -286,7 +286,7 @@ internal class DisplacementHelper
 				var uv_t1 = new[] { uv_a, uv_c, uv_b };
 				var uv_t2 = new[] { uv_c, uv_d, uv_b };
 
-				var materialFallback = $"test_vertex_color";
+				var materialFallback = $"bsp_vertex_color";
 
 				var t1 = mesh.AddFace( v_t1 );
 				//mesh.SetEdgeSmoothing( t1.Edge, PolygonMesh.EdgeSmoothMode.Soft );
